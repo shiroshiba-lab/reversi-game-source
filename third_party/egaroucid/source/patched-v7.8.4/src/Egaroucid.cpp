@@ -1,0 +1,147 @@
+﻿/*
+    Egaroucid Project
+
+    @file Main.cpp
+        Main file for GUI application
+    @date 2021-2026
+    @author Takuto Yamana
+    @license GPL-3.0-or-later
+*/
+
+#include <iostream>
+#include "gui/gui_all.hpp"
+#include "tools/operation_check/gui_probe.hpp"
+
+/*
+    @brief used for scaling
+*/
+double CalculateScale(const Vec2& baseSize, const Vec2& currentSize) {
+    return Min((currentSize.x / baseSize.x), (currentSize.y / baseSize.y));
+}
+
+#if !GUI_OPEN_CONSOLE
+    class Logger_cerr {
+        private:
+            std::stringstream logger_stream;
+            std::mutex logger_mtx;
+            String logger_String;
+
+        public:
+            Logger_cerr() {
+                std::cerr.rdbuf(logger_stream.rdbuf());
+            }
+
+            String get_last_line() {
+                std::unique_lock{logger_mtx};
+                std::string log_line;
+                while (getline(logger_stream, log_line)) {
+                    logger_String = Unicode::Widen(log_line);
+                }
+                logger_stream.clear(std::stringstream::goodbit);
+                return logger_String;
+            }
+    };
+#endif 
+
+/*
+    @brief main function
+*/
+void Main() {
+    operation_check::Gui_probe operation_check;
+    if (!operation_check.prepare()) return;
+    Scene::SetBackground(Color(36, 153, 114));
+    Size window_size = Size(WINDOW_SIZE_X, WINDOW_SIZE_Y);
+    Size min_window_size = Size(WINDOW_SIZE_X_MIN, WINDOW_SIZE_Y_MIN);
+    Window::Resize(window_size);
+    Window::SetMinimumFrameBufferSize(min_window_size);
+    Window::SetStyle(WindowStyle::Sizable);
+    Scene::SetResizeMode(ResizeMode::Virtual);
+    Window::SetTitle(U"Egaroucid {}"_fmt(EGAROUCID_VERSION));
+    // inactivate special keys of Siv3D
+    System::SetTerminationTriggers(UserAction::NoAction);
+    ScreenCapture::SetShortcutKeys({KeyPrintScreen});
+    Window::SetToggleFullscreenEnabled(false);
+    LicenseManager::DisableDefaultTrigger();
+    #if GUI_OPEN_CONSOLE
+        Console.open();
+    #else
+        Logger_cerr logger;
+        String logger_String;
+    #endif
+    
+    operation_check::Observed_app scene_manager;
+    scene_manager.add <Silent_load> (U"Silent_load");
+    scene_manager.add <Load>(U"Load");
+    scene_manager.add <Main_scene>(U"Main_scene");
+    scene_manager.add <Game_information_scene>(U"Game_information_scene");
+    scene_manager.add <Game_editor>(U"Game_editor");
+    scene_manager.add <Save_location_picker>(U"Save_location_picker");
+    scene_manager.add <Shortcut_key_setting>(U"Shortcut_key_setting");
+    scene_manager.add <Shortcut_button_setting>(U"Shortcut_button_setting");
+    scene_manager.add <Mouse_additional_button_setting>(U"Mouse_additional_button_setting");
+    scene_manager.add <Merge_book>(U"Merge_book");
+    scene_manager.add <Refer_book>(U"Refer_book");
+    scene_manager.add <Enhance_book>(U"Enhance_book");
+    scene_manager.add <Deviate_book_transcript>(U"Deviate_book_transcript");
+    scene_manager.add <Store_book>(U"Store_book");
+    scene_manager.add <Fix_book>(U"Fix_book");
+    scene_manager.add <Fix_book_edax>(U"Fix_book_edax");
+    scene_manager.add <Reduce_book>(U"Reduce_book");
+    scene_manager.add <Leaf_recalculate_book>(U"Leaf_recalculate_book");
+    scene_manager.add <N_lines_recalculate_book>(U"N_lines_recalculate_book");
+    //scene_manager.add <Upgrade_better_leaves_book>(U"Upgrade_better_leaves_book");
+    scene_manager.add <Import_book>(U"Import_book");
+    scene_manager.add <Export_book>(U"Export_book");
+    scene_manager.add <Show_book_info>(U"Show_book_info");
+    scene_manager.add <Import_text>(U"Import_text");
+    scene_manager.add <Import_othello_quest>(U"Import_othello_quest");
+    scene_manager.add <Edit_board>(U"Edit_board");
+    scene_manager.add <Game_library>(U"Game_library");
+    scene_manager.add <Export_game>(U"Export_game");
+    scene_manager.add <Board_image>(U"Board_image");
+    scene_manager.add <Import_bitboard>(U"Import_bitboard");
+    scene_manager.add <Change_screenshot_saving_dir>(U"Change_screenshot_saving_dir");
+    scene_manager.add <Opening_setting>(U"Opening_setting");
+    scene_manager.add <AI_loss_graph_setting>(U"AI_loss_graph_setting");
+    scene_manager.add <AI_profile_load>(U"AI_profile_load");
+    scene_manager.add <AI_profile_save>(U"AI_profile_save");
+    scene_manager.add <Display_profile_load>(U"Display_profile_load");
+    scene_manager.add <Display_profile_save>(U"Display_profile_save");
+    scene_manager.add <Export_settings_data>(U"Export_settings_data");
+    scene_manager.add <Import_settings_data>(U"Import_settings_data");
+    scene_manager.add <Update_check>(U"Update_check");
+    scene_manager.add <Close>(U"Close");
+    scene_manager.setFadeColor(Color(36, 153, 114));
+    scene_manager.init(U"Silent_load", SCENE_FADE_TIME);
+
+    while (System::Update()) {
+        update_scene_ime_focus_state();
+#if SIV3D_PLATFORM(WINDOWS)
+        // Consume message edges in every scene. The per-frame cached snapshot
+        // is reused by Main_scene; editing keys must not replay on returning.
+        (void)get_windows_shortcut_keyboard_state();
+#endif
+
+        // scale
+        double scale = CalculateScale(window_size, Scene::Size());
+        const Transformer2D screenScaling{ Mat3x2::Scale(scale), TransformCursor::Yes };
+        scene_manager.get()->window_state.window_scale = scale;
+
+        // scene
+        scene_manager.update();
+        scene_manager.get()->graph_resources.prune_board_image_edits();
+        operation_check.update(scene_manager);
+
+        // log
+        #if !GUI_OPEN_CONSOLE
+            logger_String = logger.get_last_line();
+            operation_check.log(logger_String);
+            if (scene_manager.get()->menu_elements.show_log || scene_manager.get()->window_state.loading) {
+                scene_manager.get()->fonts.font(logger_String).draw(12, Arg::bottomLeft(8, WINDOW_SIZE_Y - 5), scene_manager.get()->colors.white);
+            }
+        #endif
+
+        // Draw IME candidate window last so it stays on top of GUI elements.
+        gui_textarea_ime::flush_deferred_ime_candidate_window();
+    }
+}

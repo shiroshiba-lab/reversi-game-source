@@ -1,0 +1,968 @@
+egaroucid5 vs edax without book
+
+"133   89 30 149   30 19" means:
+Egaroucid won 89 times
+Edax won 149 times
+39 draws
+
+2021/12/16
+eg lv10 vs ed lv10
+133   89 30 149   30 19
+
+eg lv10 vs ed lv9
+133   106 34 128   30 61
+
+2021/12/17
+eg lv10 vs ed lv8
+133   136 43 89   30 133
+
+new simple evaluation function
+eg lv10 vs ed lv9
+133   108 37 123   30 133
+
+hillclimb
+eg lv10 vs ed lv9
+133   132 26 110   30 133
+
+eg lv10 ed lv10
+133   97 32 139   30 133
+
+2021/12/18
+new evaluation function (with 13 patterns) without hillclimb
+eg lv10 vs ed lv9
+133   125 35 108   30 133
+
+eg lv10 vs ed lv10
+133   106 42 120   30 133
+
+hillclimb
+eg lv10 vs ed lv9
+133   130 37 101   30 133
+
+eg lv10 vs ed lv10
+133   102 38 128   30 133
+
+new hillclimb
+eg lv10 vs ed lv10
+133   112 35 121   30 133
+
+hillclimb
+eg lv10 vs ed lv10
+133   109 44 115   30 133
+
+new evaluation function with 10 phases
+eg lv10 vs ed lv10
+133   107 51 110   30 133
+
+hillclimb
+eg lv10 vs ed lv10
+133   115 45 108   30 133
+
+hillclimb
+eg lv10 vs ed lv10
+133   115 45 108   30 133
+
+with big book
+eg lv10 vs ed lv10
+133   130 64 74   30 17
+
+with normal book
+eg 14/23 vs ed lv10
+133   153 45 70   30 83
+
+new 15 phase evaluation function
+149   112 89 99   35 233
+
+new 15 phase big model read depth 1/2
+199   140 84 176   54 199
+199   151 28 221   50 199
+199   161 16 223   46 199
+
+15 phase with only hillclimb
+499   354 273 373   57 499
+499   381 176 443   53 499
+
+10 phase hillclimb
+499   372 217 411   55 499
+
+level 1 vs level 1
+format:
+num [egaroucid black win, egaroucid white win] [egaroucid black draw, egaroucid white draw] [egaroucid black lose, egaroucid white lose] (egaroucid total win) (egaroucid total lose)  (egaroucid win rate) from_moves num
+
+2022/01/05
+299   [125, 98] [79, 89] [96, 113] 223 209   53 299
+
+2022/01/07
+299   [149, 135] [20, 7] [131, 158] 284 289   47 299
+
+2022/01/07 test with logistello's records
+499   [131, 178] [187, 191] [182, 131] 309 313   54 499
+499   [195, 257] [36, 43] [269, 200] 452 469   48 499
+499   [224, 265] [14, 15] [262, 220] 489 482   42 499
+499   [240, 245] [13, 14] [247, 241] 485 488   36 499
+401   [185, 169] [14, 11] [203, 222] 354 425   30 401
+with rate
+499   [125, 169] [208, 207] [167, 124] 294 291 0.5025641025641026   54 499
+499   [191, 260] [39, 36] [270, 204] 451 474 0.4875675675675676   48 4998
+499   [220, 273] [13, 15] [267, 212] 493 479 0.507201646090535   42 49992
+499   [226, 243] [12, 10] [262, 247] 469 509 0.47955010224948874   36 499
+
+2022/01/08
+499   [239, 245] [16, 14] [245, 241] 484 486 0.49896907216494846   36 499
+step 128
+499   [122, 170] [204, 221] [174, 109] 292 283 0.5078260869565218   54 499
+499   [187, 248] [39, 50] [274, 202] 435 476 0.4774972557628979   48 499
+499   [211, 275] [8, 19] [281, 206] 486 487 0.499486125385406   42 499
+499   [231, 245] [9, 21] [260, 234] 476 494 0.49072164948453606   36 499
+401   [154, 190] [9, 12] [239, 200] 344 439 0.4393358876117497   30 401
+354   [140, 177] [3, 8] [212, 170] 317 382 0.45350500715307585   24 354
+268   [97, 134] [5, 9] [167, 126] 231 293 0.44083969465648853   18 268
+84   [41, 39] [0, 1] [44, 45] 80 89 0.47337278106508873   12 84
+4   [3, 2] [1, 0] [1, 3] 5 4 0.5555555555555556   6 4
+0   [1, 0] [0, 0] [0, 1] 1 1 0.5   1 0
+
+2022/01/09
+499   [134, 180] [195, 201] [171, 119] 314 290 0.5198675496688742   54 499
+499   [194, 265] [35, 30] [271, 205] 459 476 0.4909090909090909   48 499
+499   [222, 264] [9, 16] [269, 220] 486 489 0.49846153846153846   42 499
+401   [152, 179] [11, 9] [239, 214] 331 453 0.4221938775510204   30 401
+human dataset
+499   [173, 207] [108, 117] [219, 176] 380 395 0.49032258064516127   54 499
+499   [198, 265] [26, 32] [276, 203] 463 479 0.49150743099787686   48 499
+499   [205, 268] [20, 13] [275, 219] 473 494 0.4891416752843847   42 499
+499   [211, 260] [14, 14] [275, 226] 471 501 0.4845679012345679   36 499
+499   [188, 274] [22, 10] [290, 216] 462 506 0.4772727272727273   30 499
+499   [188, 252] [13, 13] [299, 235] 440 534 0.4517453798767967   24 4998
+logistello dataset
+499   [133, 182] [204, 196] [163, 122] 315 285 0.525   54 4991436   54 499
+499   [179, 268] [39, 37] [282, 195] 447 477 0.4837662337662338   48 499
+2022/01/9&10
+15 phase logistello dataset
+499   [71, 99] [328, 341] [101, 60] 170 161 0.513595166163142   56 499
+499   [160, 250] [93, 91] [247, 159] 410 406 0.5024509803921569   52 499
+499   [195, 264] [31, 37] [274, 199] 459 473 0.4924892703862661   48 499
+499   [207, 263] [20, 24] [273, 213] 470 486 0.4916317991631799   44 499
+499   [232, 257] [12, 17] [256, 226] 489 482 0.5036045314109165   40 499
+499   [228, 232] [19, 8] [253, 260] 460 513 0.4727646454265159   36 499
+427   [184, 223] [15, 12] [229, 193] 407 422 0.49095295536791317   32 427
+378   [150, 208] [7, 9] [222, 162] 358 384 0.48247978436657685   28 378
+354   [134, 183] [9, 13] [212, 159] 317 371 0.46075581395348836   24 354
+307   [110, 142] [5, 4] [193, 162] 252 355 0.41515650741350907   20 307
+
+2022/01/12 add 2 patterns
+499   [72, 90] [329, 343] [99, 67] 162 166 0.49390243902439024   56 499
+499   [157, 252] [104, 83] [239, 165] 409 404 0.5030750307503075   52 499
+499   [189, 273] [33, 45] [278, 182] 462 460 0.5010845986984815   48 499
+499   [201, 279] [10, 17] [289, 204] 480 493 0.4933196300102775   44 499
+499   [230, 268] [11, 22] [259, 210] 498 469 0.5149948293691831   40 499
+499   [213, 246] [15, 16] [272, 238] 459 510 0.47368421052631576   36 499
+427   [178, 203] [15, 10] [235, 215] 381 450 0.4584837545126354   32 427
+378   [168, 183] [11, 4] [200, 192] 351 392 0.47240915208613726   28 378
+354   [136, 188] [11, 15] [208, 152] 324 360 0.47368421052631576   24 354
+307   [134, 156] [4, 8] [170, 144] 290 314 0.48013245033112584   20 307
+206   [73, 106] [4, 4] [130, 97] 179 227 0.4408866995073892   16 206
+84   [35, 47] [1, 3] [49, 35] 82 84 0.4939759036144578   12 844
+79   [24, 40] [4, 0] [52, 40] 64 92 0.41025641025641024   8 19
+human dataset
+67   [40, 52] [0, 0] [28, 16] 92 44 0.6764705882352942   4 16
+95   [32, 64] [0, 0] [64, 32] 96 96 0.5   2
+
+2022/01/13 same model for different color logistello
+499   [66, 95] [320, 340] [114, 65] 161 179 0.47352941176470587   56 499
+
+2022/01/14
+start depth: 55 Egaroucid plays black WDL: 167-263-70 Egaroucid plays white WDL: 86-258-156 Egaroucid win rate: 0.5281837160751566
+start depth: 51 Egaroucid plays black WDL: 237-81-182 Egaroucid plays white WDL: 204-76-220 Egaroucid win rate: 0.5231316725978647
+start depth: 47 Egaroucid plays black WDL: 222-36-242 Egaroucid plays white WDL: 236-40-224 Egaroucid win rate: 0.49567099567099565
+start depth: 43 Egaroucid plays black WDL: 260-13-227 Egaroucid plays white WDL: 235-20-245 Egaroucid win rate: 0.5118924508790073
+start depth: 39 Egaroucid plays black WDL: 247-21-232 Egaroucid plays white WDL: 224-15-261 Egaroucid win rate: 0.48858921161825725
+start depth: 35 Egaroucid plays black WDL: 281-12-207 Egaroucid plays white WDL: 223-9-268 Egaroucid win rate: 0.5148110316649642
+start depth: 31 Egaroucid plays black WDL: 208-11-199 Egaroucid plays white WDL: 180-6-232 Egaroucid win rate: 0.47374847374847373
+start depth: 27 Egaroucid plays black WDL: 167-11-194 Egaroucid plays white WDL: 152-6-214 Egaroucid win rate: 0.43878954607977994
+start depth: 23 Egaroucid plays black WDL: 143-3-194 Egaroucid plays white WDL: 160-10-170 Egaroucid win rate: 0.4542728635682159
+start depth: 19 Egaroucid plays black WDL: 128-2-160 Egaroucid plays white WDL: 118-11-161 Egaroucid win rate: 0.43386243386243384
+start depth: 15 Egaroucid plays black WDL: 75-2-94 Egaroucid plays white WDL: 82-7-82 Egaroucid win rate: 0.47147147147147145
+start depth: 7 Egaroucid plays black WDL: 6-1-4 Egaroucid plays white WDL: 5-0-6 Egaroucid win rate: 0.5238095238095238
+
+2022/01/15 with new evaluation model with mobility pattern
+start depth: 55 Egaroucid plays black WDL: 169-259-72 Egaroucid plays white WDL: 82-261-157 Egaroucid win rate: 0.5229166666666667
+start depth: 51 Egaroucid plays black WDL: 247-87-166 Egaroucid plays white WDL: 209-84-207 Egaroucid win rate: 0.5500603136308806
+start depth: 47 Egaroucid plays black WDL: 255-39-206 Egaroucid plays white WDL: 220-41-239 Egaroucid win rate: 0.5163043478260869
+start depth: 43 Egaroucid plays black WDL: 259-19-222 Egaroucid plays white WDL: 254-16-230 Egaroucid win rate: 0.5316062176165803
+start depth: 39 Egaroucid plays black WDL: 265-20-215 Egaroucid plays white WDL: 247-12-241 Egaroucid win rate: 0.5289256198347108
+start depth: 35 Egaroucid plays black WDL: 276-14-210 Egaroucid plays white WDL: 245-7-248 Egaroucid win rate: 0.5321756894790602
+start depth: 31 Egaroucid plays black WDL: 215-6-197 Egaroucid plays white WDL: 200-14-204 Egaroucid win rate: 0.508578431372549
+start depth: 27 Egaroucid plays black WDL: 178-8-186 Egaroucid plays white WDL: 180-9-183 Egaroucid win rate: 0.4924346629986245
+start depth: 23 Egaroucid plays black WDL: 169-8-163 Egaroucid plays white WDL: 151-6-183 Egaroucid win rate: 0.4804804804804805
+start depth: 19 Egaroucid plays black WDL: 139-3-148 Egaroucid plays white WDL: 151-4-135 Egaroucid win rate: 0.506108202443281
+start depth: 15 Egaroucid plays black WDL: 76-3-92 Egaroucid plays white WDL: 93-2-76 Egaroucid win rate: 0.5014836795252225
+
+2022/01/15 new evaluation model with 8 cells black and white mobility
+start depth: 55 Egaroucid plays black WDL: 170-258-72 Egaroucid plays white WDL: 88-273-139 Egaroucid win rate: 0.5501066098081023
+start depth: 51 Egaroucid plays black WDL: 263-74-163 Egaroucid plays white WDL: 203-90-207 Egaroucid win rate: 0.5574162679425837
+start depth: 47 Egaroucid plays black WDL: 235-27-238 Egaroucid plays white WDL: 242-34-224 Egaroucid win rate: 0.5079872204472844
+start depth: 43 Egaroucid plays black WDL: 276-12-212 Egaroucid plays white WDL: 250-25-225 Egaroucid win rate: 0.5462097611630322
+start depth: 39 Egaroucid plays black WDL: 267-19-214 Egaroucid plays white WDL: 244-15-241 Egaroucid win rate: 0.5289855072463768
+start depth: 35 Egaroucid plays black WDL: 281-12-207 Egaroucid plays white WDL: 219-8-273 Egaroucid win rate: 0.5102040816326531
+start depth: 31 Egaroucid plays black WDL: 229-8-181 Egaroucid plays white WDL: 208-13-197 Egaroucid win rate: 0.5361963190184049
+start depth: 27 Egaroucid plays black WDL: 189-9-174 Egaroucid plays white WDL: 185-22-165 Egaroucid win rate: 0.5245441795231417
+start depth: 23 Egaroucid plays black WDL: 184-9-147 Egaroucid plays white WDL: 163-4-173 Egaroucid win rate: 0.52023988005997
+start depth: 19 Egaroucid plays black WDL: 141-4-145 Egaroucid plays white WDL: 158-4-128 Egaroucid win rate: 0.5227272727272727
+start depth: 15 Egaroucid plays black WDL: 70-7-94 Egaroucid plays white WDL: 96-4-71 Egaroucid win rate: 0.5015105740181269
+start depth: 11 Egaroucid plays black WDL: 34-1-29 Egaroucid plays white WDL: 36-2-26 Egaroucid win rate: 0.56
+level 5
+start depth: 40 Egaroucid plays black WDL: 215-47-238 Egaroucid plays white WDL: 255-42-203 Egaroucid win rate: 0.5159165751920965
+start depth: 30 Egaroucid plays black WDL: 181-30-191 Egaroucid plays white WDL: 172-23-207 Egaroucid win rate: 0.47003994673768307
+start depth: 20 Egaroucid plays black WDL: 164-14-130 Egaroucid plays white WDL: 178-11-119 Egaroucid win rate: 0.5786802030456852
+start depth: 10 Egaroucid plays black WDL: 20-3-18 Egaroucid plays white WDL: 24-3-14 Egaroucid win rate: 0.5789473684210527
+
+2022/01/18
+level 1
+start depth: 55 Egaroucid plays black WDL: 160-273-67 Egaroucid plays white WDL: 86-294-120 Egaroucid win rate: 0.5681293302540416
+start depth: 51 Egaroucid plays black WDL: 250-81-169 Egaroucid plays white WDL: 209-91-200 Egaroucid win rate: 0.5543478260869565
+start depth: 47 Egaroucid plays black WDL: 255-31-214 Egaroucid plays white WDL: 234-33-233 Egaroucid win rate: 0.5224358974358975
+start depth: 43 Egaroucid plays black WDL: 266-17-217 Egaroucid plays white WDL: 248-18-234 Egaroucid win rate: 0.5326424870466321
+start depth: 39 Egaroucid plays black WDL: 281-19-200 Egaroucid plays white WDL: 248-19-233 Egaroucid win rate: 0.5498960498960499
+start depth: 35 Egaroucid plays black WDL: 274-15-211 Egaroucid plays white WDL: 266-16-218 Egaroucid win rate: 0.5572755417956656
+start depth: 31 Egaroucid plays black WDL: 226-7-185 Egaroucid plays white WDL: 227-10-181 Egaroucid win rate: 0.5531135531135531
+start depth: 27 Egaroucid plays black WDL: 186-8-178 Egaroucid plays white WDL: 184-24-164 Egaroucid win rate: 0.5196629213483146
+start depth: 23 Egaroucid plays black WDL: 200-6-134 Egaroucid plays white WDL: 159-12-169 Egaroucid win rate: 0.5422960725075529
+start depth: 19 Egaroucid plays black WDL: 147-2-141 Egaroucid plays white WDL: 136-7-147 Egaroucid win rate: 0.4956217162872154
+start depth: 15 Egaroucid plays black WDL: 81-2-88 Egaroucid plays white WDL: 91-3-77 Egaroucid win rate: 0.5103857566765578
+start depth: 11 Egaroucid plays black WDL: 36-3-25 Egaroucid plays white WDL: 38-0-26 Egaroucid win rate: 0.592
+level 5
+start depth: 40 Egaroucid plays black WDL: 230-48-222 Egaroucid plays white WDL: 249-46-205 Egaroucid win rate: 0.5286975717439294
+start depth: 30 Egaroucid plays black WDL: 183-21-198 Egaroucid plays white WDL: 183-33-186 Egaroucid win rate: 0.488
+start depth: 20 Egaroucid plays black WDL: 154-12-142 Egaroucid plays white WDL: 176-22-110 Egaroucid win rate: 0.5670103092783505
+start depth: 10 Egaroucid plays black WDL: 24-2-15 Egaroucid plays white WDL: 23-1-17 Egaroucid win rate: 0.5949367088607594
+
+2022/01/24 fixed bug
+level 1
+start depth: 55 Egaroucid plays black WDL: 155-276-69 Egaroucid plays white WDL: 91-282-127 Egaroucid win rate: 0.5565610859728507
+start depth: 51 Egaroucid plays black WDL: 257-82-161 Egaroucid plays white WDL: 215-80-205 Egaroucid win rate: 0.5632458233890215
+start depth: 47 Egaroucid plays black WDL: 250-40-210 Egaroucid plays white WDL: 235-31-234 Egaroucid win rate: 0.5220667384284177
+start depth: 43 Egaroucid plays black WDL: 256-23-221 Egaroucid plays white WDL: 259-15-226 Egaroucid win rate: 0.5353430353430353
+start depth: 39 Egaroucid plays black WDL: 285-13-202 Egaroucid plays white WDL: 246-24-230 Egaroucid win rate: 0.5514018691588785
+start depth: 35 Egaroucid plays black WDL: 284-10-206 Egaroucid plays white WDL: 259-10-231 Egaroucid win rate: 0.5540816326530612
+start depth: 31 Egaroucid plays black WDL: 222-8-188 Egaroucid plays white WDL: 209-6-203 Egaroucid win rate: 0.524330900243309
+start depth: 27 Egaroucid plays black WDL: 187-10-175 Egaroucid plays white WDL: 173-7-192 Egaroucid win rate: 0.4951856946354883
+start depth: 23 Egaroucid plays black WDL: 175-5-160 Egaroucid plays white WDL: 164-15-161 Egaroucid win rate: 0.5136363636363637
+start depth: 19 Egaroucid plays black WDL: 158-4-128 Egaroucid plays white WDL: 149-6-135 Egaroucid win rate: 0.5385964912280702
+start depth: 15 Egaroucid plays black WDL: 76-5-90 Egaroucid plays white WDL: 85-5-81 Egaroucid win rate: 0.48493975903614456
+start depth: 11 Egaroucid plays black WDL: 38-2-24 Egaroucid plays white WDL: 46-0-18 Egaroucid win rate: 0.6666666666666666
+level 1 quest data
+start depth: 55 Egaroucid plays black WDL: 227-112-161 Egaroucid plays white WDL: 182-112-206 Egaroucid win rate: 0.5270618556701031
+start depth: 51 Egaroucid plays black WDL: 217-72-211 Egaroucid plays white WDL: 210-70-220 Egaroucid win rate: 0.4976689976689977
+start depth: 47 Egaroucid plays black WDL: 257-24-219 Egaroucid plays white WDL: 231-32-237 Egaroucid win rate: 0.5169491525423728
+start depth: 43 Egaroucid plays black WDL: 259-13-228 Egaroucid plays white WDL: 236-23-241 Egaroucid win rate: 0.5134854771784232
+start depth: 39 Egaroucid plays black WDL: 261-19-220 Egaroucid plays white WDL: 257-19-224 Egaroucid win rate: 0.5384615384615384
+start depth: 35 Egaroucid plays black WDL: 257-16-227 Egaroucid plays white WDL: 248-17-235 Egaroucid win rate: 0.5222337125129266
+start depth: 31 Egaroucid plays black WDL: 250-7-243 Egaroucid plays white WDL: 251-16-233 Egaroucid win rate: 0.5127942681678608
+start depth: 27 Egaroucid plays black WDL: 233-15-252 Egaroucid plays white WDL: 254-21-225 Egaroucid win rate: 0.5051867219917012
+start depth: 23 Egaroucid plays black WDL: 250-10-240 Egaroucid plays white WDL: 258-14-228 Egaroucid win rate: 0.5204918032786885
+start depth: 19 Egaroucid plays black WDL: 242-8-250 Egaroucid plays white WDL: 261-15-224 Egaroucid win rate: 0.5148413510747185
+start depth: 15 Egaroucid plays black WDL: 260-12-228 Egaroucid plays white WDL: 285-7-208 Egaroucid win rate: 0.5555555555555556
+start depth: 11 Egaroucid plays black WDL: 272-14-214 Egaroucid plays white WDL: 297-13-190 Egaroucid win rate: 0.5847893114080165
+start depth: 7 Egaroucid plays black WDL: 196-17-216 Egaroucid plays white WDL: 239-9-181 Egaroucid win rate: 0.5228365384615384
+level 5 quest data
+start depth: 40 Egaroucid plays black WDL: 264-39-197 Egaroucid plays white WDL: 216-42-242 Egaroucid win rate: 0.5223068552774756
+start depth: 30 Egaroucid plays black WDL: 269-22-209 Egaroucid plays white WDL: 245-28-227 Egaroucid win rate: 0.5410526315789473
+start depth: 20 Egaroucid plays black WDL: 270-17-213 Egaroucid plays white WDL: 243-27-230 Egaroucid win rate: 0.5366108786610879
+start depth: 10 Egaroucid plays black WDL: 271-14-215 Egaroucid plays white WDL: 265-34-201 Egaroucid win rate: 0.5630252100840336
+start depth: 5 Egaroucid plays black WDL: 64-11-61 Egaroucid plays white WDL: 72-5-59 Egaroucid win rate: 0.53125
+
+2022/01/28 use bitboard
+level 1
+start depth: 55 Egaroucid plays black WDL: 224-127-149 Egaroucid plays white WDL: 225-130-145 Egaroucid win rate: 0.604306864064603
+start depth: 51 Egaroucid plays black WDL: 308-62-130 Egaroucid plays white WDL: 263-65-172 Egaroucid win rate: 0.6540664375715922
+start depth: 47 Egaroucid plays black WDL: 302-39-159 Egaroucid plays white WDL: 301-35-164 Egaroucid win rate: 0.6511879049676026
+start depth: 43 Egaroucid plays black WDL: 342-24-134 Egaroucid plays white WDL: 326-19-155 Egaroucid win rate: 0.6980146290491118
+start depth: 39 Egaroucid plays black WDL: 360-15-125 Egaroucid plays white WDL: 352-16-132 Egaroucid win rate: 0.7347781217750258
+start depth: 35 Egaroucid plays black WDL: 372-7-121 Egaroucid plays white WDL: 346-21-133 Egaroucid win rate: 0.7386831275720165
+start depth: 31 Egaroucid plays black WDL: 378-11-111 Egaroucid plays white WDL: 366-15-119 Egaroucid win rate: 0.7638603696098563
+start depth: 27 Egaroucid plays black WDL: 384-11-105 Egaroucid plays white WDL: 400-8-92 Egaroucid win rate: 0.799184505606524
+start depth: 23 Egaroucid plays black WDL: 408-7-85 Egaroucid plays white WDL: 416-3-81 Egaroucid win rate: 0.8323232323232324
+start depth: 19 Egaroucid plays black WDL: 394-14-92 Egaroucid plays white WDL: 404-11-85 Egaroucid win rate: 0.8184615384615385
+start depth: 15 Egaroucid plays black WDL: 406-11-83 Egaroucid plays white WDL: 413-11-76 Egaroucid win rate: 0.8374233128834356
+start depth: 11 Egaroucid plays black WDL: 410-14-76 Egaroucid plays white WDL: 416-9-75 Egaroucid win rate: 0.8454452405322416
+start depth: 7 Egaroucid plays black WDL: 338-2-89 Egaroucid plays white WDL: 371-7-51 Egaroucid win rate: 0.8351001177856302
+start depth: 3 Egaroucid plays black WDL: 26-0-3 Egaroucid plays white WDL: 26-0-3 Egaroucid win rate: 0.896551724137931
+level 5
+start depth: 40 Egaroucid plays black WDL: 288-35-177 Egaroucid plays white WDL: 261-31-208 Egaroucid win rate: 0.5877944325481799
+start depth: 30 Egaroucid plays black WDL: 291-28-181 Egaroucid plays white WDL: 292-20-188 Egaroucid win rate: 0.6123949579831933
+start depth: 20 Egaroucid plays black WDL: 325-14-161 Egaroucid plays white WDL: 327-18-155 Egaroucid win rate: 0.6735537190082644
+start depth: 10 Egaroucid plays black WDL: 347-18-135 Egaroucid plays white WDL: 350-17-133 Egaroucid win rate: 0.722279792746114
+
+2022/01/29 update evaluation function
+level 0
+start depth: 55 Egaroucid plays black WDL: 370-53-77 Egaroucid plays white WDL: 323-76-101 Egaroucid win rate: 0.7956371986222732
+start depth: 51 Egaroucid plays black WDL: 435-16-49 Egaroucid plays white WDL: 419-18-63 Egaroucid win rate: 0.8840579710144928
+start depth: 47 Egaroucid plays black WDL: 485-3-12 Egaroucid plays white WDL: 463-9-28 Egaroucid win rate: 0.9595141700404858
+start depth: 43 Egaroucid plays black WDL: 485-3-12 Egaroucid plays white WDL: 491-2-7 Egaroucid win rate: 0.9809045226130654
+start depth: 39 Egaroucid plays black WDL: 489-1-10 Egaroucid plays white WDL: 498-0-2 Egaroucid win rate: 0.987987987987988
+start depth: 35 Egaroucid plays black WDL: 491-2-7 Egaroucid plays white WDL: 498-0-2 Egaroucid win rate: 0.9909819639278558
+start depth: 31 Egaroucid plays black WDL: 495-0-5 Egaroucid plays white WDL: 497-0-3 Egaroucid win rate: 0.992
+start depth: 27 Egaroucid plays black WDL: 494-2-4 Egaroucid plays white WDL: 498-0-2 Egaroucid win rate: 0.9939879759519038
+start depth: 23 Egaroucid plays black WDL: 494-0-6 Egaroucid plays white WDL: 498-0-2 Egaroucid win rate: 0.992
+start depth: 19 Egaroucid plays black WDL: 497-1-2 Egaroucid plays white WDL: 495-0-5 Egaroucid win rate: 0.992992992992993
+start depth: 15 Egaroucid plays black WDL: 495-1-4 Egaroucid plays white WDL: 497-1-2 Egaroucid win rate: 0.9939879759519038
+start depth: 11 Egaroucid plays black WDL: 499-0-1 Egaroucid plays white WDL: 498-0-2 Egaroucid win rate: 0.997
+start depth: 7 Egaroucid plays black WDL: 425-0-4 Egaroucid plays white WDL: 425-2-2 Egaroucid win rate: 0.9929906542056075
+start depth: 3 Egaroucid plays black WDL: 29-0-0 Egaroucid plays white WDL: 29-0-0 Egaroucid win rate: 1.0
+level 5
+start depth: 40 Egaroucid plays black WDL: 269-24-207 Egaroucid plays white WDL: 261-34-205 Egaroucid win rate: 0.5626326963906582
+start depth: 30 Egaroucid plays black WDL: 319-22-159 Egaroucid plays white WDL: 283-27-190 Egaroucid win rate: 0.6330178759200841
+start depth: 20 Egaroucid plays black WDL: 329-22-149 Egaroucid plays white WDL: 327-21-152 Egaroucid win rate: 0.6854754440961337
+start depth: 10 Egaroucid plays black WDL: 374-16-110 Egaroucid plays white WDL: 361-24-115 Egaroucid win rate: 0.765625
+level 10
+start depth: 30 Egaroucid plays black WDL: 105-18-77 Egaroucid plays white WDL: 94-21-85 Egaroucid win rate: 0.5512465373961218
+start depth: 20 Egaroucid plays black WDL: 114-22-64 Egaroucid plays white WDL: 111-21-68 Egaroucid win rate: 0.6302521008403361
+start depth: 10 Egaroucid plays black WDL: 110-20-70 Egaroucid plays white WDL: 126-14-60 Egaroucid win rate: 0.644808743169399
+
+2022/02/07 fixed level
+level 1
+start depth: 50 Egaroucid plays black WDL: 72-27-101 Egaroucid plays white WDL: 110-29-61 Egaroucid win rate: 0.5290697674418605
+start depth: 40 Egaroucid plays black WDL: 100-6-94 Egaroucid plays white WDL: 93-13-94 Egaroucid win rate: 0.5065616797900262
+start depth: 30 Egaroucid plays black WDL: 83-2-115 Egaroucid plays white WDL: 111-6-83 Egaroucid win rate: 0.49489795918367346
+start depth: 20 Egaroucid plays black WDL: 88-7-105 Egaroucid plays white WDL: 108-3-89 Egaroucid win rate: 0.5025641025641026
+start depth: 10 Egaroucid plays black WDL: 99-7-94 Egaroucid plays white WDL: 110-4-86 Egaroucid win rate: 0.5372750642673522
+level 5
+start depth: 40 Egaroucid plays black WDL: 101-12-87 Egaroucid plays white WDL: 93-13-94 Egaroucid win rate: 0.5173333333333333
+start depth: 30 Egaroucid plays black WDL: 99-12-89 Egaroucid plays white WDL: 99-9-92 Egaroucid win rate: 0.5224274406332454
+start depth: 20 Egaroucid plays black WDL: 120-9-71 Egaroucid plays white WDL: 92-10-98 Egaroucid win rate: 0.5564304461942258
+start depth: 10 Egaroucid plays black WDL: 105-10-85 Egaroucid plays white WDL: 108-9-83 Egaroucid win rate: 0.5590551181102362
+
+2022/02/09 update evaluation function
+level 1
+start depth: 50 Egaroucid plays black WDL: 94-10-96 Egaroucid plays white WDL: 109-22-69 Egaroucid win rate: 0.5516304347826086
+start depth: 40 Egaroucid plays black WDL: 94-6-100 Egaroucid plays white WDL: 113-4-83 Egaroucid win rate: 0.5307692307692308
+start depth: 30 Egaroucid plays black WDL: 93-5-102 Egaroucid plays white WDL: 111-8-81 Egaroucid win rate: 0.5271317829457365
+
+2022/02/09 updating evaluation function
+start depth: 40 Egaroucid plays black WDL: 97-5-98 Egaroucid plays white WDL: 103-3-94 Egaroucid win rate: 0.5102040816326531
+start depth: 40 Egaroucid plays black WDL: 94-4-102 Egaroucid plays white WDL: 103-8-89 Egaroucid win rate: 0.5077319587628866
+start depth: 40 Egaroucid plays black WDL: 87-5-108 Egaroucid plays white WDL: 108-7-85 Egaroucid win rate: 0.5025773195876289
+start depth: 40 Egaroucid plays black WDL: 96-9-95 Egaroucid plays white WDL: 113-9-78 Egaroucid win rate: 0.5471204188481675
+start depth: 40 Egaroucid plays black WDL: 80-4-116 Egaroucid plays white WDL: 119-7-74 Egaroucid win rate: 0.5115681233933161
+start depth: 40 Egaroucid plays black WDL: 89-4-107 Egaroucid plays white WDL: 111-7-82 Egaroucid win rate: 0.5141388174807198
+
+start depth: 30 Egaroucid plays black WDL: 94-4-102 Egaroucid plays white WDL: 105-7-88 Egaroucid win rate: 0.5115681233933161
+start depth: 30 Egaroucid plays black WDL: 88-2-110 Egaroucid plays white WDL: 115-4-81 Egaroucid win rate: 0.5152284263959391
+
+2022/02/09 update evaluation function
+level 1
+start depth: 50 Egaroucid plays black WDL: 162-38-200 Egaroucid plays white WDL: 227-37-136 Egaroucid win rate: 0.5365517241379311
+start depth: 40 Egaroucid plays black WDL: 200-13-187 Egaroucid plays white WDL: 205-8-187 Egaroucid win rate: 0.5198973042362003
+start depth: 30 Egaroucid plays black WDL: 179-10-211 Egaroucid plays white WDL: 193-16-191 Egaroucid win rate: 0.4806201550387597
+start depth: 20 Egaroucid plays black WDL: 183-5-212 Egaroucid plays white WDL: 237-6-157 Egaroucid win rate: 0.532319391634981
+start depth: 10 Egaroucid plays black WDL: 183-6-211 Egaroucid plays white WDL: 207-10-183 Egaroucid win rate: 0.49744897959183676
+
+2022/02/07 fixed level reuse this parameter
+level 1
+start depth: 50 Egaroucid plays black WDL: 72-27-101 Egaroucid plays white WDL: 110-29-61 Egaroucid win rate: 0.5290697674418605
+start depth: 40 Egaroucid plays black WDL: 100-6-94 Egaroucid plays white WDL: 93-13-94 Egaroucid win rate: 0.5065616797900262
+start depth: 30 Egaroucid plays black WDL: 83-2-115 Egaroucid plays white WDL: 111-6-83 Egaroucid win rate: 0.49489795918367346
+start depth: 20 Egaroucid plays black WDL: 88-7-105 Egaroucid plays white WDL: 108-3-89 Egaroucid win rate: 0.5025641025641026
+start depth: 10 Egaroucid plays black WDL: 99-7-94 Egaroucid plays white WDL: 110-4-86 Egaroucid win rate: 0.5372750642673522
+level 5
+start depth: 40 Egaroucid plays black WDL: 101-12-87 Egaroucid plays white WDL: 93-13-94 Egaroucid win rate: 0.5173333333333333
+start depth: 30 Egaroucid plays black WDL: 99-12-89 Egaroucid plays white WDL: 99-9-92 Egaroucid win rate: 0.5224274406332454
+start depth: 20 Egaroucid plays black WDL: 120-9-71 Egaroucid plays white WDL: 92-10-98 Egaroucid win rate: 0.5564304461942258
+start depth: 10 Egaroucid plays black WDL: 105-10-85 Egaroucid plays white WDL: 108-9-83 Egaroucid win rate: 0.5590551181102362
+
+2022/02/18
+level 1
+start depth: 10 Egaroucid plays black WDL: 190-8-202 Egaroucid plays white WDL: 209-13-178 Egaroucid win rate: 0.5121951219512195 
+start depth: 20 Egaroucid plays black WDL: 177-9-214 Egaroucid plays white WDL: 210-7-183 Egaroucid win rate: 0.49362244897959184 
+start depth: 30 Egaroucid plays black WDL: 175-9-216 Egaroucid plays white WDL: 191-11-198 Egaroucid win rate: 0.46923076923076923
+start depth: 40 Egaroucid plays black WDL: 184-16-200 Egaroucid plays white WDL: 225-10-165 Egaroucid win rate: 0.5284237726098191
+start depth: 50 Egaroucid plays black WDL: 171-29-200 Egaroucid plays white WDL: 211-30-159 Egaroucid win rate: 0.5155195681511471
+level 5
+start depth: 10 Egaroucid plays black WDL: 179-14-107 Egaroucid plays white WDL: 161-17-122 Egaroucid win rate: 0.5975395430579965
+start depth: 20 Egaroucid plays black WDL: 152-12-136 Egaroucid plays white WDL: 159-18-123 Egaroucid win rate: 0.5456140350877193
+start depth: 30 Egaroucid plays black WDL: 163-23-114 Egaroucid plays white WDL: 143-21-136 Egaroucid win rate: 0.5503597122302158
+start depth: 40 Egaroucid plays black WDL: 155-14-131 Egaroucid plays white WDL: 144-26-130 Egaroucid win rate: 0.5339285714285714
+level 15 to 33 moves
+start depth: 10 Egaroucid plays black WDL: 63-11-26 Egaroucid plays white WDL: 52-11-37 Egaroucid win rate: 0.6460674157303371
+start depth: 20 Egaroucid plays black WDL: 52-9-39 Egaroucid plays white WDL: 49-7-44 Egaroucid win rate: 0.5489130434782609
+
+2022/03/01 new evaluation function
+level 1
+start depth: 10 Egaroucid plays black WDL: 218-12-270 Egaroucid plays white WDL: 285-14-201 Egaroucid win rate: 0.5164271047227926
+start depth: 20 Egaroucid plays black WDL: 218-13-269 Egaroucid plays white WDL: 261-13-226 Egaroucid win rate: 0.4917864476386037
+start depth: 30 Egaroucid plays black WDL: 218-16-266 Egaroucid plays white WDL: 262-12-226 Egaroucid win rate: 0.49382716049382713
+start depth: 40 Egaroucid plays black WDL: 222-21-257 Egaroucid plays white WDL: 274-19-207 Egaroucid win rate: 0.5166666666666667
+start depth: 50 Egaroucid plays black WDL: 218-43-239 Egaroucid plays white WDL: 255-43-202 Egaroucid win rate: 0.5175054704595186
+level 5
+start depth: 10 Egaroucid plays black WDL: 175-9-116 Egaroucid plays white WDL: 167-13-120 Egaroucid win rate: 0.5916955017301038
+start depth: 20 Egaroucid plays black WDL: 159-11-130 Egaroucid plays white WDL: 161-14-125 Egaroucid win rate: 0.5565217391304348
+start depth: 30 Egaroucid plays black WDL: 161-18-121 Egaroucid plays white WDL: 138-15-147 Egaroucid win rate: 0.527336860670194
+start depth: 40 Egaroucid plays black WDL: 149-15-136 Egaroucid plays white WDL: 146-23-131 Egaroucid win rate: 0.5249110320284698
+
+2022/03/06 new ai
+level 1
+start depth: 10 Egaroucid plays black WDL: 163-7-130 Egaroucid plays white WDL: 162-15-123 Egaroucid win rate: 0.5622837370242214
+start depth: 20 Egaroucid plays black WDL: 157-3-140 Egaroucid plays white WDL: 162-12-126 Egaroucid win rate: 0.5452991452991452
+start depth: 30 Egaroucid plays black WDL: 150-9-141 Egaroucid plays white WDL: 149-5-146 Egaroucid win rate: 0.5102389078498294
+start depth: 40 Egaroucid plays black WDL: 161-9-130 Egaroucid plays white WDL: 155-12-133 Egaroucid win rate: 0.5457685664939551
+start depth: 50 Egaroucid plays black WDL: 119-22-159 Egaroucid plays white WDL: 154-23-123 Egaroucid win rate: 0.4918918918918919
+level 5
+start depth: 40 Egaroucid plays black WDL: 150-21-129 Egaroucid plays white WDL: 140-16-144 Egaroucid win rate: 0.5150976909413855
+
+2022/03/13 new evaluation function with fixed bug
+level 1
+start depth: 10 Egaroucid plays black WDL: 156-6-138 Egaroucid plays white WDL: 173-8-119 Egaroucid win rate: 0.5614334470989761
+start depth: 20 Egaroucid plays black WDL: 172-5-123 Egaroucid plays white WDL: 177-5-118 Egaroucid win rate: 0.5915254237288136
+start depth: 30 Egaroucid plays black WDL: 157-4-139 Egaroucid plays white WDL: 144-9-147 Egaroucid win rate: 0.5127768313458262
+start depth: 40 Egaroucid plays black WDL: 168-8-124 Egaroucid plays white WDL: 152-10-138 Egaroucid win rate: 0.5498281786941581
+start depth: 50 Egaroucid plays black WDL: 127-35-138 Egaroucid plays white WDL: 156-27-117 Egaroucid win rate: 0.5260223048327137
+
+2022/03/13 updated
+level 1 600 games
+start depth: 10 Egaroucid plays black WDL: 154-7-139 Egaroucid plays white WDL: 175-7-118 Egaroucid win rate: 0.5614334470989761
+start depth: 20 Egaroucid plays black WDL: 167-11-122 Egaroucid plays white WDL: 175-11-114 Egaroucid win rate: 0.5916955017301038
+start depth: 30 Egaroucid plays black WDL: 164-5-131 Egaroucid plays white WDL: 144-10-146 Egaroucid win rate: 0.5264957264957265
+start depth: 40 Egaroucid plays black WDL: 148-9-143 Egaroucid plays white WDL: 166-2-132 Egaroucid win rate: 0.533106960950764
+start depth: 50 Egaroucid plays black WDL: 131-31-138 Egaroucid plays white WDL: 150-29-121 Egaroucid win rate: 0.5203703703703704
+level 5 400 games
+start depth: 10 Egaroucid plays black WDL: 108-16-76 Egaroucid plays white WDL: 126-11-63 Egaroucid win rate: 0.6273458445040214
+start depth: 20 Egaroucid plays black WDL: 99-12-89 Egaroucid plays white WDL: 100-11-89 Egaroucid win rate: 0.5278514588859416
+start depth: 30 Egaroucid plays black WDL: 96-8-96 Egaroucid plays white WDL: 116-8-76 Egaroucid win rate: 0.5520833333333334
+start depth: 40 Egaroucid plays black WDL: 105-10-85 Egaroucid plays white WDL: 107-10-83 Egaroucid win rate: 0.5578947368421052
+
+2022/03/14 updated evaluation function
+level 1 600 games
+start depth: 10 Egaroucid plays black WDL: 148-7-145 Egaroucid plays white WDL: 181-10-109 Egaroucid win rate: 0.5643224699828473
+start depth: 20 Egaroucid plays black WDL: 154-8-138 Egaroucid plays white WDL: 165-4-131 Egaroucid win rate: 0.5425170068027211
+
+level 5 400 games
+start depth: 10 Egaroucid plays black WDL: 107-8-85 Egaroucid plays white WDL: 114-12-74 Egaroucid win rate: 0.5815789473684211
+start depth: 20 Egaroucid plays black WDL: 105-12-83 Egaroucid plays white WDL: 97-7-96 Egaroucid win rate: 0.5301837270341208
+
+level 11 200 games used exact Edax's level
+start depth: 10 Egaroucid plays black WDL: 53-7-40 Egaroucid plays white WDL: 49-9-42 Egaroucid win rate: 0.5543478260869565
+start depth: 20 Egaroucid plays black WDL: 49-11-40 Egaroucid plays white WDL: 48-11-41 Egaroucid win rate: 0.5449438202247191
+
+2022/03/15 update mpc
+level 11 200 games used exact Edax's level
+start depth: 10 Egaroucid plays black WDL: 50-11-39 Egaroucid plays white WDL: 52-9-39 Egaroucid win rate: 0.5666666666666667
+start depth: 20 Egaroucid plays black WDL: 61-10-29 Egaroucid plays white WDL: 48-6-46 Egaroucid win rate: 0.592391304347826
+
+2022/04/25 update mpc use xot
+level 1
+start depth: 8 Egaroucid plays black WDL: 61-2-67 Egaroucid plays white WDL: 76-3-51 Egaroucid win rate: 0.5372549019607843
+level 5
+start depth: 8 Egaroucid plays black WDL: 68-6-56 Egaroucid plays white WDL: 67-11-52 Egaroucid win rate: 0.5555555555555556
+level 11
+start depth: 8 Egaroucid plays black WDL: 69-18-43 Egaroucid plays white WDL: 61-15-54 Egaroucid win rate: 0.5726872246696035
+
+2022/05/05 update evaluation algorithm xot 8 moves
+level: 1 start depth: 8 Egaroucid plays black WDL: 61-2-67 Egaroucid plays white WDL: 76-3-51 Egaroucid win rate: 0.5372549019607843
+level: 5 start depth: 8 Egaroucid plays black WDL: 68-6-56 Egaroucid plays white WDL: 69-11-50 Egaroucid win rate: 0.5637860082304527
+
+2022/05/11 fixed crash bug xot 8 moves
+level: 1 level: 1 start depth: 8 Egaroucid plays black WDL: 61-2-67 Egaroucid plays white WDL: 77-3-50 Egaroucid win rate: 0.5411764705882353
+level: 5 start depth: 8 Egaroucid plays black WDL: 71-4-55 Egaroucid plays white WDL: 70-11-49 Egaroucid win rate: 0.5755102040816327
+level: 11 start depth: 8 Egaroucid plays black WDL: 72-16-42 Egaroucid plays white WDL: 62-14-54 Egaroucid win rate: 0.5826086956521739
+
+xot 1000 games
+level: 1 start depth: 8 Egaroucid plays black WDL: 489-24-487 Egaroucid plays white WDL: 534-27-439 Egaroucid win rate: 0.5248845561826577
+level: 5 start depth: 8 Egaroucid plays black WDL: 582-59-359 Egaroucid plays white WDL: 549-44-407 Egaroucid win rate: 0.5962045334739061
+level: 10 start depth: 8 Egaroucid plays black WDL: 585-119-296 Egaroucid plays white WDL: 443-124-433 Egaroucid win rate: 0.585088218554354
+level: 11 start depth: 8 Egaroucid plays black WDL: 552-132-316 Egaroucid plays white WDL: 501-115-384 Egaroucid win rate: 0.6006845407872219
+
+2022/05/19 update evaluation function xot 1000 games
+level: 1 start depth: 8 Egaroucid plays black WDL: 499-25-476 0.5117948717948718 Egaroucid plays white WDL: 514-35-451 0.5326424870466321 Egaroucid win rate: 0.5221649484536083
+level: 5 start depth: 8 Egaroucid plays black WDL: 575-61-364 0.6123535676251332 Egaroucid plays white WDL: 559-57-384 0.5927889713679746 Egaroucid win rate: 0.6025504782146652
+level: 10 start depth: 8 Egaroucid plays black WDL: 568-112-320 0.6396396396396397 Egaroucid plays white WDL: 463-121-416 0.5267349260523322 Egaroucid win rate: 0.5834748160724391
+
+2022/05/29 update evaluation function
+level: 1 start depth: 8 Egaroucid plays black WDL: 497-24-479 0.5092213114754098 Egaroucid plays white WDL: 532-22-446 0.5439672801635992 Egaroucid win rate: 0.5266120777891504
+level: 5 start depth: 8 Egaroucid plays black WDL: 573-52-375 0.6044303797468354 Egaroucid plays white WDL: 535-54-411 0.5655391120507399 Egaroucid win rate: 0.5850052798310454
+level: 10 start depth: 8 Egaroucid plays black WDL: 536-131-333 0.616800920598389 Egaroucid plays white WDL: 468-109-423 0.5252525252525253 Egaroucid win rate: 0.5704545454545454
+
+2022/09/19 egaroucid 6
+level: 1 start depth: 8 Egaroucid plays black WDL: 493-18-489 0.5020366598778004 Egaroucid plays white WDL: 526-25-449 0.5394871794871795 Egaroucid win rate: 0.5206949412365867
+level: 5 start depth: 8 Egaroucid plays black WDL: 590-57-353 0.6256627783669141 Egaroucid plays white WDL: 539-52-409 0.5685654008438819 Egaroucid win rate: 0.5970386039132733
+level: 10 start depth: 8 Egaroucid plays black WDL: 598-115-287 0.6757062146892655 Egaroucid plays white WDL: 473-115-412 0.5344632768361582 Egaroucid win rate: 0.6050847457627119
+
+2022/10/01 egaroucid 6 level 15
+level: 15 start depth: 8 Egaroucid plays black WDL: 50-18-32 0.6097560975609756 Egaroucid plays white WDL: 36-21-43 0.45569620253164556 Egaroucid win rate: 0.5341614906832298
+
+2022/10/02 update probcut
+level: 11 start depth: 8 Egaroucid plays black WDL: 181-36-83 0.6856060606060606 Egaroucid plays white WDL: 131-37-132 0.49809885931558934 Egaroucid win rate: 0.5920303605313093
+level: 15 start depth: 8 Egaroucid plays black WDL: 106-23-71 0.5988700564971752 Egaroucid plays white WDL: 89-37-74 0.5460122699386503 Egaroucid win rate: 0.5735294117647058
+
+2022/10/02 fixed probcut values
+level: 11 start depth: 8 Egaroucid plays black WDL: 115-21-64 0.6424581005586593 Egaroucid plays white WDL: 94-26-80 0.5402298850574713 Egaroucid win rate: 0.5920679886685553
+level: 15 start depth: 8 Egaroucid plays black WDL: 98-28-74 0.5697674418604651 Egaroucid plays white WDL: 97-35-68 0.5878787878787879 Egaroucid win rate: 0.5786350148367952
+
+2022/10/03 update probcut
+level: 15 start depth: 8 Egaroucid plays black WDL: 45-20-35 0.5625 Egaroucid plays white WDL: 41-21-38 0.5189873417721519 Egaroucid win rate: 0.5408805031446541
+
+2022/10/09 update several bug
+level: 15 start depth: 8 Egaroucid plays black WDL: 58-12-30 0.6590909090909091 Egaroucid plays white WDL: 49-18-33 0.5975609756097561 Egaroucid win rate: 0.6294117647058823
+
+2022/10/12 update evaluation function
+level: 1 start depth: 8 Egaroucid plays black WDL: 525-17-458 0.5340793489318413 Egaroucid plays white WDL: 558-25-417 0.5723076923076923 Egaroucid win rate: 0.5531154239019408
+level: 5 start depth: 8 Egaroucid plays black WDL: 597-37-366 0.6199376947040498 Egaroucid plays white WDL: 595-51-354 0.6269757639620653 Egaroucid win rate: 0.6234309623430963
+level: 10 start depth: 8 Egaroucid plays black WDL: 290-58-152 0.6561085972850679 Egaroucid plays white WDL: 244-60-196 0.5545454545454546 Egaroucid win rate: 0.6054421768707483
+level: 15 start depth: 8 Egaroucid plays black WDL: 55-20-25 0.6875 Egaroucid plays white WDL: 46-18-36 0.5609756097560976 Egaroucid win rate: 0.6234567901234568
+
+2022/10/26 update evaluation function
+level: 1 start depth: 8 Egaroucid plays black WDL: 562-20-418 0.573469387755102 Egaroucid plays white WDL: 540-38-422 0.5613305613305614 Egaroucid win rate: 0.5674562306900103
+level: 5 start depth: 8 Egaroucid plays black WDL: 597-38-365 0.6205821205821206 Egaroucid plays white WDL: 585-51-364 0.6164383561643836 Egaroucid win rate: 0.6185243328100472
+level: 10 start depth: 8 Egaroucid plays black WDL: 288-68-144 0.6666666666666666 Egaroucid plays white WDL: 241-58-201 0.5452488687782805 Egaroucid win rate: 0.6052631578947368
+level: 15 start depth: 8 Egaroucid plays black WDL: 58-17-25 0.6987951807228916 Egaroucid plays white WDL: 54-25-21 0.72 Egaroucid win rate: 0.7088607594936709
+
+2022/11/06 updating test for 6.1.0
+level: 15 start depth: 8 Egaroucid plays black WDL: 44-23-33 0.5714285714285714 Egaroucid plays white WDL: 53-21-26 0.6708860759493671 Egaroucid win rate: 0.6217948717948718
+
+2022/11/07 updating for 6.1.0 level 11
+start depth: 10 Egaroucid plays black WDL: 59-13-28 Egaroucid plays white WDL: 52-15-33 Egaroucid win rate: 0.6453488372093024
+
+2022/12/17 test for Egaroucid 6.1.0
+vs Edax 4.4
+level: 1 Egaroucid plays black WDL: 643-21-336 0.6567926455566905 Egaroucid plays white WDL: 638-19-343 0.6503567787971458 Egaroucid win rate: 0.6535714285714286
+level: 5 Egaroucid plays black WDL: 609-51-340 0.6417281348788199 Egaroucid plays white WDL: 580-44-376 0.606694560669456 Egaroucid win rate: 0.6241469816272965
+level: 10 Egaroucid plays black WDL: 587-112-301 0.661036036036036 Egaroucid plays white WDL: 458-135-407 0.5294797687861271 Egaroucid win rate: 0.5961209355390759
+level: 15 Egaroucid plays black WDL: 63-11-26 0.7078651685393258 Egaroucid plays white WDL: 44-24-32 0.5789473684210527 Egaroucid win rate: 0.6484848484848484
+
+2023/02/03 testing new evaluation function (20230203)
+level: 1 Egaroucid plays black WDL: 48-2-50 0.4897959183673469 Egaroucid plays white WDL: 61-2-37 0.6224489795918368 Egaroucid win rate: 0.5561224489795918
+
+2023/02/03 testing new evaluation function (20230203_1)
+level: 1 Egaroucid plays black WDL: 47-3-50 0.4845360824742268 Egaroucid plays white WDL: 60-2-38 0.6122448979591837 Egaroucid win rate: 0.5487179487179488
+
+2023/02/04 new evaluation function (20230204)
+level: 1 Egaroucid plays black WDL: 51-2-47 0.5204081632653061 Egaroucid plays white WDL: 62-2-36 0.6326530612244898 Egaroucid win rate: 0.576530612244898
+
+2023/02/04 new evaluation function (20230204_2)
+level: 1 Egaroucid plays black WDL: 48-3-49 0.4948453608247423 Egaroucid plays white WDL: 55-3-42 0.5670103092783505 Egaroucid win rate: 0.5309278350515464
+
+2023/02/05 new evaluation (20230205_1, model=20230205)
+level: 1 Egaroucid plays black WDL: 47-5-48 0.49473684210526314 Egaroucid plays white WDL: 52-1-47 0.5252525252525253 Egaroucid win rate: 0.5103092783505154
+
+2023/02/05 evaluation 20230205_2
+level: 1 Egaroucid plays black WDL: 47-1-52 0.47474747474747475 Egaroucid plays white WDL: 50-1-49 0.5050505050505051 Egaroucid win rate: 0.4898989898989899
+level: 5 Egaroucid plays black WDL: 52-7-41 0.5591397849462365 Egaroucid plays white WDL: 41-6-53 0.43617021276595747 Egaroucid win rate: 0.49732620320855614
+
+2023/02/06 evaluation 20230206
+level: 1 Egaroucid plays black WDL: 46-5-49 0.4842105263157895 Egaroucid plays white WDL: 54-1-45 0.5454545454545454 Egaroucid win rate: 0.5154639175257731
+
+2023/02/06 evaluation 20230206_1
+level: 1 Egaroucid plays black WDL: 47-1-52 0.47474747474747475 Egaroucid plays white WDL: 54-2-44 0.5510204081632653 Egaroucid win rate: 0.5126903553299492
+
+2023/02/06 evaluation 20230206_2
+level: 1 Egaroucid plays black WDL: 55-1-44 0.5555555555555556 Egaroucid plays white WDL: 63-0-37 0.63 Egaroucid win rate: 0.592964824120603
+level: 5 Egaroucid plays black WDL: 52-5-43 0.5473684210526316 Egaroucid plays white WDL: 41-7-52 0.44086021505376344 Egaroucid win rate: 0.4946808510638298
+
+2023/02/06 evaluation 20230206_3
+level: 1 Egaroucid plays black WDL: 50-4-46 0.5208333333333334 Egaroucid plays white WDL: 60-0-40 0.6 Egaroucid win rate: 0.5612244897959183
+level: 5 Egaroucid plays black WDL: 45-5-50 0.47368421052631576 Egaroucid plays white WDL: 50-3-47 0.5154639175257731 Egaroucid win rate: 0.4947916666666667
+level: 1 Egaroucid plays black WDL: 526-25-449 0.5394871794871795 Egaroucid plays white WDL: 593-25-382 0.6082051282051282 Egaroucid win rate: 0.5738461538461539
+level: 5 Egaroucid plays black WDL: 521-38-441 0.5415800415800416 Egaroucid plays white WDL: 484-47-469 0.5078698845750262 Egaroucid win rate: 0.5248041775456919
+
+2023/02/07 evaluation 20230207
+level: 1 Egaroucid plays black WDL: 45-3-52 0.4639175257731959 Egaroucid plays white WDL: 57-1-42 0.5757575757575758 Egaroucid win rate: 0.5204081632653061
+level: 5 Egaroucid plays black WDL: 53-5-42 0.5578947368421052 Egaroucid plays white WDL: 48-5-47 0.5052631578947369 Egaroucid win rate: 0.531578947368421
+
+2023/02/07 evaluation 20230207_2 (model 20230206)
+level: 1 Egaroucid plays black WDL: 70-2-28 0.7142857142857143 Egaroucid plays white WDL: 69-1-30 0.696969696969697 Egaroucid win rate: 0.7055837563451777
+level: 5 Egaroucid plays black WDL: 61-8-31 0.6630434782608695 Egaroucid plays white WDL: 60-9-31 0.6593406593406593 Egaroucid win rate: 0.6612021857923497
+
+2023/02/07 evaluation 20230207_3
+level: 1 Egaroucid plays black WDL: 74-3-23 0.7628865979381443 Egaroucid plays white WDL: 56-2-42 0.5714285714285714 Egaroucid win rate: 0.6666666666666666
+level: 5 Egaroucid plays black WDL: 54-6-40 0.574468085106383 Egaroucid plays white WDL: 52-8-40 0.5652173913043478 Egaroucid win rate: 0.5698924731182796
+level: 1 Egaroucid plays black WDL: 627-32-341 0.6477272727272727 Egaroucid plays white WDL: 615-32-353 0.6353305785123967 Egaroucid win rate: 0.6415289256198347
+level: 5 Egaroucid plays black WDL: 597-39-364 0.6212278876170656 Egaroucid plays white WDL: 545-60-395 0.5797872340425532 Egaroucid win rate: 0.6007364544976328
+
+2023/02/07 new evaluation 20230207_3 test
+level: 1 Egaroucid plays black WDL: 627-32-341 0.6477272727272727 Egaroucid plays white WDL: 615-32-353 0.6353305785123967 Egaroucid win rate: 0.6415289256198347
+level: 5 Egaroucid plays black WDL: 597-39-364 0.6212278876170656 Egaroucid plays white WDL: 545-60-395 0.5797872340425532 Egaroucid win rate: 0.6007364544976328
+level: 10 Egaroucid plays black WDL: 601-124-275 0.6860730593607306 Egaroucid plays white WDL: 478-116-406 0.5407239819004525 Egaroucid win rate: 0.6130681818181818
+level: 15 Egaroucid plays black WDL: 64-10-26 0.7111111111111111 Egaroucid plays white WDL: 47-17-36 0.5662650602409639 Egaroucid win rate: 0.6416184971098265
+
+2023/02/08 evaluation 20230207_4
+level: 1 Egaroucid plays black WDL: 67-1-32 0.6767676767676768 Egaroucid plays white WDL: 54-3-43 0.5567010309278351 Egaroucid win rate: 0.6173469387755102
+level: 1 Egaroucid plays black WDL: 635-25-340 0.6512820512820513 Egaroucid plays white WDL: 623-31-346 0.6429308565531475 Egaroucid win rate: 0.647119341563786
+level: 5 Egaroucid plays black WDL: 594-46-360 0.6226415094339622 Egaroucid plays white WDL: 551-46-403 0.5775681341719078 Egaroucid win rate: 0.600104821802935
+level: 10 Egaroucid plays black WDL: 598-121-281 0.6803185437997725 Egaroucid plays white WDL: 476-114-410 0.5372460496613995 Egaroucid win rate: 0.6084985835694051
+level: 15 Egaroucid plays black WDL: 62-13-25 0.7126436781609196 Egaroucid plays white WDL: 49-13-38 0.5632183908045977 Egaroucid win rate: 0.6379310344827587
+
+2023/02/11 eval spped optimize 20230210_1
+level: 1 Egaroucid plays black WDL: 626-24-350 0.6413934426229508 Egaroucid plays white WDL: 615-28-357 0.6327160493827161 Egaroucid win rate: 0.6370636550308009
+level: 5 Egaroucid plays black WDL: 600-39-361 0.6243496357960457 Egaroucid plays white WDL: 547-52-401 0.5770042194092827 Egaroucid win rate: 0.6008381351492929
+level: 10 Egaroucid plays black WDL: 598-117-285 0.6772366930917327 Egaroucid plays white WDL: 468-125-407 0.5348571428571428 Egaroucid win rate: 0.6063708759954494
+level: 15 Egaroucid plays black WDL: 62-11-27 0.6966292134831461 Egaroucid plays white WDL: 48-16-36 0.5714285714285714 Egaroucid win rate: 0.6358381502890174
+
+2023/03/14 test before release (Egaroucid for Console 6.2.0)
+level: 1 Egaroucid plays black WDL: 615-23-362 0.6294779938587513 Egaroucid plays white WDL: 619-26-355 0.635523613963039 Egaroucid win rate: 0.6324961558175295
+level: 5 Egaroucid plays black WDL: 566-48-386 0.5945378151260504 Egaroucid plays white WDL: 535-44-421 0.5596234309623431 Egaroucid win rate: 0.5770440251572327
+level: 10 Egaroucid plays black WDL: 589-115-296 0.6655367231638418 Egaroucid plays white WDL: 451-119-430 0.5119182746878547 Egaroucid win rate: 0.5889014722536806
+level: 15 Egaroucid plays black WDL: 114-31-55 0.6745562130177515 Egaroucid plays white WDL: 108-36-56 0.6585365853658537 Egaroucid win rate: 0.6666666666666666
+
+2023/06/18 test for Egaroucid 6.3.0
+level: 1 Egaroucid plays black WDL: 591-20-389 0.6030612244897959 Egaroucid plays white WDL: 636-26-338 0.6529774127310062 Egaroucid win rate: 0.627942681678608
+level: 5 Egaroucid plays black WDL: 593-45-362 0.6209424083769634 Egaroucid plays white WDL: 561-42-397 0.5855949895615866 Egaroucid win rate: 0.6032409827496079
+level: 10 Egaroucid plays black WDL: 599-107-294 0.6707726763717805 Egaroucid plays white WDL: 451-130-419 0.5183908045977011 Egaroucid win rate: 0.5955757231990925
+level: 15 Egaroucid plays black WDL: 162-51-87 0.6506024096385542 Egaroucid plays white WDL: 140-63-97 0.5907172995780591 Egaroucid win rate: 0.6213991769547325
+
+2023/08/31 Egaroucid 6.4.0
+level: 1 Egaroucid plays black WDL: 602-29-369 0.6165 Egaroucid plays white WDL: 644-30-326 0.659 Egaroucid win rate: 0.63775
+level: 5 Egaroucid plays black WDL: 586-50-364 0.611 Egaroucid plays white WDL: 566-51-383 0.5915 Egaroucid win rate: 0.60125
+level: 10 Egaroucid plays black WDL: 623-97-280 0.6715 Egaroucid plays white WDL: 439-126-435 0.502 Egaroucid win rate: 0.58675
+level: 15 Egaroucid plays black WDL: 234-74-192 0.542 Egaroucid plays white WDL: 246-85-169 0.577 Egaroucid win rate: 0.5595
+level: 21 Egaroucid plays black WDL: 56-25-19 0.685 Egaroucid plays white WDL: 30-27-43 0.435 Egaroucid win rate: 0.56
+
+2023/09/20 update evaluation function with old model
+python egaroucid_vs_edax.py 1 1000 resources_exp\20230920_1.egev 
+3623 openings found
+egaroucid eval  resources_exp\20230920_1.egev
+level 1
+openings 3623
+play 1000 games
+ 999 1000   [675, 662] [18, 26] [307, 312] 1337 619 0.6795
+level: 1 Egaroucid plays black WDL: 675-18-307 0.684 Egaroucid plays white WDL: 662-26-312 0.675 Egaroucid win rate: 0.6795
+
+
+2023/09/20 6.5.0 beta
+200 games played for each winning rate
+        beta    6.4.0   6.3.0   6.2.0   6.1.0   Edax    all
+beta    -       0.5400  0.6275  0.6275  0.5625  0.7650  0.6245
+6.4.0   0.4600  -       0.5850  0.5850  0.4575  0.7000  0.5575
+6.3.0   0.3725  0.4150  -       0.5000  0.4425  0.5425  0.4545
+6.2.0   0.3725  0.4150  0.5000  -       0.4425  0.5425  0.4545
+6.1.0   0.4375  0.5425  0.5575  0.5575  -       0.6275  0.5445
+Edax    0.2350  0.3000  0.4575  0.4575  0.3725  -       0.3645
+
+
+2023/09/25 new evaluation function with 10M data
+python egaroucid_vs_edax.py 1 1000 resources_exp\20230925_1.egev
+3623 openings found
+egaroucid eval  resources_exp\20230925_1.egev
+level 1
+openings 3623
+play 1000 games
+ 999 1000   [645, 668] [26, 26] [329, 306] 1313 635 0.6695
+level: 1 Egaroucid plays black WDL: 645-26-329 0.658 Egaroucid plays white WDL: 668-26-306 0.681 Egaroucid win rate: 0.6695
+
+200 games played for each winning rate
+        beta    6.4.0   6.3.0   6.2.0   6.1.0   Edax    all
+beta    -       0.5675  0.6425  0.6425  0.5525  0.7250  0.6260
+6.4.0   0.4325  -       0.5850  0.5850  0.4575  0.7000  0.5520
+6.3.0   0.3575  0.4150  -       0.5000  0.4425  0.5425  0.4515
+6.2.0   0.3575  0.4150  0.5000  -       0.4425  0.5425  0.4515
+6.1.0   0.4475  0.5425  0.5575  0.5575  -       0.6275  0.5465
+Edax    0.2750  0.3000  0.4575  0.4575  0.3725  -       0.3725
+
+
+
+2023/09/26 20230925_2.egev
+python egaroucid_vs_edax.py 1 1000 resources_exp\20230925_2.egev 
+3623 openings found
+egaroucid eval  resources_exp\20230925_2.egev
+level 1
+openings 3623
+play 1000 games
+ 999 1000   [645, 678] [23, 25] [332, 297] 1323 629 0.6735
+level: 1 Egaroucid plays black WDL: 645-23-332 0.6565 Egaroucid plays white WDL: 678-25-297 0.6905 Egaroucid win rate: 0.6735
+
+200 games played for each winning rate
+        beta    6.4.0   6.3.0   6.2.0   6.1.0   Edax    all
+beta    -       0.5950  0.5925  0.5925  0.5250  0.7100  0.6030
+6.4.0   0.4050  -       0.5850  0.5850  0.4575  0.7000  0.5465
+6.3.0   0.4075  0.4150  -       0.5000  0.4425  0.5425  0.4615
+6.2.0   0.4075  0.4150  0.5000  -       0.4425  0.5425  0.4615
+6.1.0   0.4750  0.5425  0.5575  0.5575  -       0.6275  0.5520
+Edax    0.2900  0.3000  0.4575  0.4575  0.3725  -       0.3755
+
+
+
+
+
+2023/10/06 after update egaroucid_vs_edax.py
+python egaroucid_vs_edax.py 1 200  
+3623 openings found
+level 1
+openings 3623
+play 200 games
+ 199 200   [140, 141] [1, 8] [59, 51] 281 110 0.71375
+level: 1 Egaroucid plays black WDL: 140-1-59 0.7025 Egaroucid plays white WDL: 141-8-51 0.725 Egaroucid win rate: 0.71375
+
+1 thread, reboot each battle
+200 games played for each winning rate
+        beta    6.4.0   6.3.0   6.2.0   6.1.0   Edax    all
+beta    -       0.6200  0.6300  0.6300  0.5475  0.7375  0.6330
+6.4.0   0.3800  -       0.5850  0.5850  0.4575  0.7000  0.5415
+6.3.0   0.3700  0.4150  -       0.5000  0.4425  0.5425  0.4540
+6.2.0   0.3700  0.4150  0.5000  -       0.4425  0.5425  0.4540
+6.1.0   0.4525  0.5425  0.5575  0.5575  -       0.6275  0.5475
+Edax    0.2625  0.3000  0.4575  0.4575  0.3725  -       0.3700
+
+2023/10/07
+python egaroucid_vs_edax.py 1 1000
+3623 openings found
+Egaroucid_for_console.exe -quiet -nobook -level 1
+level 1
+openings 3623
+play 1000 games
+ 999 1000   [686, 700] [14, 28] [300, 272] 1386 572 0.7035
+level: 1 Egaroucid plays black WDL: 686-14-300 0.693 Egaroucid plays white WDL: 700-28-272 0.714 Egaroucid win rate: 0.7035
+
+
+2023/10/08 release for Egaroucid 6.5.0
+level: 1 Egaroucid plays black WDL: 686-14-300 0.693 Egaroucid plays white WDL: 700-28-272 0.714 Egaroucid win rate: 0.7035
+level: 5 Egaroucid plays black WDL: 639-51-310 0.6645 Egaroucid plays white WDL: 611-36-353 0.629 Egaroucid win rate: 0.64675
+level: 10 Egaroucid plays black WDL: 571-117-312 0.6295 Egaroucid plays white WDL: 470-120-410 0.53 Egaroucid win rate: 0.57975
+level: 15 Egaroucid plays black WDL: 248-84-168 0.58 Egaroucid plays white WDL: 225-108-167 0.558 Egaroucid win rate: 0.569
+level: 21 Egaroucid plays black WDL: 48-28-24 0.62 Egaroucid plays white WDL: 33-32-35 0.49 Egaroucid win rate: 0.555
+
+200 games played for each winning rate
+vs >    6.5.0   6.4.0   6.3.0   6.1.0   Edax    all
+6.5.0   -       0.6200  0.6300  0.5475  0.7375  0.6338
+6.4.0   0.3800  -       0.5850  0.4575  0.7000  0.5306
+6.3.0   0.3700  0.4150  -       0.4425  0.5425  0.4425
+6.1.0   0.4525  0.5425  0.5575  -       0.6275  0.5450
+Edax    0.2625  0.3000  0.4575  0.3725  -       0.3481
+
+
+
+2024/03/15 new engine egaroucid 7.0.0
+level: 1 Egaroucid plays black WDL: 580-27-393 0.5935 Egaroucid plays white WDL: 601-29-370 0.6155 Egaroucid win rate: 0.6045
+level: 5 Egaroucid plays black WDL: 593-45-362 0.6155 Egaroucid plays white WDL: 528-67-405 0.5615 Egaroucid win rate: 0.5885
+level: 10 Egaroucid plays black WDL: 491-120-389 0.551 Egaroucid plays white WDL: 397-110-493 0.452 Egaroucid win rate: 0.5015
+
+
+
+2024/03/28 probcut and other things updated
+level: 1 Egaroucid plays black WDL: 570-26-404 0.583 Egaroucid plays white WDL: 607-24-369 0.619 Egaroucid win rate: 0.601
+level: 5 Egaroucid plays black WDL: 654-55-291 0.6815 Egaroucid plays white WDL: 600-41-359 0.6205 Egaroucid win rate: 0.651
+level: 10 Egaroucid plays black WDL: 502-110-388 0.557 Egaroucid plays white WDL: 412-115-473 0.4695 Egaroucid win rate: 0.51325
+level: 15 Egaroucid plays black WDL: 50-18-32 0.59 Egaroucid plays white WDL: 42-15-43 0.495 Egaroucid win rate: 0.5425
+level: 21 Egaroucid plays black WDL: 55-13-32 0.615 Egaroucid plays white WDL: 26-33-41 0.425 Egaroucid win rate: 0.52
+
+2024/03/31 probcut and move ordering updated
+level: 1 Egaroucid plays black WDL: 594-17-389 0.6025 Egaroucid plays white WDL: 640-28-332 0.654 Egaroucid win rate: 0.62825
+level: 5 Egaroucid plays black WDL: 651-55-294 0.6785 Egaroucid plays white WDL: 635-51-314 0.6605 Egaroucid win rate: 0.6695
+
+level: 15 Egaroucid plays black WDL: 47-18-35 0.56 Egaroucid plays white WDL: 44-15-41 0.515 Egaroucid win rate: 0.5375
+level: 21 Egaroucid plays black WDL: 54-25-21 0.665 Egaroucid plays white WDL: 25-21-54 0.355 Egaroucid win rate: 0.51
+
+
+2024/04/01 fixed bug
+level: 1 Egaroucid plays black WDL: 581-20-399 0.591 Egaroucid plays white WDL: 637-28-335 0.651 Egaroucid win rate: 0.621
+level: 5 Egaroucid plays black WDL: 649-53-298 0.6755 Egaroucid plays white WDL: 647-59-294 0.6765 Egaroucid win rate: 0.676
+level: 10 Egaroucid plays black WDL: 519-119-362 0.5785 Egaroucid plays white WDL: 404-124-472 0.466 Egaroucid win rate: 0.52225
+level: 15 Egaroucid plays black WDL: 46-15-39 0.535 Egaroucid plays white WDL: 39-20-41 0.49 Egaroucid win rate: 0.5125
+level: 21 Egaroucid plays black WDL: 45-29-26 0.595 Egaroucid plays white WDL: 29-27-44 0.425 Egaroucid win rate: 0.51
+
+
+2024/04/01 update probcut
+level: 1 Egaroucid plays black WDL: 595-15-390 0.6025 Egaroucid plays white WDL: 636-29-335 0.6505 Egaroucid win rate: 0.6265
+level: 5 Egaroucid plays black WDL: 671-47-282 0.6945 Egaroucid plays white WDL: 635-58-307 0.664 Egaroucid win rate: 0.67925
+level: 10 Egaroucid plays black WDL: 532-104-364 0.584 Egaroucid plays white WDL: 407-112-481 0.463 Egaroucid win rate: 0.5235
+level: 15 Egaroucid plays black WDL: 116-49-85 0.562 Egaroucid plays white WDL: 93-57-100 0.486 Egaroucid win rate: 0.524
+level: 21 Egaroucid plays black WDL: 51-18-31 0.6 Egaroucid plays white WDL: 33-34-33 0.5 Egaroucid win rate: 0.55
+
+
+
+2024/04/07 fixed etc, update move ordering
+level: 1 Egaroucid plays black WDL: 591-18-391 0.6 Egaroucid plays white WDL: 629-29-342 0.6435 Egaroucid win rate: 0.62175
+level: 5 Egaroucid plays black WDL: 638-65-297 0.6705 Egaroucid plays white WDL: 609-55-336 0.6365 Egaroucid win rate: 0.6535
+level: 10 Egaroucid plays black WDL: 520-112-368 0.576 Egaroucid plays white WDL: 405-95-500 0.4525 Egaroucid win rate: 0.51425
+level: 15 Egaroucid plays black WDL: 109-45-96 0.526 Egaroucid plays white WDL: 101-55-94 0.514 Egaroucid win rate: 0.52
+
+
+2024/04/07 use lazy smp
+level: 1 Egaroucid plays black WDL: 589-17-394 0.5975 Egaroucid plays white WDL: 628-30-342 0.643 Egaroucid win rate: 0.62025
+level: 5 Egaroucid plays black WDL: 599-54-347 0.626 Egaroucid plays white WDL: 590-54-356 0.617 Egaroucid win rate: 0.6215
+level: 10 Egaroucid plays black WDL: 500-120-380 0.56 Egaroucid plays white WDL: 404-116-480 0.462 Egaroucid win rate: 0.511
+level: 15 Egaroucid plays black WDL: 128-43-79 0.598 Egaroucid plays white WDL: 104-51-95 0.518 Egaroucid win rate: 0.558
+level: 21 Egaroucid plays black WDL: 49-30-21 0.64 Egaroucid plays white WDL: 32-30-38 0.47 Egaroucid win rate: 0.555
+
+
+2024/05/29 new eval, update lazy smp
+level: 1 Egaroucid plays black WDL: 600-32-368 0.616 Egaroucid plays white WDL: 628-23-349 0.6395 Egaroucid win rate: 0.62775
+level: 5 Egaroucid plays black WDL: 676-45-279 0.6985 Egaroucid plays white WDL: 619-40-341 0.639 Egaroucid win rate: 0.66875
+level: 10 Egaroucid plays black WDL: 569-94-337 0.616 Egaroucid plays white WDL: 451-98-451 0.5 Egaroucid win rate: 0.558
+level: 15 Egaroucid plays black WDL: 119-49-82 0.574 Egaroucid plays white WDL: 115-37-98 0.534 Egaroucid win rate: 0.554
+level: 21 Egaroucid plays black WDL: 48-28-24 0.62 Egaroucid plays white WDL: 33-26-41 0.46 Egaroucid win rate: 0.54
+
+
+2024/05/30 update lazy smp
+level: 1 Egaroucid plays black WDL: 594-30-376 0.609 Egaroucid plays white WDL: 638-23-339 0.6495 Egaroucid win rate: 0.62925
+level: 5 Egaroucid plays black WDL: 642-53-305 0.6685 Egaroucid plays white WDL: 613-49-338 0.6375 Egaroucid win rate: 0.653
+level: 10 Egaroucid plays black WDL: 565-109-326 0.6195 Egaroucid plays white WDL: 451-125-424 0.5135 Egaroucid win rate: 0.5665
+level: 15 Egaroucid plays black WDL: 113-51-86 0.554 Egaroucid plays white WDL: 102-60-88 0.528 Egaroucid win rate: 0.541
+level: 21 Egaroucid plays black WDL: 57-19-24 0.665 Egaroucid plays white WDL: 28-31-41 0.435 Egaroucid win rate: 0.55
+
+
+
+
+2024/06/21 update mmpc
+level: 1 Egaroucid plays black WDL: 591-29-380 0.6055 Egaroucid plays white WDL: 636-27-337 0.6495 Egaroucid win rate: 0.6275
+level: 5 Egaroucid plays black WDL: 673-54-273 0.7 Egaroucid plays white WDL: 624-56-320 0.652 Egaroucid win rate: 0.676
+level: 10 Egaroucid plays black WDL: 599-93-308 0.6455 Egaroucid plays white WDL: 478-103-419 0.5295 Egaroucid win rate: 0.5875
+level: 15 Egaroucid plays black WDL: 117-53-80 0.574 Egaroucid plays white WDL: 117-47-86 0.562 Egaroucid win rate: 0.568
+
+
+
+2024/06/21 update lazy smp
+level: 1 Egaroucid plays black WDL: 600-31-369 0.6155 Egaroucid plays white WDL: 628-24-348 0.64 Egaroucid win rate: 0.62775
+level: 5 Egaroucid plays black WDL: 653-44-303 0.675 Egaroucid plays white WDL: 675-46-279 0.698 Egaroucid win rate: 0.6865
+level: 10 Egaroucid plays black WDL: 575-110-315 0.63 Egaroucid plays white WDL: 456-107-437 0.5095 Egaroucid win rate: 0.56975
+level: 15 Egaroucid plays black WDL: 126-51-73 0.606 Egaroucid plays white WDL: 100-56-94 0.512 Egaroucid win rate: 0.559
+level: 21 Egaroucid plays black WDL: 47-32-21 0.63 Egaroucid plays white WDL: 32-28-40 0.46 Egaroucid win rate: 0.545
+
+
+
+2024/06/25 Egaroucid 7.2.0 Release
+level: 1 Egaroucid plays black WDL: 586-33-381 0.6025 Egaroucid plays white WDL: 650-18-332 0.659 Egaroucid win rate: 0.63075
+level: 5 Egaroucid plays black WDL: 679-49-272 0.7035 Egaroucid plays white WDL: 669-39-292 0.6885 Egaroucid win rate: 0.696
+level: 10 Egaroucid plays black WDL: 563-117-320 0.6215 Egaroucid plays white WDL: 465-116-419 0.523 Egaroucid win rate: 0.57225
+level: 15 Egaroucid plays black WDL: 129-45-76 0.606 Egaroucid plays white WDL: 101-56-93 0.516 Egaroucid win rate: 0.561
+level: 21 Egaroucid plays black WDL: 46-27-27 0.595 Egaroucid plays white WDL: 35-29-36 0.495 Egaroucid win rate: 0.545
+
+
+2024/06/25 Egaroucid 7.2.0 Release fixed clogsearch
+level: 1 Egaroucid plays black WDL: 586-33-381 0.6025 Egaroucid plays white WDL: 650-18-332 0.659 Egaroucid win rate: 0.63075
+level: 5 Egaroucid plays black WDL: 679-49-272 0.7035 Egaroucid plays white WDL: 669-39-292 0.6885 Egaroucid win rate: 0.696
+level: 10 Egaroucid plays black WDL: 563-117-320 0.6215 Egaroucid plays white WDL: 465-116-419 0.523 Egaroucid win rate: 0.57225
+level: 15 Egaroucid plays black WDL: 134-43-73 0.622 Egaroucid plays white WDL: 104-59-87 0.534 Egaroucid win rate: 0.578
+level: 21 Egaroucid plays black WDL: 46-34-20 0.63 Egaroucid plays white WDL: 33-26-41 0.46 Egaroucid win rate: 0.545
+
+
+
+
+2024/08/15 control
+level: 11 Egaroucid plays black WDL: 120-37-93 0.554 Egaroucid plays white WDL: 105-43-102 0.506 Egaroucid win rate: 0.53
+
+2024/08/15 mpda updated
+level: 11 Egaroucid plays black WDL: 123-33-94 0.558 Egaroucid plays white WDL: 114-35-101 0.526 Egaroucid win rate: 0.542
+
+2024/08/15 lazy smp updated
+level: 11 Egaroucid plays black WDL: 123-27-100 0.546 Egaroucid plays white WDL: 96-47-107 0.478 Egaroucid win rate: 0.512
+
+2024/08/15 update mpc in ybwc
+level: 11 Egaroucid plays black WDL: 138-24-88 0.6 Egaroucid plays white WDL: 115-37-98 0.534 Egaroucid win rate: 0.567
+
+2024/08/15 Egaroucid 7.3.0 Release (update mpc in ybwc)
+level: 1 Egaroucid plays black WDL: 597-33-370 0.6135 Egaroucid plays white WDL: 635-25-340 0.6475 Egaroucid win rate: 0.6305
+level: 5 Egaroucid plays black WDL: 673-52-275 0.699 Egaroucid plays white WDL: 640-57-303 0.6685 Egaroucid win rate: 0.68375
+level: 10 Egaroucid plays black WDL: 568-113-319 0.6245 Egaroucid plays white WDL: 445-109-446 0.4995 Egaroucid win rate: 0.562
+level: 15 Egaroucid plays black WDL: 125-52-73 0.604 Egaroucid plays white WDL: 103-51-96 0.514 Egaroucid win rate: 0.559
+level: 21 Egaroucid plays black WDL: 47-25-28 0.595 Egaroucid plays white WDL: 31-29-40 0.455 Egaroucid win rate: 0.525
+
+
+
+
+2024/09/26 new evaluation function for 7.4.0
+level: 1 Egaroucid plays black WDL: 629-29-342 0.6435 Egaroucid plays white WDL: 644-18-338 0.653 Egaroucid win rate: 0.64825
+level: 5 Egaroucid plays black WDL: 672-55-273 0.6995 Egaroucid plays white WDL: 663-45-292 0.6855 Egaroucid win rate: 0.6925
+level: 10 Egaroucid plays black WDL: 610-108-282 0.664 Egaroucid plays white WDL: 454-118-428 0.513 Egaroucid win rate: 0.5885
+level: 15 Egaroucid plays black WDL: 130-50-70 0.62 Egaroucid plays white WDL: 115-54-81 0.568 Egaroucid win rate: 0.594
+level: 21 Egaroucid plays black WDL: 59-15-26 0.665 Egaroucid plays white WDL: 25-28-47 0.39 Egaroucid win rate: 0.5275
+
+
+
+2024/12/02 new evaluation function for 7.5.0 (11900k)
+level: 1 Egaroucid plays black WDL: 571-28-401 0.585 Egaroucid plays white WDL: 607-22-371 0.618 Egaroucid win rate: 0.6015 Egaroucid average discs earned: 5.999
+level: 5 Egaroucid plays black WDL: 679-46-275 0.702 Egaroucid plays white WDL: 629-64-307 0.661 Egaroucid win rate: 0.6815 Egaroucid average discs earned: 7.04
+level: 10 Egaroucid plays black WDL: 597-100-303 0.647 Egaroucid plays white WDL: 461-107-432 0.5145 Egaroucid win rate: 0.58075 Egaroucid average discs earned: 1.49
+level: 15 Egaroucid plays black WDL: 134-45-71 0.626 Egaroucid plays white WDL: 112-48-90 0.544 Egaroucid win rate: 0.585 Egaroucid average discs earned: 1.28
+level: 21 Egaroucid plays black WDL: 51-26-23 0.64 Egaroucid plays white WDL: 32-32-36 0.48 Egaroucid win rate: 0.56 Egaroucid average discs earned: 0.66
+
+
+2024/12/22 7.5.0 release
+level: 1 Egaroucid plays black WDL: 644-18-338 0.653 Egaroucid plays white WDL: 686-17-297 0.6945 Egaroucid win rate: 0.67375 Egaroucid average discs earned: 10.5
+level: 5 Egaroucid plays black WDL: 719-52-229 0.745 Egaroucid plays white WDL: 680-56-264 0.708 Egaroucid win rate: 0.7265 Egaroucid average discs earned: 9.042
+level: 10 Egaroucid plays black WDL: 616-88-296 0.66 Egaroucid plays white WDL: 493-115-392 0.5505 Egaroucid win rate: 0.60525 Egaroucid average discs earned: 1.773
+level: 15 Egaroucid plays black WDL: 129-34-87 0.584 Egaroucid plays white WDL: 120-43-87 0.566 Egaroucid win rate: 0.575 Egaroucid average discs earned: 1.072
+level: 21 Egaroucid plays black WDL: 48-26-26 0.61 Egaroucid plays white WDL: 34-30-36 0.49 Egaroucid win rate: 0.55 Egaroucid average discs earned: 0.43
+
+
+2025/03/06 7.6.0 beta for GGS tournament
+level: 1 Egaroucid WDL: 737-11-252 Egaroucid win rate: 0.7425 Egaroucid average discs earned: 11.94
+level: 15 Egaroucid WDL: 147-31-72 Egaroucid win rate: 0.65 Egaroucid average discs earned: 1.22
+
+
+2025/03/07 update mpc
+3623 openings found
+Egaroucid_for_console.exe -quiet -nobook -level 15
+level 15
+openings 3623
+play 250 games
+versions/edax_4_6/wEdax-x86-64-v3.exe -q -level 15
+---
+level: 1 Egaroucid WDL: 730-20-250 Egaroucid win rate: 0.74 Egaroucid average discs earned: 11.475
+level: 15 Egaroucid WDL: 139-31-80 Egaroucid win rate: 0.618 Egaroucid average discs earned: 0.956
+
+
+2025/03/08 Egaroucid 7.5.1 vs Edax 4.6
+level: 1 Egaroucid WDL: 727-14-259 Egaroucid win rate: 0.734 Egaroucid average discs earned: 10.929
+level: 11 Egaroucid WDL: 145-20-85 Egaroucid win rate: 0.62 Egaroucid average discs earned: 1.328
+level: 15 Egaroucid WDL: 133-35-82 Egaroucid win rate: 0.602 Egaroucid average discs earned: 0.916
+
+
+2025/04/02 new eval for 7.6.0
+level: 1 Egaroucid WDL: 734-15-251 Egaroucid win rate: 0.7415 Egaroucid average discs earned: 11.268
+level: 5 Egaroucid WDL: 781-25-194 Egaroucid win rate: 0.7935 Egaroucid average discs earned: 8.37
+level: 10 Egaroucid WDL: 590-87-323 Egaroucid win rate: 0.6335 Egaroucid average discs earned: 1.716
+level: 15 Egaroucid WDL: 138-31-81 Egaroucid win rate: 0.614 Egaroucid average discs earned: 0.892
+level: 21 Egaroucid WDL: 50-13-37 Egaroucid win rate: 0.565 Egaroucid average discs earned: 0.45
+
+
+2025/05/16 new eval with new mpc for 7.7
+level: 1 Egaroucid WDL: 738-31-231 Egaroucid win rate: 0.7535 Egaroucid average discs earned: 12.793
+level: 5 Egaroucid WDL: 818-29-153 Egaroucid win rate: 0.8325 Egaroucid average discs earned: 9.57
+level: 10 Egaroucid WDL: 633-77-290 Egaroucid win rate: 0.6715 Egaroucid average discs earned: 1.98
+level: 15 Egaroucid WDL: 146-30-74 Egaroucid win rate: 0.644 Egaroucid average discs earned: 1.016
+level: 21 Egaroucid WDL: 55-19-26 Egaroucid win rate: 0.645 Egaroucid average discs earned: 0.99
+
+
+
+2025/06/04 update mpc
+level: 15 Egaroucid WDL: 132-39-79 Egaroucid win rate: 0.606 Egaroucid average discs earned: 0.68
+
+
+2025/06/05 update eval & mpc
+level: 15 Egaroucid WDL: 149-32-69 Egaroucid win rate: 0.66 Egaroucid average discs earned: 1.084
+
+
+2025/06/05 update mpc
+level: 15 Egaroucid WDL: 157-24-69 Egaroucid win rate: 0.676 Egaroucid average discs earned: 1.232
+
+
+
+2025/06/05 update mpc
+149 250   [90, 22, 38] 101.0 49.0 0.673333 1.22  
+
+
+
+
+
+2025/08/16 for 7.7.0 release
+level: 1 Egaroucid WDL: 720-12-268 Egaroucid win rate: 0.726 Egaroucid average discs earned: 10.92
+level: 5 Egaroucid WDL: 784-21-195 Egaroucid win rate: 0.7945 Egaroucid average discs earned: 8.983
+level: 10 Egaroucid WDL: 637-69-294 Egaroucid win rate: 0.6715 Egaroucid average discs earned: 2.158
+level: 15 Egaroucid WDL: 138-32-80 Egaroucid win rate: 0.616 Egaroucid average discs earned: 0.888
+level: 21 Egaroucid WDL: 46-21-33 Egaroucid win rate: 0.565 Egaroucid average discs earned: 0.24
+
+
+
+2025/09/20 update mpc
+level: 1 Egaroucid WDL: 722-14-264 Egaroucid win rate: 0.729 Egaroucid average discs earned: 11.474
+level: 5 Egaroucid WDL: 798-32-170 Egaroucid win rate: 0.814 Egaroucid average discs earned: 9.066
+level: 10 Egaroucid WDL: 649-66-285 Egaroucid win rate: 0.682 Egaroucid average discs earned: 2.38
+level: 15 Egaroucid WDL: 141-30-79 Egaroucid win rate: 0.624 Egaroucid average discs earned: 1.076
+level: 21 Egaroucid WDL: 42-17-41 Egaroucid win rate: 0.505 Egaroucid average discs earned: 0.08
+
+
+2025/12/25 7.8.0 release
+level: 1 Egaroucid WDL: 709-10-281 Egaroucid win rate: 0.714 Egaroucid average discs earned: 10.475
+level: 5 Egaroucid WDL: 822-24-154 Egaroucid win rate: 0.834 Egaroucid average discs earned: 9.893
+level: 10 Egaroucid WDL: 609-76-315 Egaroucid win rate: 0.647 Egaroucid average discs earned: 2.013
+level: 15 Egaroucid WDL: 146-28-76 Egaroucid win rate: 0.64 Egaroucid average discs earned: 1.124
+level: 21 Egaroucid WDL: 51-20-29 Egaroucid win rate: 0.61 Egaroucid average discs earned: 0.39
+

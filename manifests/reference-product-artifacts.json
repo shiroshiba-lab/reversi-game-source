@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "0121472213611b34684a7c1bb287a5cb17fb9d58",
+  "sourceBasis": {
+    "privateBaseCommit": "0121472213611b34684a7c1bb287a5cb17fb9d58",
+    "includesAllowlistedWorktreeChanges": true,
+    "allowlistedWorktreeStatusSha256": "4ac0d0a1dd4c9e432a9ab893d20f99ba5312c2e3b007c9babe473cd7fb5db52b",
+    "note": "The manifests are the authoritative byte inventory. Worktree status is recorded only as a non-sensitive provenance fingerprint."
+  },
+  "purpose": "Reference product build created from the private source tree before snapshot assembly",
+  "files": [
+    {
+      "path": "frontend/dist/assets/index-ADPoY2hi.js",
+      "bytes": 268000,
+      "sha256": "b37fe953fadf5a5ee4bdfc8142fedb06c28d398ead59379955790e0e4adf77ae",
+      "mode": "0644"
+    },
+    {
+      "path": "frontend/dist/assets/index-SARgcqeU.css",
+      "bytes": 18129,
+      "sha256": "cb31923dabfbbb4efb63197e38908d11a14e98ccdd5884a12910b0200c366973",
+      "mode": "0644"
+    },
+    {
+      "path": "frontend/dist/assets/legacyCpu.worker-BD7qpHg5.js",
+      "bytes": 7731,
+      "sha256": "5eb51926577be13ca9f99a2dad577cdc0e8e2b4fe5dd71a0699abcf472662922",
+      "mode": "0644"
+    },
+    {
+      "path": "frontend/dist/egaroucid/ai.js",
+      "bytes": 59008,
+      "sha256": "dae7647b147611fcda66618ba1a94f51d5d0230201ef07ea08008bf8f10ac28d",
+      "mode": "0644"
+    },
+    {
+      "path": "frontend/dist/egaroucid/ai.wasm",
+      "bytes": 1428745,
+      "sha256": "833c1d14f1d204cdbb733819aacb1079dfe971df66c324c18c84886747b76f98",
+      "mode": "0644"
+    },
+    {
+      "path": "frontend/dist/egaroucid/artifact-manifest.json",
+      "bytes": 2034,
+      "sha256": "5831e5c2c985cd74a5565eaf59af94454eabdaf78ec7464c8cd4c05b1a650319",
+      "mode": "0644"
+    },
+    {
+      "path": "frontend/dist/egaroucid/egaroucid.worker.js",
+      "bytes": 5402,
+      "sha256": "19e3edf6a27d383916084dc6ca99cd3f8144d9591e74e41606fa0317f17a69b5",
+      "mode": "0644"
+    },
+    {
+      "path": "frontend/dist/egaroucid/Emscripten-LICENSE.txt",
+      "bytes": 5091,
+      "sha256": "2fd38dc06e484cdd7a3f1e2f6577f5d53062052a2fd85131b56b89fbd673731c",
+      "mode": "0644"
+    },
+    {
+      "path": "frontend/dist/egaroucid/emsdk-LICENSE.txt",
+      "bytes": 1326,
+      "sha256": "99d9a9616fbde3f5ee22a71d8645799a8522d48526130c5ba6dc27ad15ce01f1",
+      "mode": "0644"
+    },
+    {
+      "path": "frontend/dist/egaroucid/GPL-3.0.txt",
+      "bytes": 35149,
+      "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
+      "mode": "0644"
+    },
+    {
+      "path": "frontend/dist/egaroucid/NOTICE.txt",
+      "bytes": 1543,
+      "sha256": "7aad0a90498840f3863282e8a967908a26aeff8e17427a3b7866b3c1a2a8bba1",
+      "mode": "0644"
+    },
+    {
+      "path": "frontend/dist/index.html",
+      "bytes": 580,
+      "sha256": "5273f1626ecbbefebbf379572758439a79d03555ecac499f8f35f96c30b13c04",
+      "mode": "0644"
+    }
+  ]
+}

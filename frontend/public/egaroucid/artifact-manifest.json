@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Release 1 product asset pair for Reversi Board v2.0.0",
+  "variant": "64m-max128m",
+  "release": {
+    "productVersion": "v2.0.0",
+    "correspondingSource": "https://github.com/shiroshiba-lab/reversi-game-source/releases/tag/v2.0.0"
+  },
+  "source": {
+    "repository": "https://github.com/Nyanyan/Egaroucid",
+    "tag": "v7.8.4",
+    "commit": "3b1c6ad380209162c2ad07aefe5c1fc6fd8072cb",
+    "archiveSha256": "85c88f57c0b8cec38c22ca02a408cd475f6dabe7e10be1ddc297ac3bead49376"
+  },
+  "toolchain": {
+    "emscripten": "4.0.22",
+    "emscriptenCommit": "0f3d2e62bccf8e14497ff19e05a1202c51eb0c65",
+    "image": "emscripten/emsdk@sha256:a08b927777707813e64af195db105f935bd554f5825606b2048031151a9635f5"
+  },
+  "build": {
+    "initialLinearMemoryBytes": 67108864,
+    "maximumLinearMemoryBytes": 134217728,
+    "allowMemoryGrowth": true,
+    "repeatedBuildsByteIdentical": true,
+    "patch": "../../../experiments/egaroucid-wasm/patches/v7.8.4-prototype.patch",
+    "patchSha256": "449eb0be046adbc895c863df2382118de24f0324bc2d62793c2a4a0580cc6715",
+    "recipe": "../../../experiments/egaroucid-wasm/scripts/build-memory-capped-variant.mjs",
+    "recipeSha256": "113b5c4afed857ed60208b6af8eabfdbaffd6150ddae1c9627a749a3338449c6"
+  },
+  "files": {
+    "ai.js": {
+      "bytes": 59008,
+      "sha256": "dae7647b147611fcda66618ba1a94f51d5d0230201ef07ea08008bf8f10ac28d"
+    },
+    "ai.wasm": {
+      "bytes": 1428745,
+      "sha256": "833c1d14f1d204cdbb733819aacb1079dfe971df66c324c18c84886747b76f98"
+    },
+    "egaroucid.worker.js": {
+      "bytes": 5402,
+      "sha256": "19e3edf6a27d383916084dc6ca99cd3f8144d9591e74e41606fa0317f17a69b5"
+    },
+    "GPL-3.0.txt": {
+      "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986"
+    },
+    "Emscripten-LICENSE.txt": {
+      "sha256": "2fd38dc06e484cdd7a3f1e2f6577f5d53062052a2fd85131b56b89fbd673731c"
+    },
+    "emsdk-LICENSE.txt": {
+      "sha256": "99d9a9616fbde3f5ee22a71d8645799a8522d48526130c5ba6dc27ad15ce01f1"
+    }
+  }
+}

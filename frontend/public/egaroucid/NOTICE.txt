@@ -1,0 +1,33 @@
+Egaroucid for Web v7.8.4 — Reversi Board v2.0.0 integration notice
+
+Copyright (c) 2021-2026 Takuto Yamana and Egaroucid contributors.
+Egaroucid is licensed under the GNU General Public License version 3 or later.
+There is no warranty, to the extent permitted by law. See GPL-3.0.txt.
+
+Official project:
+https://www.egaroucid.nyanyan.dev/ja/web/
+
+Upstream source:
+https://github.com/Nyanyan/Egaroucid
+Tag: v7.8.4
+Commit: 3b1c6ad380209162c2ad07aefe5c1fc6fd8072cb
+
+Modified on 2026-11-05 for Reversi Board v2.0 Task 12:
+- Added deterministic seed control and search diagnostics to the Web interface.
+- Added a Book on/off argument used by the product Worker adapter.
+- Removed diagnostic stdout from normal search.
+- Built with Emscripten 4.0.22, initial WebAssembly linear memory 64 MiB,
+  maximum linear memory 128 MiB, and ALLOW_MEMORY_GROWTH=1.
+- Added Web Worker isolation, initialization/search timeouts, cancellation,
+  stale response rejection, and legal-move validation in the application.
+
+The generated JavaScript and WebAssembly are tracked by artifact-manifest.json.
+The Emscripten and emsdk license texts are included beside this notice.
+
+Corresponding source for Reversi Board v2.0.0, including the complete modified
+Egaroucid source, patch, build recipes, application integration source, license
+notices, and SHA-256 manifests:
+https://github.com/shiroshiba-lab/reversi-game-source/releases/tag/v2.0.0
+
+The corresponding-source repository is maintained by the Reversi Board
+project. It is not the official Egaroucid repository.

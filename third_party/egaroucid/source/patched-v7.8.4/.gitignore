@@ -1,0 +1,102 @@
+# common
+**/*.out
+**/*.exe
+**/*.pdb
+**/*.ilk
+**/*.exp
+**/*.lib
+**/__pycache__
+**/legacy
+**/data
+**/statistics
+**/output
+**/learned_data
+**/trained
+**/trained_data
+
+# special directories
+model
+release
+train_data
+
+# build, VS Project
+build
+build_Egaroucid_for_Console
+build_lib
+Intermediate
+.vs
+*.vcxproj.user
+enc_temp_folde
+src/tools/evaluation/eval_optimizer_cuda_build
+
+# Egaroucid user resources
+bin/appdata/forced_openings.txt
+bin/appdata/setting.json
+bin/appdata/ai_settings/*.json
+bin/appdata/display_settings/*.json
+bin/appdata/shortcut_key.json
+bin/appdata/shortcut_button.json
+bin/appdata/mouse_additional_button.json
+bin/appdata/version.txt
+bin/document/forced_openings/**/folder_state.json
+bin/document/forced_openings/**/summary.csv
+bin/document/games/*.json
+bin/document/games/summary.csv
+bin/document/games/*/*
+bin/document/screenshots/*.png
+bin/document/*.egbk3
+bin/document/*.egbk3.bak
+bin/data_44
+bin/data_46
+bin/tools/data
+
+# Egaroucid duplicated resources
+bin/LICENSE
+bin/document/book.egbk3
+
+# bin directory
+bin/data
+bin/problem
+bin/versions
+bin/transcript
+bin/ffotest_result
+bin/ggs/id
+bin/ggs/log
+bin/ggs/etc
+bin/egaroucid_vs_edax_time_log
+
+# bin directory (for Linux)
+bin/resources/engine
+
+# img
+img/demo
+
+# src directory
+src/ai.js
+src/ai.wasm
+
+# web_resources directory
+web_resources/generated
+web_resources/table_generator/ffotest_result
+
+# book generate
+/book
+
+# for macOS
+.DS_Store
+App
+Egaroucid.xcodeproj/xcuserdata
+Egaroucid.xcodeproj/project.xcworkspace/xcuserdata
+
+# temp folder
+enc_temp_folder
+
+# test
+src/tools/evaluation/dl_test
+
+# .github
+# .github
+
+# workspace
+# *.code-workspace
+# .vscode

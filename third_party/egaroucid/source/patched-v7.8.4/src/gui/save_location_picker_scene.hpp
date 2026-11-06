@@ -1,0 +1,648 @@
+/*
+    Egaroucid Project
+
+    @file save_location_picker_scene.hpp
+        Save location picker scene - folder selection for game saving
+    @date 2025
+    @author GitHub Copilot
+    @license GPL-3.0-or-later
+*/
+
+#pragma once
+#include <iostream>
+#include <future>
+#include <algorithm>
+#include <unordered_set>
+#include "./../engine/engine_all.hpp"
+#include "function/function_all.hpp"
+#include "draw.hpp"
+
+// Forward declaration
+inline bool load_game_from_json(
+    Common_resources& data,
+    Opening& opening,
+    const String& json_path,
+    const String& game_date,
+    const std::string& subfolder
+);
+
+// Save Location Picker Scene
+// Used to choose a folder location for saving games
+class Save_location_picker : public App::Scene {
+private:
+    Button back_button;
+    Button save_here_button;
+    Button up_button;
+    Button create_folder_button;
+    
+    // Folder navigation state
+    std::string picker_subfolder;
+    std::vector<String> save_folders_display;
+    std::vector<Game_abstract> picker_games;
+    bool picker_has_parent = false;
+    std::unordered_set<int> selected_folder_indices;
+    std::unordered_set<int> selected_game_indices;
+    int selection_anchor_row = -1;
+    
+    // Scroll and UI state
+    Scroll_manager folder_scroll_manager;
+    TextEditState new_folder_area;
+    
+    // Return scene info
+    String return_scene;
+    std::vector<History_elem> pending_history;
+    int black_score;
+    int white_score;
+
+public:
+    Save_location_picker(const InitData& init) : IScene{ init } {
+        set_scene_ime_enabled(true);
+        back_button.init(BUTTON3_1_SX, BUTTON3_SY, BUTTON3_WIDTH, BUTTON3_HEIGHT, BUTTON3_RADIUS, language.get("common", "back"), 25, getData().fonts.font, getData().colors.white, getData().colors.black);
+        save_here_button.init(BUTTON3_3_SX, BUTTON3_SY, BUTTON3_WIDTH, BUTTON3_HEIGHT, BUTTON3_RADIUS, language.get("in_out", "save_here"), 25, getData().fonts.font, getData().colors.white, getData().colors.black);
+        up_button.init(IMPORT_GAME_SX, IMPORT_GAME_SY - 30, 28, 24, 4, U"↑", 16, getData().fonts.font, getData().colors.white, getData().colors.black);
+        create_folder_button.init(620, EXPORT_GAME_CREATE_FOLDER_Y_CENTER - 30 / 2, 120, 30, 8, language.get("in_out", "create"), 15, getData().fonts.font, getData().colors.white, getData().colors.black);
+        
+        // Get return scene and history from getData
+        return_scene = getData().game_editor_info.return_scene;
+        pending_history = getData().save_location_picker_info.pending_history;
+        black_score = getData().save_location_picker_info.black_score;
+        white_score = getData().save_location_picker_info.white_score;
+        
+        // Initialize folder picker state
+        picker_subfolder.clear();
+        enumerate_save_dir();
+        init_folder_scroll_manager();
+        
+        new_folder_area.text.clear();
+        new_folder_area.cursorPos = 0;
+        new_folder_area.active = false;
+        gui_list::discard_pending_text_input();
+    }
+
+    void update() override {
+        if (System::GetUserActions() & UserAction::CloseButtonClicked) {
+            changeScene(U"Close", SCENE_FADE_TIME);
+        }
+        Scene::SetBackground(getData().colors.green);
+
+        if (!new_folder_area.active) {
+            gui_list::discard_pending_text_input();
+        }
+
+        // Title
+        getData().fonts.font(language.get("in_out", "save_subfolder")).draw(25, Arg::center(X_CENTER, 30), getData().colors.white);
+        
+        // Path label
+        String path_label = U"games/" + Unicode::Widen(picker_subfolder);
+        getData().fonts.font(path_label).draw(15, Arg::rightCenter(IMPORT_GAME_SX + IMPORT_GAME_WIDTH, 30), getData().colors.white);
+
+        // List via shared helper (folders only)
+        std::vector<ImageButton> dummyDeleteBtns;
+        std::vector<ImageButton> dummyEditBtns;
+        bool has_parent_folder = !picker_subfolder.empty();
+        auto pickRes = DrawExplorerList(
+            save_folders_display, picker_games, dummyDeleteBtns, dummyEditBtns,
+            folder_scroll_manager, up_button, EXPORT_GAME_FOLDER_AREA_HEIGHT, EXPORT_GAME_N_GAMES_ON_WINDOW, 
+            has_parent_folder, getData().fonts, getData().colors, getData().resources, language,
+            getData().directories.document_dir, picker_subfolder, nullptr, &selected_folder_indices, &selected_game_indices);
+
+        draw_selection_highlights_foreground(has_parent_folder);
+        
+        if (pickRes.upButtonClicked || pickRes.parentFolderDoubleClicked) {
+            clear_selection();
+            std::string s = picker_subfolder;
+            if (!s.empty() && s.back() == '/') s.pop_back();
+            size_t pos = s.find_last_of('/');
+            if (pos == std::string::npos) picker_subfolder.clear();
+            else picker_subfolder = s.substr(0, pos);
+            enumerate_save_dir();
+            init_folder_scroll_manager();
+            return;
+        }
+        if (pickRes.backgroundClicked) {
+            clear_selection();
+        }
+        if (pickRes.folderClicked) {
+            handle_selection_click(explorer::selection_row_for_folder(pickRes.folderRenameIndex, (int)save_folders_display.size()), KeyControl.pressed(), KeyShift.pressed());
+        }
+        if (pickRes.folderDoubleClicked) {
+            clear_selection();
+            String fname = pickRes.clickedFolder;
+            if (!picker_subfolder.empty()) picker_subfolder += "/";
+            picker_subfolder += fname.narrow();
+            enumerate_save_dir();
+            init_folder_scroll_manager();
+            return;
+        }
+        if (pickRes.drop_completed) {
+            handle_picker_drop(pickRes);
+        } else if (pickRes.reorderRequested) {
+            handle_picker_reorder(pickRes);
+        }
+        if (pickRes.gameClicked && pickRes.clickedGameIndex >= 0) {
+            handle_selection_click(explorer::selection_row_for_item(pickRes.clickedGameIndex, (int)save_folders_display.size(), (int)picker_games.size()), KeyControl.pressed(), KeyShift.pressed());
+        }
+
+        // New folder UI - horizontal layout
+        getData().fonts.font(language.get("in_out", "new_folder")).draw(15, Arg::rightCenter(200, EXPORT_GAME_CREATE_FOLDER_Y_CENTER), getData().colors.white);
+        text_box_with_ime_candidate_window(new_folder_area, Vec2{210, EXPORT_GAME_CREATE_FOLDER_Y_CENTER - 30 / 2 - 2}, 400, 64);
+        
+        create_folder_button.draw();
+        if (create_folder_button.clicked()) {
+            String s = new_folder_area.text.replaced(U"\r", U"").replaced(U"\n", U"").replaced(U"\\", U"/");
+            while (s.size() && s.front() == U'/') s.erase(s.begin());
+            while (s.size() && s.back() == U'/') s.pop_back();
+            s.replace(U"..", U"");
+            if (s.size()) {
+                String base = Unicode::Widen(getData().directories.document_dir) + U"games/" + Unicode::Widen(picker_subfolder);
+                if (base.size() && base.back() != U'/') base += U"/";
+                String target = base + s + U"/";
+                bool created = FileSystem::CreateDirectories(target);
+                if (created) {
+                    new_folder_area.text.clear();
+                    new_folder_area.cursorPos = 0;
+                    enumerate_save_dir();
+                    init_folder_scroll_manager();
+                }
+            }
+        }
+
+        // Action buttons
+        back_button.draw();
+        if (back_button.clicked() || gui_textarea_ime::escape_pressed_for_scene_change()) {
+            changeScene(return_scene.empty() ? U"Game_editor" : return_scene, SCENE_FADE_TIME);
+            return;
+        }
+        
+        save_here_button.draw();
+        if (save_here_button.clicked()) {
+            // Save the game at the selected location
+            getData().save_location_picker_info.selected_subfolder = picker_subfolder;
+            save_game_here();
+            // Return to main scene after saving
+            getData().graph_resources.need_init = false;
+            changeScene(U"Main_scene", SCENE_FADE_TIME);
+        }
+        clear_selection_on_empty_space_press();
+    }
+
+    void draw() const override {
+    }
+
+private:
+    static bool button_contains(const Button& button, const Vec2& pos) {
+        return RectF(button.rect.x, button.rect.y, button.rect.w, button.rect.h).contains(pos);
+    }
+
+    bool explorer_element_row_contains(const Vec2& pos) const {
+        const RectF list_bounds(
+            IMPORT_GAME_SX,
+            IMPORT_GAME_SY + 8,
+            IMPORT_GAME_WIDTH,
+            EXPORT_GAME_FOLDER_AREA_HEIGHT * EXPORT_GAME_N_GAMES_ON_WINDOW
+        );
+        if (!list_bounds.contains(pos)) {
+            return false;
+        }
+        const int local_row = static_cast<int>((pos.y - list_bounds.y) / EXPORT_GAME_FOLDER_AREA_HEIGHT);
+        const int row = folder_scroll_manager.get_strt_idx_int() + local_row;
+        const int parent_offset = picker_has_parent ? 1 : 0;
+        const int total_rows = parent_offset + static_cast<int>(save_folders_display.size()) + static_cast<int>(picker_games.size());
+        return 0 <= row && row < total_rows;
+    }
+
+    bool explorer_control_contains(const Vec2& pos) const {
+        if (button_contains(back_button, pos) ||
+            button_contains(save_here_button, pos) ||
+            button_contains(up_button, pos) ||
+            button_contains(create_folder_button, pos)) {
+            return true;
+        }
+        const RectF text_area_rect(210, EXPORT_GAME_CREATE_FOLDER_Y_CENTER - 30 / 2 - 2, 400, 30);
+        if (text_area_rect.contains(pos)) {
+            return true;
+        }
+        const RectF scrollbar_rect(770, IMPORT_GAME_SY + 8, 10, EXPORT_GAME_FOLDER_AREA_HEIGHT * EXPORT_GAME_N_GAMES_ON_WINDOW);
+        return scrollbar_rect.contains(pos);
+    }
+
+    void clear_selection_on_empty_space_press() {
+        if (!MouseL.down()) {
+            return;
+        }
+        const Vec2 pos = Cursor::Pos();
+        if (explorer_element_row_contains(pos) || explorer_control_contains(pos)) {
+            return;
+        }
+        clear_selection();
+    }
+
+    void enumerate_save_dir() {
+        save_folders_display.clear();
+        picker_has_parent = !picker_subfolder.empty();
+        
+        std::vector<String> folders = enumerate_direct_subdirectories(getData().directories.document_dir, picker_subfolder);
+        for (auto& folder : folders) {
+            save_folders_display.emplace_back(folder);
+        }
+        
+        load_picker_games();
+    }
+
+    void load_picker_games() {
+        picker_games.clear();
+        String base = Unicode::Widen(getData().directories.document_dir) + U"games/";
+        if (picker_subfolder.size()) {
+            base += Unicode::Widen(picker_subfolder) + U"/";
+        }
+        const String csv_path = base + U"summary.csv";
+        const CSV csv{ csv_path };
+        if (csv) {
+            for (size_t row = 0; row < csv.rows(); ++row) {
+                if (csv[row].size() < 6) {
+                    continue;
+                }
+                Game_abstract game_abstract;
+                game_abstract.filename_date = csv[row][0];
+                game_abstract.black_player = csv[row][1];
+                game_abstract.white_player = csv[row][2];
+                game_abstract.memo = csv[row][3];
+                game_abstract.black_score = ParseOr<int32>(csv[row][4], GAME_DISCS_UNDEFINED);
+                game_abstract.white_score = ParseOr<int32>(csv[row][5], GAME_DISCS_UNDEFINED);
+                if (csv[row].size() >= 7 && !csv[row][6].isEmpty()) {
+                    game_abstract.game_date = csv[row][6];
+                } else {
+                    game_abstract.game_date = game_abstract.filename_date.substr(0, 10).replaced(U"_", U"-");
+                }
+                picker_games.emplace_back(game_abstract);
+            }
+        }
+        reverse(picker_games.begin(), picker_games.end());
+    }
+
+    void init_folder_scroll_manager() {
+        int parent_offset = picker_has_parent ? 1 : 0;
+        int total = parent_offset + (int)save_folders_display.size() + (int)picker_games.size();
+        folder_scroll_manager.init(770, IMPORT_GAME_SY + 8, 10, EXPORT_GAME_FOLDER_AREA_HEIGHT * EXPORT_GAME_N_GAMES_ON_WINDOW, 20, total, EXPORT_GAME_N_GAMES_ON_WINDOW, IMPORT_GAME_SX, 73, IMPORT_GAME_WIDTH + 10, EXPORT_GAME_FOLDER_AREA_HEIGHT * EXPORT_GAME_N_GAMES_ON_WINDOW);
+    }
+
+    void clear_selection() {
+        explorer::clear_selection(selected_folder_indices, selected_game_indices, selection_anchor_row);
+    }
+
+    void prune_selection() {
+        explorer::prune_selection(
+            selected_folder_indices,
+            selected_game_indices,
+            selection_anchor_row,
+            (int)save_folders_display.size(),
+            (int)picker_games.size()
+        );
+    }
+
+    void handle_selection_click(int row, bool ctrl_pressed, bool shift_pressed) {
+        explorer::handle_selection_click(
+            selected_folder_indices,
+            selected_game_indices,
+            selection_anchor_row,
+            row,
+            (int)save_folders_display.size(),
+            (int)picker_games.size(),
+            ctrl_pressed,
+            shift_pressed
+        );
+    }
+
+    bool dragged_item_is_selected(const ExplorerDrawResult& res) const {
+        if (res.is_dragging_game && res.dragged_game_index >= 0) {
+            return selected_game_indices.count(res.dragged_game_index) != 0;
+        }
+        if (res.is_dragging_folder && !res.dragged_folder_name.empty()) {
+            for (int idx : selected_folder_indices) {
+                if (idx >= 0 && idx < (int)save_folders_display.size() && save_folders_display[idx] == res.dragged_folder_name) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    void draw_selection_highlights_foreground(bool has_parent_folder) {
+        prune_selection();
+        draw_explorer_selection_highlights_foreground(
+            folder_scroll_manager,
+            has_parent_folder,
+            (int)save_folders_display.size(),
+            (int)picker_games.size(),
+            selected_folder_indices,
+            selected_game_indices,
+            IMPORT_GAME_SX,
+            IMPORT_GAME_SY + 8,
+            IMPORT_GAME_WIDTH,
+            EXPORT_GAME_FOLDER_AREA_HEIGHT,
+            EXPORT_GAME_N_GAMES_ON_WINDOW,
+            getData().colors.white
+        );
+    }
+
+    std::string parent_picker_subfolder() const {
+        if (picker_subfolder.empty()) {
+            return "";
+        }
+        std::string parent_folder = picker_subfolder;
+        if (!parent_folder.empty() && parent_folder.back() == '/') {
+            parent_folder.pop_back();
+        }
+        size_t pos = parent_folder.find_last_of('/');
+        if (pos == std::string::npos) {
+            return "";
+        }
+        return parent_folder.substr(0, pos);
+    }
+
+    std::string child_picker_subfolder(const std::string& folder_name) const {
+        if (picker_subfolder.empty()) {
+            return folder_name;
+        }
+        return picker_subfolder + "/" + folder_name;
+    }
+
+    std::string drop_target_picker_subfolder(const ExplorerDrawResult& res) const {
+        if (res.drop_on_parent) {
+            return parent_picker_subfolder();
+        }
+        return child_picker_subfolder(res.drop_target_folder.narrow());
+    }
+
+    void move_selected_items_to_folder(const std::string& target_folder) {
+        std::vector<int> game_indices(selected_game_indices.begin(), selected_game_indices.end());
+        std::sort(game_indices.rbegin(), game_indices.rend());
+        for (int game_index : game_indices) {
+            if (game_index >= 0 && game_index < (int)picker_games.size()) {
+                move_picker_game_to_folder(game_index, target_folder);
+            }
+        }
+
+        std::vector<std::string> folder_names;
+        folder_names.reserve(selected_folder_indices.size());
+        for (int folder_index : selected_folder_indices) {
+            if (folder_index >= 0 && folder_index < (int)save_folders_display.size()) {
+                folder_names.emplace_back(save_folders_display[folder_index].narrow());
+            }
+        }
+        for (const std::string& folder_name : folder_names) {
+            move_picker_folder_to_folder(folder_name, target_folder);
+        }
+
+        clear_selection();
+        enumerate_save_dir();
+        init_folder_scroll_manager();
+    }
+     
+    void handle_picker_drop(const ExplorerDrawResult& res) {
+        const std::string target_folder = drop_target_picker_subfolder(res);
+        if (dragged_item_is_selected(res)) {
+            move_selected_items_to_folder(target_folder);
+            return;
+        }
+        if (res.is_dragging_game && res.dragged_game_index >= 0 && res.dragged_game_index < (int)picker_games.size()) {
+            move_picker_game_to_folder(res.dragged_game_index, target_folder);
+        } else if (res.is_dragging_folder && !res.dragged_folder_name.empty()) {
+            move_picker_folder_to_folder(res.dragged_folder_name.narrow(), target_folder);
+        }
+    }
+
+    void handle_picker_reorder(const ExplorerDrawResult& res) {
+        if (!res.reorderRequested || !res.is_dragging_game) {
+            return;
+        }
+        if (res.reorderFrom < 0 || res.reorderFrom >= (int)picker_games.size()) {
+            return;
+        }
+        int insert_idx = std::clamp(res.reorderTo, 0, (int)picker_games.size());
+        bool changed = gui_list::reorder_parallel(picker_games, res.reorderFrom, insert_idx);
+        if (!changed) {
+            return;
+        }
+        persist_picker_games_order_to_csv();
+    }
+
+    String make_unique_picker_child_path(const String& target_dir, const String& name, bool folder) const {
+        String candidate = target_dir + name + (folder ? U"/" : U".json");
+        if (!FileSystem::Exists(candidate)) {
+            return candidate;
+        }
+        for (int i = 1; i < 1000; ++i) {
+            String suffix = U" (" + Format(i) + U")";
+            candidate = target_dir + name + suffix + (folder ? U"/" : U".json");
+            if (!FileSystem::Exists(candidate)) {
+                return candidate;
+            }
+        }
+        return U"";
+    }
+
+    Game_abstract picker_game_with_filename(const Game_abstract& game, const String& filename_date) const {
+        Game_abstract copied = game;
+        copied.filename_date = filename_date;
+        return copied;
+    }
+
+    void move_picker_game_to_parent(int game_index) {
+        if (picker_subfolder.empty()) return;
+        
+        std::string parent_folder = picker_subfolder;
+        if (!parent_folder.empty() && parent_folder.back() == '/') parent_folder.pop_back();
+        size_t pos = parent_folder.find_last_of('/');
+        if (pos == std::string::npos) parent_folder.clear();
+        else parent_folder = parent_folder.substr(0, pos);
+        
+        move_picker_game_to_folder(game_index, parent_folder);
+    }
+    
+    void move_picker_folder_to_parent(const std::string& folder_name) {
+        if (picker_subfolder.empty()) return;
+        
+        std::string parent_folder = picker_subfolder;
+        if (!parent_folder.empty() && parent_folder.back() == '/') parent_folder.pop_back();
+        size_t pos = parent_folder.find_last_of('/');
+        if (pos == std::string::npos) parent_folder.clear();
+        else parent_folder = parent_folder.substr(0, pos);
+        
+        move_picker_folder_to_folder(folder_name, parent_folder);
+    }
+    
+    void move_picker_game_to_folder(int game_index, const std::string& target_folder) {
+        if (game_index < 0 || game_index >= (int)picker_games.size()) return;
+
+        const Game_abstract game = picker_games[game_index];
+
+        String source_base = Unicode::Widen(getData().directories.document_dir) + U"games/";
+        if (!picker_subfolder.empty()) {
+            source_base += Unicode::Widen(picker_subfolder) + U"/";
+        }
+        String target_base = Unicode::Widen(getData().directories.document_dir) + U"games/";
+        if (!target_folder.empty()) {
+            target_base += Unicode::Widen(target_folder) + U"/";
+        }
+
+        if (!FileSystem::Exists(target_base)) {
+            FileSystem::CreateDirectories(target_base);
+        }
+
+        const String source_json = source_base + game.filename_date + U".json";
+        String target_name = game.filename_date;
+        String target_json = target_base + target_name + U".json";
+        if (FileSystem::Exists(target_json)) {
+            target_json = make_unique_picker_child_path(target_base, target_name, false);
+            if (target_json.empty()) {
+                return;
+            }
+            target_name = FileSystem::BaseName(target_json).replaced(U".json", U"");
+        }
+        if (FileSystem::FullPath(source_json) == FileSystem::FullPath(target_json)) {
+            return;
+        }
+        if (!FileSystem::Exists(source_json) || !FileSystem::Copy(source_json, target_json)) {
+            return;
+        }
+        FileSystem::Remove(source_json);
+
+        remove_picker_game_from_csv(game_index);
+        add_picker_game_to_target_csv(picker_game_with_filename(game, target_name), target_base);
+
+        enumerate_save_dir();
+        init_folder_scroll_manager();
+    }
+     
+    void move_picker_folder_to_folder(const std::string& folder_name, const std::string& target_folder) {
+        String source_folder = Unicode::Widen(getData().directories.document_dir) + U"games/";
+        if (!picker_subfolder.empty()) {
+            source_folder += Unicode::Widen(picker_subfolder) + U"/";
+        }
+        source_folder += Unicode::Widen(folder_name);
+        
+        String target_parent = Unicode::Widen(getData().directories.document_dir) + U"games/";
+        if (!target_folder.empty()) {
+            target_parent += Unicode::Widen(target_folder) + U"/";
+        }
+        String target_full = target_parent + Unicode::Widen(folder_name);
+        
+        if (!FileSystem::Exists(target_parent)) {
+            FileSystem::CreateDirectories(target_parent);
+        }
+        
+        if (FileSystem::Exists(source_folder) && !FileSystem::Exists(target_full)) {
+            if (!move_folder(source_folder, target_parent, Unicode::Widen(folder_name))) {
+                return;
+            }
+            enumerate_save_dir();
+            init_folder_scroll_manager();
+        }
+    }
+    
+    void remove_picker_game_from_csv(int game_index) {
+        String source_base = Unicode::Widen(getData().directories.document_dir) + U"games/";
+        if (!picker_subfolder.empty()) {
+            source_base += Unicode::Widen(picker_subfolder) + U"/";
+        }
+        const String csv_path = source_base + U"summary.csv";
+        CSV csv{ csv_path };
+        CSV new_csv;
+        
+        int csv_row_to_remove = (int)picker_games.size() - 1 - game_index;
+        
+        for (int i = 0; i < (int)csv.rows(); ++i) {
+            if (i == csv_row_to_remove || csv[i].size() < 1) {
+                continue;
+            }
+            for (size_t j = 0; j < csv[i].size(); ++j) {
+                new_csv.write(csv[i][j]);
+            }
+            new_csv.newLine();
+        }
+        save_csv_escaped(new_csv, csv_path); // escapes backslashes, see util.hpp
+    }
+    
+    void add_picker_game_to_target_csv(const Game_abstract& game, const String& target_base) {
+        String target_csv = target_base + U"summary.csv";
+        CSV csv{ target_csv };
+        
+        CSV new_csv;
+        for (int i = 0; i < (int)csv.rows(); ++i) {
+            if (csv[i].size() >= 1) {
+                size_t cols = std::min(csv[i].size(), size_t(6));
+                for (size_t j = 0; j < cols; ++j) {
+                    new_csv.write(csv[i][j]);
+                }
+                if (csv[i].size() < 7) {
+                    String old_date = csv[i][0].substr(0, 10).replaced(U"_", U"-");
+                    new_csv.write(old_date);
+                } else {
+                    new_csv.write(csv[i][6]);
+                }
+                new_csv.newLine();
+            }
+        }
+        
+        new_csv.write(game.filename_date);
+        new_csv.write(game.black_player);
+        new_csv.write(game.white_player);
+        new_csv.write(game.memo);
+        new_csv.write(game.black_score == GAME_DISCS_UNDEFINED ? U"" : ToString(game.black_score));
+        new_csv.write(game.white_score == GAME_DISCS_UNDEFINED ? U"" : ToString(game.white_score));
+        new_csv.write(game.game_date);
+        new_csv.newLine();
+        
+        save_csv_escaped(new_csv, target_csv); // escapes backslashes, see util.hpp
+    }
+
+    void persist_picker_games_order_to_csv() {
+        const String csv_path = get_picker_base_dir() + U"summary.csv";
+        CSV new_csv;
+        for (int i = (int)picker_games.size() - 1; i >= 0; --i) {
+            const auto& game = picker_games[i];
+            new_csv.write(game.filename_date);
+            new_csv.write(game.black_player);
+            new_csv.write(game.white_player);
+            new_csv.write(game.memo);
+            new_csv.write(game.black_score == GAME_DISCS_UNDEFINED ? U"" : ToString(game.black_score));
+            new_csv.write(game.white_score == GAME_DISCS_UNDEFINED ? U"" : ToString(game.white_score));
+            new_csv.write(game.game_date);
+            new_csv.newLine();
+        }
+        save_csv_escaped(new_csv, csv_path); // escapes backslashes, see util.hpp
+    }
+
+    String get_picker_base_dir() const {
+        String base = Unicode::Widen(getData().directories.document_dir) + U"games/";
+        if (!picker_subfolder.empty()) {
+            base += Unicode::Widen(picker_subfolder) + U"/";
+        }
+        return base;
+    }
+
+    void save_game_here() {
+        String date = Unicode::Widen(calc_date());
+        String base_dir = Unicode::Widen(getData().directories.document_dir) + U"games/";
+        String folder = Unicode::Widen(picker_subfolder);
+        if (folder.size()) {
+            base_dir += folder + U"/";
+        }
+        
+        game_save_helper::save_game_to_file(
+            base_dir,
+            date,
+            getData().game_information.black_player_name,
+            getData().game_information.white_player_name,
+            getData().game_information.memo,
+            pending_history,
+            getData().game_information.date,
+            black_score,
+            white_score
+        );
+        
+        String json_path = base_dir + date + U".json";
+        load_game_from_json(getData(), opening, json_path, date, picker_subfolder);
+    }
+};

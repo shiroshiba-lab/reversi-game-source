@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "0121472213611b34684a7c1bb287a5cb17fb9d58",
+  "sourceBasis": {
+    "privateBaseCommit": "0121472213611b34684a7c1bb287a5cb17fb9d58",
+    "includesAllowlistedWorktreeChanges": true,
+    "allowlistedWorktreeStatusSha256": "4ac0d0a1dd4c9e432a9ab893d20f99ba5312c2e3b007c9babe473cd7fb5db52b",
+    "note": "The manifests are the authoritative byte inventory. Worktree status is recorded only as a non-sensitive provenance fingerprint."
+  },
+  "allowlist": "third_party/egaroucid/release1-source-allowlist.json",
+  "excluded": [
+    ".git and all private repository history",
+    ".env files, credentials, keys, tokens, and production-only configuration",
+    "node_modules and generated dist directories",
+    "Playwright reports, traces, coverage, caches, and temporary files",
+    "Task research raw results, screenshots, personal communication, and local machine paths",
+    "production backups, logs, dumps, deployment configuration, and all other-service assets",
+    "v1.1.0 application source and release assets, which are not linked into the Release 1 React/Egaroucid object code"
+  ],
+  "retainedPublicUpstreamMetadata": {
+    "reason": "The fixed public upstream archive contains Inkscape export paths in three SVG files. They identify the upstream author workspace, not this project, and are retained to keep the upstream tree byte-exact.",
+    "valuePrefix": "C:\\Users\\yaman\\Desktop\\",
+    "files": [
+      "img/app_img_resources/app_design.svg",
+      "img/eyecatch/eyecatch.svg",
+      "img/icon/icon.svg"
+    ]
+  },
+  "policy": "Only repositoryEntries plus documented generatedEntries are copied. No denylist-only export is used."
+}

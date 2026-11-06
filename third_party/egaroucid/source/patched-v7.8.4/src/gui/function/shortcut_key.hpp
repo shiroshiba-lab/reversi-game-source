@@ -1,0 +1,2363 @@
+/*
+    Egaroucid Project
+
+    @file shortcut_key.hpp
+        Shortcut Key Manager
+    @date 2021-2026
+    @author Takuto Yamana
+    @license GPL-3.0-or-later
+*/
+
+#pragma once
+#include <Siv3D.hpp>
+#include <algorithm>
+#include <cstdlib>
+#include <fstream>
+#include <iomanip>
+#include <limits>
+#include <mutex>
+#include <sstream>
+#include <vector>
+#include <unordered_set>
+#include <unordered_map>
+#include "const/gui_common.hpp"
+#include "ai_profile.hpp"
+#include "display_profile.hpp"
+#include "language.hpp"
+#if SIV3D_PLATFORM(WINDOWS)
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <Windows.h>
+#include <CommCtrl.h>
+#pragma comment(lib, "Comctl32.lib")
+#endif
+
+#define SHORTCUT_KEY_UNDEFINED U"undefined"
+#define SHORTCUT_KEY_AI_PROFILE_PREFIX U"ai_profile:"
+#define SHORTCUT_KEY_DISPLAY_PROFILE_PREFIX U"display_profile:"
+
+struct Shortcut_key_elem {
+    String name;
+    std::vector<String> keys;
+    std::vector<std::vector<std::string>> description_keys;
+    String description_suffix;
+};
+
+inline String get_ai_profile_shortcut_name(const String& profile_file_name) {
+    return String(SHORTCUT_KEY_AI_PROFILE_PREFIX) + profile_file_name;
+}
+
+inline bool is_ai_profile_shortcut_name(const String& shortcut_name) {
+    return shortcut_name.starts_with(String(SHORTCUT_KEY_AI_PROFILE_PREFIX));
+}
+
+inline String get_ai_profile_file_name_from_shortcut_name(const String& shortcut_name) {
+    if (!is_ai_profile_shortcut_name(shortcut_name)) {
+        return U"";
+    }
+    return shortcut_name.substr(String(SHORTCUT_KEY_AI_PROFILE_PREFIX).size());
+}
+
+inline String get_display_profile_shortcut_name(const String& profile_file_name) {
+    return String(SHORTCUT_KEY_DISPLAY_PROFILE_PREFIX) + profile_file_name;
+}
+
+inline bool is_display_profile_shortcut_name(const String& shortcut_name) {
+    return shortcut_name.starts_with(String(SHORTCUT_KEY_DISPLAY_PROFILE_PREFIX));
+}
+
+inline String get_display_profile_file_name_from_shortcut_name(const String& shortcut_name) {
+    if (!is_display_profile_shortcut_name(shortcut_name)) {
+        return U"";
+    }
+    return shortcut_name.substr(String(SHORTCUT_KEY_DISPLAY_PROFILE_PREFIX).size());
+}
+
+inline Shortcut_key_elem create_ai_profile_shortcut_key_elem(const FilePath& path) {
+    String profile_name;
+    AI_profile_values values;
+    if (!load_ai_profile_values(path, &values, &profile_name) || profile_name.trimmed().isEmpty()) {
+        profile_name = FileSystem::FileName(path);
+    }
+
+    Shortcut_key_elem elem;
+    elem.name = get_ai_profile_shortcut_name(FileSystem::FileName(path));
+    elem.description_keys = {{"settings", "settings"}, {"settings", "profile", "profile"}};
+    elem.description_suffix = profile_name;
+    return elem;
+}
+
+inline Shortcut_key_elem create_display_profile_shortcut_key_elem(const FilePath& path) {
+    String profile_name;
+    Display_profile_values values;
+    if (!load_display_profile_values(path, &values, &profile_name) || profile_name.trimmed().isEmpty()) {
+        profile_name = FileSystem::FileName(path);
+    }
+
+    Shortcut_key_elem elem;
+    elem.name = get_display_profile_shortcut_name(FileSystem::FileName(path));
+    elem.description_keys = {{"display", "display"}, {"display", "profile", "profile"}};
+    elem.description_suffix = profile_name;
+    return elem;
+}
+
+inline void append_ai_profile_shortcut_key_elems(std::vector<Shortcut_key_elem>* shortcut_key_elems, const Directories* directories) {
+    if (directories == nullptr) {
+        return;
+    }
+    for (const auto& path : enumerate_ai_profile_files(*directories)) {
+        shortcut_key_elems->emplace_back(create_ai_profile_shortcut_key_elem(path));
+    }
+}
+
+inline void append_display_profile_shortcut_key_elems(std::vector<Shortcut_key_elem>* shortcut_key_elems, const Directories* directories) {
+    if (directories == nullptr) {
+        return;
+    }
+    for (const auto& path : enumerate_display_profile_files(*directories)) {
+        shortcut_key_elems->emplace_back(create_display_profile_shortcut_key_elem(path));
+    }
+}
+
+std::vector<Shortcut_key_elem> shortcut_keys_default = {
+    // buttons
+    {U"start_game",             {U"Space"},             {{"play", "start_game"}}},
+    {U"pass",                   {},                     {{"play", "pass"}}},
+
+    // game
+    {U"new_game",               {U"Ctrl", U"N"},        {{"play", "game"}, {"play", "new_game"}}},
+    {U"new_game_human_black",   {},                     {{"play", "game"}, {"play", "new_game_human_black"}}},
+    {U"new_game_human_white",   {},                     {{"play", "game"}, {"play", "new_game_human_white"}}},
+    {U"new_selfplay",           {},                     {{"play", "game"}, {"play", "new_selfplay"}}},
+    {U"analyze",                {U"A"},                 {{"play", "game"}, {"play", "analyze"}}},
+    {U"game_information",       {},                     {{"play", "game"}, {"play", "game_information"}}},
+
+    // settings
+    {U"use_book",               {},                     {{"settings", "settings"}, {"ai_settings", "use_book"}}},
+    {U"accept_ai_loss",         {},                     {{"settings", "settings"}, {"ai_settings", "accept_ai_loss"}}}, 
+    {U"ai_put_black",           {U"B"},                 {{"settings", "settings"}, {"settings", "play", "ai_put_black"}}},
+    {U"ai_put_white",           {U"W"},                 {{"settings", "settings"}, {"settings", "play", "ai_put_white"}}},
+    {U"pause_when_pass",        {},                     {{"settings", "settings"}, {"settings", "play", "pause_when_pass"}}},
+    {U"force_specified_openings", {},                   {{"settings", "settings"}, {"settings", "play", "force_specified_openings"}}},
+    {U"opening_setting",        {},                     {{"settings", "settings"}, {"settings", "play", "opening_setting"}}},
+    {U"ai_profile_load",        {},                     {{"settings", "settings"}, {"settings", "profile", "profile"}}},
+    {U"shortcut_key_setting",   {},                     {{"settings", "settings"}, {"settings", "shortcut_keys", "settings"}}},
+    {U"shortcut_button_setting",{},                     {{"settings", "settings"}, {"settings", "shortcut_buttons", "settings"}}},
+    {U"mouse_additional_button_setting",{},             {{"settings", "settings"}, {"settings", "mouse_additional_buttons", "settings"}}},
+
+    // display
+    {U"display_profile_load",  {},                      {{"display", "display"}, {"display", "profile", "profile"}}},
+    // on cell
+    {U"show_legal",             {},                     {{"display", "display"}, {"display", "cell", "display_on_cell"}, {"display", "cell", "legal"}}},
+    {U"show_disc_hint",         {U"V"},                 {{"display", "display"}, {"display", "cell", "display_on_cell"}, {"display", "cell", "disc_value"}}},
+    {U"show_hint_level",        {},                     {{"display", "display"}, {"display", "cell", "display_on_cell"}, {"display", "cell", "disc_value"}, {"display", "cell", "show_hint_level"}}},
+    {U"show_value_when_ai_calculating", {},             {{"display", "display"}, {"display", "cell", "display_on_cell"}, {"display", "cell", "disc_value"}, {"display", "cell", "show_value_when_ai_calculating"}}},
+    {U"show_book_accuracy",     {},                     {{"display", "display"}, {"display", "cell", "display_on_cell"}, {"display", "cell", "disc_value"}, {"display", "cell", "show_book_accuracy"}}},
+    {U"hint_colorize",          {},                     {{"display", "display"}, {"display", "cell", "display_on_cell"}, {"display", "cell", "disc_value"}, {"display", "cell", "hint_colorize"}}},
+    {U"show_umigame_value",     {U"U"},                 {{"display", "display"}, {"display", "cell", "display_on_cell"}, {"display", "cell", "umigame_value"}}},
+    {U"show_opening_on_cell",   {},                     {{"display", "display"}, {"display", "cell", "display_on_cell"}, {"display", "cell", "opening"}}},
+    {U"show_next_move",         {},                     {{"display", "display"}, {"display", "cell", "display_on_cell"}, {"display", "cell", "next_move"}}},
+    // on discs
+    {U"show_last_move",         {},                     {{"display", "display"}, {"display", "disc", "display_on_disc"}, {"display", "disc", "last_move"}}},
+    {U"show_stable_discs",      {},                     {{"display", "display"}, {"display", "disc", "display_on_disc"}, {"display", "disc", "stable"}}},
+    {U"show_play_ordering",     {},                     {{"display", "display"}, {"display", "disc", "display_on_disc"}, {"display", "disc", "play_ordering"}}},
+    {U"play_ordering_board_format", {},                 {{"display", "display"}, {"display", "disc", "display_on_disc"}, {"display", "disc", "play_ordering"}, {"display", "disc", "play_ordering_board_format"}}},
+    {U"play_ordering_transcript_format",    {},         {{"display", "display"}, {"display", "disc", "display_on_disc"}, {"display", "disc", "play_ordering"}, {"display", "disc", "play_ordering_transcript_format"}}},
+    // info area
+    {U"show_opening_name",      {},                     {{"display", "display"}, {"display", "info", "display_on_info_area"}, {"display", "info", "opening_name"}}},
+    {U"show_principal_variation",   {},                 {{"display", "display"}, {"display", "info", "display_on_info_area"}, {"display", "info", "principal_variation"}}},
+    {U"show_timer",             {},                     {{"display", "display"}, {"display", "info", "display_on_info_area"}, {"display", "info", "timer"}}},
+    // graph area
+    {U"show_graph",             {},                     {{"display", "display"}, {"display", "graph", "display_on_graph_area"}, {"display", "graph", "graph"}}},
+    {U"show_graph_value",       {U"D"},                 {{"display", "display"}, {"display", "graph", "display_on_graph_area"}, {"display", "graph", "graph"}, {"display", "graph", "value"}}},
+    {U"show_graph_sum_of_loss", {U"S"},                 {{"display", "display"}, {"display", "graph", "display_on_graph_area"}, {"display", "graph", "graph"}, {"display", "graph", "sum_of_loss"}}},
+    {U"show_random_board_graph", {},                    {{"display", "display"}, {"display", "graph", "display_on_graph_area"}, {"display", "graph", "graph"}, {"display", "graph", "show_random_board_graph"}}},
+    {U"show_endgame_error",     {},                     {{"display", "display"}, {"display", "graph", "display_on_graph_area"}, {"display", "graph", "endgame_error"}}},
+    // others
+    {U"show_ai_focus",          {},                     {{"display", "display"}, {"display", "ai_focus"}}},
+    {U"show_laser_pointer",     {U"P"},                 {{"display", "display"}, {"display", "laser_pointer"}}},
+    {U"show_log",               {},                     {{"display", "display"}, {"display", "log"}}},
+    {U"change_color_type",      {},                     {{"display", "display"}, {"display", "change_color_type"}}},
+
+    // operate
+    {U"put_1_move_by_ai",       {U"G"},                 {{"operation", "operation"}, {"operation", "put_1_move_by_ai"}}},
+    {U"forward",                {U"Right"},             {{"operation", "operation"}, {"operation", "forward"}}},
+    {U"backward",               {U"Left"},              {{"operation", "operation"}, {"operation", "backward"}}},
+    {U"undo",                   {U"Backspace"},         {{"operation", "operation"}, {"operation", "undo"}}},
+    {U"go_to_first_position",   {U"Home"},              {{"operation", "operation"}, {"operation", "go_to_first_position"}}},
+    {U"go_to_last_position",    {U"End"},               {{"operation", "operation"}, {"operation", "go_to_last_position"}}},
+    {U"go_to_random_generated_position", {U"Shift", U"Home"}, {{"operation", "operation"}, {"operation", "go_to_random_generated_position"}}},
+    {U"save_this_branch",       {U"Ctrl", U"L"},        {{"operation", "operation"}, {"operation", "save_this_branch"}}},
+    {U"generate_xot_board",     {},                     {{"operation", "operation"}, {"operation", "generate_xot_board"}}},
+    {U"generate_random_board",  {U"Ctrl", U"R"},        {{"operation", "operation"}, {"operation", "generate_random_board", "generate"}}},
+    {U"convert_180",            {},                     {{"operation", "operation"}, {"operation", "convert", "convert"}, {"operation", "convert", "rotate_180"}}},
+    {U"convert_90_clock",       {},                     {{"operation", "operation"}, {"operation", "convert", "convert"}, {"operation", "convert", "rotate_90_clock"}}},
+    {U"convert_90_anti_clock",  {},                     {{"operation", "operation"}, {"operation", "convert", "convert"}, {"operation", "convert", "rotate_90_anti_clock"}}},
+    {U"convert_blackline",      {},                     {{"operation", "operation"}, {"operation", "convert", "convert"}, {"operation", "convert", "black_line"}}},
+    {U"convert_whiteline",      {},                     {{"operation", "operation"}, {"operation", "convert", "convert"}, {"operation", "convert", "white_line"}}},
+    {U"convert_horizontal",     {},                     {{"operation", "operation"}, {"operation", "convert", "convert"}, {"operation", "convert", "horizontal"}}},
+    {U"convert_vertical",       {},                     {{"operation", "operation"}, {"operation", "convert", "convert"}, {"operation", "convert", "vertical"}}},
+    {U"stop_calculating",       {U"Q"},                 {{"operation", "operation"}, {"operation", "ai_operation", "ai_operation"}, {"operation", "ai_operation", "stop_calculating"}}},
+    {U"resume_calculating",     {},                     {{"operation", "operation"}, {"operation", "ai_operation", "ai_operation"}, {"operation", "ai_operation", "resume_calculating"}}},
+    {U"cache_clear",            {},                     {{"operation", "operation"}, {"operation", "ai_operation", "ai_operation"}, {"operation", "ai_operation", "cache_clear"}}},
+
+    // input / output
+    // input
+    {U"input_from_clipboard",   {U"Ctrl", U"V"},        {{"in_out", "in_out"}, {"in_out", "in"}, {"in_out", "input_from_clipboard"}}},
+    {U"input_text",             {},                     {{"in_out", "in_out"}, {"in_out", "in"}, {"in_out", "input_text"}}},
+    {U"input_othello_quest",     {},                     {{"in_out", "in_out"}, {"in_out", "in"}, {"in_out", "input_othello_quest"}}},
+    {U"edit_board",             {U"Ctrl", U"E"},        {{"in_out", "in_out"}, {"in_out", "in"}, {"in_out", "edit_board"}}},
+    {U"input_bitboard",         {},                     {{"in_out", "in_out"}, {"in_out", "in"}, {"in_out", "input_bitboard"}}},
+    {U"game_library",           {},                     {{"in_out", "in_out"}, {"in_out", "game_library"}}},
+    // output
+    {U"output_transcript",      {U"Ctrl", U"C"},        {{"in_out", "in_out"}, {"in_out", "out"}, {"in_out", "output_transcript"}}},
+    {U"output_board",           {},                     {{"in_out", "in_out"}, {"in_out", "out"}, {"in_out", "output_board"}}},
+    {U"screen_shot",            {U"Ctrl", U"S"},        {{"in_out", "in_out"}, {"in_out", "out"}, {"in_out", "screen_shot"}}},
+    {U"change_screenshot_saving_dir",       {},         {{"in_out", "in_out"}, {"in_out", "out"}, {"in_out", "screen_shot"}, {"in_out", "change_screenshot_saving_dir"}}},
+    {U"board_image",            {},                     {{"in_out", "in_out"}, {"in_out", "out"}, {"in_out", "board_image"}}},
+    {U"save_game",              {},                     {{"in_out", "in_out"}, {"in_out", "out"}, {"in_out", "output_game"}}},
+    {U"output_bitboard_player_opponent",    {},         {{"in_out", "in_out"}, {"in_out", "out"}, {"in_out", "output_bitboard"}, {"in_out", "player_opponent"}}},
+    {U"output_bitboard_black_white",        {},         {{"in_out", "in_out"}, {"in_out", "out"}, {"in_out", "output_bitboard"}, {"in_out", "black_white"}}},
+
+    // book
+    // book settings
+    // book operation
+    {U"change_book_by_right_click", {},                 {{"book", "book"}, {"book", "book_operation"}, {"book", "right_click_to_modify"}}},
+    {U"book_start_deviate",     {},                     {{"book", "book"}, {"book", "book_operation"}, {"book", "book_deviate"}}},
+    {U"book_start_deviate_with_transcript", {},         {{"book", "book"}, {"book", "book_operation"}, {"book", "book_deviate_with_transcript"}}},
+    {U"book_start_store",       {},                     {{"book", "book"}, {"book", "book_operation"}, {"book", "book_store"}}},
+    {U"book_start_fix",         {},                     {{"book", "book"}, {"book", "book_operation"}, {"book", "book_fix"}}},
+    {U"book_start_fix_edax",    {},                     {{"book", "book"}, {"book", "book_operation"}, {"book", "book_fix_edax"}}},
+    {U"book_start_reducing",    {},                     {{"book", "book"}, {"book", "book_operation"}, {"book", "book_reduce"}}},
+    {U"book_start_recalculate_leaf",        {},         {{"book", "book"}, {"book", "book_operation"}, {"book", "book_recalculate_leaf"}}},
+    {U"book_start_recalculate_n_lines",     {},         {{"book", "book"}, {"book", "book_operation"}, {"book", "book_recalculate_n_lines"}}},
+    //{U"book_start_upgrade_better_leaves",   {},         {{"book", "book"}, {"book", "book_operation"}, {"book", "book_upgrade_better_leaves"}}},
+    // file operation
+    {U"import_book",            {},                     {{"book", "book"}, {"book", "file_operation"}, {"book", "import_book"}}},
+    {U"export_book",            {},                     {{"book", "book"}, {"book", "file_operation"}, {"book", "export_book"}}},
+    {U"book_merge",             {},                     {{"book", "book"}, {"book", "file_operation"}, {"book", "book_merge"}}},
+    {U"book_reference",         {},                     {{"book", "book"}, {"book", "file_operation"}, {"book", "book_reference"}}},
+    // others
+    {U"show_book_info",         {},                     {{"book", "book"}, {"book", "show_book_info"}}},
+
+    // help
+    {U"open_usage",             {},                     {{"help", "help"}, {"help", "usage"}}},
+    {U"open_website",           {},                     {{"help", "help"}, {"help", "website"}}},
+    {U"bug_report",             {},                     {{"help", "help"}, {"help", "bug_report"}}},
+    {U"update_check",           {},                     {{"help", "help"}, {"help", "update_check"}}},
+    {U"auto_update_check",      {},                     {{"help", "help"}, {"help", "auto_update_check"}}},
+    {U"license",                {},                     {{"help", "help"}, {"help", "license"}}},
+    {U"export_settings_data",   {},                     {{"help", "help"}, {"data_migration", "data_migration"}, {"data_migration", "export"}}},
+    {U"import_settings_data",   {},                     {{"help", "help"}, {"data_migration", "data_migration"}, {"data_migration", "import"}}},
+};
+
+// Enter and Left / Right keys are ignored
+const HashSet<String> ignore_keys = {
+    U"Enter",
+    U"Left Command",
+    U"Right Command",
+    U"Left Ctrl",
+    U"Left Shift",
+    U"Right Shift",
+};
+
+String generate_key_str(std::vector<String> keys) {
+    String res;
+    for (int i = 0; i < (int)keys.size(); ++i) {
+        if (keys[i] == U"Right") {
+            res += U"->";
+        } else if (keys[i] == U"Left") {
+            res += U"<-";
+        } else if (keys[i] == U"0x5b" || keys[i] == U"0x5c") {
+            res += U"Windows";
+        } else{
+            res += keys[i];
+        }
+        if (i < (int)keys.size() - 1) {
+            res += U"+";
+        }
+    }
+    return res;
+}
+
+#if SIV3D_PLATFORM(WINDOWS)
+inline bool windows_shortcut_modifier_vk(const int vk) {
+    return vk == VK_SHIFT || vk == VK_LSHIFT || vk == VK_RSHIFT ||
+        vk == VK_CONTROL || vk == VK_LCONTROL || vk == VK_RCONTROL ||
+        vk == VK_MENU || vk == VK_LMENU || vk == VK_RMENU;
+}
+
+inline bool windows_shortcut_ime_control_vk(const int vk) {
+    if (vk == VK_KANA || vk == VK_CONVERT || vk == VK_NONCONVERT ||
+        vk == VK_ACCEPT || vk == VK_MODECHANGE ||
+        vk == VK_HANJA || vk == VK_JUNJA || vk == VK_FINAL) {
+        return true;
+    }
+#ifdef VK_KANJI
+    if (vk == VK_KANJI) {
+        return true;
+    }
+#endif
+#ifdef VK_IME_ON
+    if (vk == VK_IME_ON) {
+        return true;
+    }
+#endif
+#ifdef VK_IME_OFF
+    if (vk == VK_IME_OFF) {
+        return true;
+    }
+#endif
+    return false;
+}
+
+inline bool windows_shortcut_scannable_vk(const int vk) {
+    if (vk < VK_BACK || 0xFE < vk) {
+        return false;
+    }
+#ifdef VK_PROCESSKEY
+    if (vk == VK_PROCESSKEY) {
+        return false;
+    }
+#endif
+#ifdef VK_PACKET
+    if (vk == VK_PACKET) {
+        return false;
+    }
+#endif
+    return true;
+}
+
+inline bool windows_shortcut_vk_to_key_name(const int vk, String* key_name) {
+    if ('A' <= vk && vk <= 'Z') {
+        *key_name = Unicode::Widen(std::string(1, static_cast<char>(vk)));
+        return true;
+    }
+    if ('0' <= vk && vk <= '9') {
+        *key_name = Unicode::Widen(std::string(1, static_cast<char>(vk)));
+        return true;
+    }
+    if (VK_NUMPAD0 <= vk && vk <= VK_NUMPAD9) {
+        *key_name = U"Num" + Format(vk - VK_NUMPAD0);
+        return true;
+    }
+    if (VK_F1 <= vk && vk <= VK_F24) {
+        *key_name = U"F" + Format(vk - VK_F1 + 1);
+        return true;
+    }
+
+    switch (vk) {
+    case VK_CANCEL: *key_name = U"Cancel"; return true;
+    case VK_BACK: *key_name = U"Backspace"; return true;
+    case VK_TAB: *key_name = U"Tab"; return true;
+    case VK_CLEAR: *key_name = U"Clear"; return true;
+    case VK_RETURN: *key_name = U"Enter"; return true;
+    case VK_SHIFT: *key_name = U"Shift"; return true;
+    case VK_CONTROL: *key_name = U"Ctrl"; return true;
+    case VK_MENU: *key_name = U"Alt"; return true;
+    case VK_PAUSE: *key_name = U"Pause"; return true;
+    case VK_CAPITAL: *key_name = U"CapsLock"; return true;
+    case VK_KANA: *key_name = U"Kana"; return true;
+#ifdef VK_IME_ON
+    case VK_IME_ON: *key_name = U"IMEOn"; return true;
+#endif
+    case VK_JUNJA: *key_name = U"Junja"; return true;
+    case VK_FINAL: *key_name = U"Final"; return true;
+    case VK_HANJA: *key_name = U"Kanji"; return true;
+#ifdef VK_IME_OFF
+    case VK_IME_OFF: *key_name = U"IMEOff"; return true;
+#endif
+    case VK_ESCAPE: *key_name = U"Escape"; return true;
+    case VK_CONVERT: *key_name = U"Convert"; return true;
+    case VK_NONCONVERT: *key_name = U"NonConvert"; return true;
+    case VK_ACCEPT: *key_name = U"Accept"; return true;
+    case VK_MODECHANGE: *key_name = U"ModeChange"; return true;
+    case VK_SPACE: *key_name = U"Space"; return true;
+    case VK_PRIOR: *key_name = U"PageUp"; return true;
+    case VK_NEXT: *key_name = U"PageDown"; return true;
+    case VK_END: *key_name = U"End"; return true;
+    case VK_HOME: *key_name = U"Home"; return true;
+    case VK_LEFT: *key_name = U"Left"; return true;
+    case VK_UP: *key_name = U"Up"; return true;
+    case VK_RIGHT: *key_name = U"Right"; return true;
+    case VK_DOWN: *key_name = U"Down"; return true;
+    case VK_SELECT: *key_name = U"Select"; return true;
+    case VK_PRINT: *key_name = U"Print"; return true;
+    case VK_EXECUTE: *key_name = U"Execute"; return true;
+    case VK_SNAPSHOT: *key_name = U"PrintScreen"; return true;
+    case VK_INSERT: *key_name = U"Insert"; return true;
+    case VK_DELETE: *key_name = U"Delete"; return true;
+    case VK_HELP: *key_name = U"Help"; return true;
+    case VK_LWIN: *key_name = U"0x5b"; return true;
+    case VK_RWIN: *key_name = U"0x5c"; return true;
+    case VK_APPS: *key_name = U"Apps"; return true;
+    case VK_SLEEP: *key_name = U"Sleep"; return true;
+    case VK_MULTIPLY: *key_name = U"NumMultiply"; return true;
+    case VK_ADD: *key_name = U"NumAdd"; return true;
+    case VK_SEPARATOR: *key_name = U"NumSeparator"; return true;
+    case VK_SUBTRACT: *key_name = U"NumSubtract"; return true;
+    case VK_DECIMAL: *key_name = U"NumDecimal"; return true;
+    case VK_DIVIDE: *key_name = U"NumDivide"; return true;
+    case VK_NUMLOCK: *key_name = U"NumLock"; return true;
+    case VK_SCROLL: *key_name = U"ScrollLock"; return true;
+    case VK_LSHIFT: *key_name = U"Left Shift"; return true;
+    case VK_RSHIFT: *key_name = U"Right Shift"; return true;
+    case VK_LCONTROL: *key_name = U"Left Ctrl"; return true;
+    case VK_RCONTROL: *key_name = U"Right Ctrl"; return true;
+    case VK_LMENU: *key_name = U"Left Alt"; return true;
+    case VK_RMENU: *key_name = U"Right Alt"; return true;
+    case VK_BROWSER_BACK: *key_name = U"BrowserBack"; return true;
+    case VK_BROWSER_FORWARD: *key_name = U"BrowserForward"; return true;
+    case VK_BROWSER_REFRESH: *key_name = U"BrowserRefresh"; return true;
+    case VK_BROWSER_STOP: *key_name = U"BrowserStop"; return true;
+    case VK_BROWSER_SEARCH: *key_name = U"BrowserSearch"; return true;
+    case VK_BROWSER_FAVORITES: *key_name = U"BrowserFavorites"; return true;
+    case VK_BROWSER_HOME: *key_name = U"BrowserHome"; return true;
+    case VK_VOLUME_MUTE: *key_name = U"VolumeMute"; return true;
+    case VK_VOLUME_DOWN: *key_name = U"VolumeDown"; return true;
+    case VK_VOLUME_UP: *key_name = U"VolumeUp"; return true;
+    case VK_MEDIA_NEXT_TRACK: *key_name = U"NextTrack"; return true;
+    case VK_MEDIA_PREV_TRACK: *key_name = U"PreviousTrack"; return true;
+    case VK_MEDIA_STOP: *key_name = U"StopMedia"; return true;
+    case VK_MEDIA_PLAY_PAUSE: *key_name = U"PlayPauseMedia"; return true;
+    case VK_LAUNCH_MAIL: *key_name = U"LaunchMail"; return true;
+    case VK_LAUNCH_MEDIA_SELECT: *key_name = U"LaunchMediaSelect"; return true;
+    case VK_LAUNCH_APP1: *key_name = U"LaunchApp1"; return true;
+    case VK_LAUNCH_APP2: *key_name = U"LaunchApp2"; return true;
+    case VK_OEM_1: *key_name = U"Semicolon"; return true;
+    case VK_OEM_PLUS: *key_name = U"Equal"; return true;
+    case VK_OEM_COMMA: *key_name = U"Comma"; return true;
+    case VK_OEM_MINUS: *key_name = U"Minus"; return true;
+    case VK_OEM_PERIOD: *key_name = U"Period"; return true;
+    case VK_OEM_2: *key_name = U"Slash"; return true;
+    case VK_OEM_3: *key_name = U"GraveAccent"; return true;
+    case VK_OEM_4: *key_name = U"LBracket"; return true;
+    case VK_OEM_5: *key_name = U"Backslash"; return true;
+    case VK_OEM_6: *key_name = U"RBracket"; return true;
+    case VK_OEM_7: *key_name = U"Apostrophe"; return true;
+    case VK_OEM_8: *key_name = U"OEM8"; return true;
+    case VK_OEM_102: *key_name = U"OEM102"; return true;
+    case VK_ATTN: *key_name = U"Attn"; return true;
+    case VK_CRSEL: *key_name = U"CrSel"; return true;
+    case VK_EXSEL: *key_name = U"ExSel"; return true;
+    case VK_EREOF: *key_name = U"EraseEOF"; return true;
+    case VK_PLAY: *key_name = U"Play"; return true;
+    case VK_ZOOM: *key_name = U"Zoom"; return true;
+    case VK_OEM_CLEAR: *key_name = U"OEMClear"; return true;
+    default:
+        return false;
+    }
+}
+#endif
+
+std::vector<String> get_all_inputs(bool *down_found) {
+    const Array<Input> raw_keys = Keyboard::GetAllInputs();
+    *down_found = false;
+    std::unordered_set<String> keys;
+    for (const auto& key : raw_keys) {
+        String key_name = key.name();
+#if SIV3D_PLATFORM(WINDOWS)
+        // Keys which show the state of the IME (VK_KANA, VK_IME_ON, VK_JUNJA, VK_FINAL, VK_KANJI / VK_HANJA, VK_IME_OFF)
+        // are ignored. With a Japanese IME, VK_KANJI is reported as pressed all the time (GetAsyncKeyState(VK_KANJI) & 0x8000
+        // while the IME is used), so every key read in the shortcut key settings became "Kanji+..." and no shortcut could
+        // be assigned. The matcher (get_windows_shortcut_match_details) already ignores these keys.
+        if (key.deviceType() == InputDeviceType::Keyboard && 0x15 <= static_cast<int>(key.code()) && static_cast<int>(key.code()) <= 0x1A) {
+            continue;
+        }
+        String windows_key_name;
+        if (key.deviceType() == InputDeviceType::Keyboard &&
+            windows_shortcut_vk_to_key_name(static_cast<int>(key.code()), &windows_key_name)) {
+            key_name = windows_key_name;
+        }
+        if (key_name == U"Left Ctrl" || key_name == U"Right Ctrl") {
+            key_name = U"Ctrl";
+        } else if (key_name == U"Left Shift" || key_name == U"Right Shift") {
+            key_name = U"Shift";
+        } else if (key_name == U"Left Alt" || key_name == U"Right Alt") {
+            key_name = U"Alt";
+        }
+#endif
+        // ignored keys
+        if (ignore_keys.contains(key_name)) {
+            continue;
+        }
+        *down_found |= key.down();
+        keys.emplace(key_name);
+    }
+    std::vector<String> res;
+    if (keys.find(U"Ctrl") != keys.end()) {
+        res.emplace_back(U"Ctrl");
+        keys.erase(U"Ctrl");
+    }
+    if (keys.find(U"Shift") != keys.end()) {
+        res.emplace_back(U"Shift");
+        keys.erase(U"Shift");
+    }
+    if (keys.find(U"Alt") != keys.end()) {
+        res.emplace_back(U"Alt");
+        keys.erase(U"Alt");
+    }
+    for (String key: keys) {
+        res.emplace_back(key);
+    }
+    return res;
+}
+
+inline std::string shortcut_key_list_to_string(const std::vector<String>& keys) {
+    std::string res;
+    for (int i = 0; i < (int)keys.size(); ++i) {
+        if (i) {
+            res += "+";
+        }
+        res += keys[i].narrow();
+    }
+    return res;
+}
+
+#if SIV3D_PLATFORM(WINDOWS)
+inline String windows_shortcut_key_token(const String& key_name) {
+    const String trimmed = key_name.trimmed();
+    String token;
+    for (const char32 ch : trimmed) {
+        if (ch == U' ' || ch == U'_') {
+            continue;
+        }
+        if (U'a' <= ch && ch <= U'z') {
+            token += static_cast<char32>(U'A' + (ch - U'a'));
+        } else {
+            token += ch;
+        }
+    }
+    return token;
+}
+
+inline bool windows_shortcut_parse_hex_vk(const String& key_name, int* vk) {
+    const String trimmed = key_name.trimmed();
+    if (trimmed.size() < 3 || trimmed[0] != U'0' || (trimmed[1] != U'x' && trimmed[1] != U'X')) {
+        return false;
+    }
+
+    int value = 0;
+    for (size_t i = 2; i < trimmed.size(); ++i) {
+        const char32 ch = trimmed[i];
+        int digit = -1;
+        if (U'0' <= ch && ch <= U'9') {
+            digit = static_cast<int>(ch - U'0');
+        } else if (U'a' <= ch && ch <= U'f') {
+            digit = 10 + static_cast<int>(ch - U'a');
+        } else if (U'A' <= ch && ch <= U'F') {
+            digit = 10 + static_cast<int>(ch - U'A');
+        } else {
+            return false;
+        }
+        value = value * 16 + digit;
+        if (value > 0xFE) {
+            return false;
+        }
+    }
+
+    if (!windows_shortcut_scannable_vk(value)) {
+        return false;
+    }
+    *vk = value;
+    return true;
+}
+
+inline bool shortcut_key_name_to_windows_vk(const String& key_name, int* vk) {
+    const String trimmed = key_name.trimmed();
+    if (trimmed.size() == 1) {
+        const char32 ch = trimmed[0];
+        if (U'A' <= ch && ch <= U'Z') {
+            *vk = static_cast<int>('A' + (ch - U'A'));
+            return true;
+        }
+        if (U'a' <= ch && ch <= U'z') {
+            *vk = static_cast<int>('A' + (ch - U'a'));
+            return true;
+        }
+        if (U'0' <= ch && ch <= U'9') {
+            *vk = static_cast<int>('0' + (ch - U'0'));
+            return true;
+        }
+        switch (ch) {
+        case U';':
+        case U':':
+            *vk = VK_OEM_1;
+            return true;
+        case U'=':
+        case U'+':
+            *vk = VK_OEM_PLUS;
+            return true;
+        case U',':
+        case U'<':
+            *vk = VK_OEM_COMMA;
+            return true;
+        case U'-':
+            *vk = VK_OEM_MINUS;
+            return true;
+        case U'.':
+        case U'>':
+            *vk = VK_OEM_PERIOD;
+            return true;
+        case U'/':
+        case U'?':
+            *vk = VK_OEM_2;
+            return true;
+        case U'`':
+        case U'~':
+            *vk = VK_OEM_3;
+            return true;
+        case U'[':
+        case U'{':
+            *vk = VK_OEM_4;
+            return true;
+        case U'\\':
+        case U'|':
+            *vk = VK_OEM_5;
+            return true;
+        case U']':
+        case U'}':
+            *vk = VK_OEM_6;
+            return true;
+        case U'\'':
+        case U'"':
+        case U'^':
+            *vk = VK_OEM_7;
+            return true;
+        default:
+            break;
+        }
+    }
+
+    if (windows_shortcut_parse_hex_vk(trimmed, vk)) {
+        return true;
+    }
+
+    const String token = windows_shortcut_key_token(trimmed);
+    if (token.size() >= 2 && token[0] == U'F') {
+        int function_key_number = 0;
+        bool valid_function_key_name = true;
+        for (size_t i = 1; i < token.size(); ++i) {
+            const char32 ch = token[i];
+            if (ch < U'0' || U'9' < ch) {
+                valid_function_key_name = false;
+                break;
+            }
+            function_key_number = function_key_number * 10 + static_cast<int>(ch - U'0');
+        }
+        if (valid_function_key_name && 1 <= function_key_number && function_key_number <= 24) {
+            *vk = VK_F1 + function_key_number - 1;
+            return true;
+        }
+    }
+
+    auto parse_numpad_digit = [&](const String& prefix) {
+        if (!token.starts_with(prefix) || token.size() != prefix.size() + 1) {
+            return false;
+        }
+        const char32 digit = token[prefix.size()];
+        if (digit < U'0' || U'9' < digit) {
+            return false;
+        }
+        *vk = VK_NUMPAD0 + static_cast<int>(digit - U'0');
+        return true;
+    };
+    if (parse_numpad_digit(U"NUM") || parse_numpad_digit(U"NUMPAD") || parse_numpad_digit(U"KEYNUM")) {
+        return true;
+    }
+
+    static const std::unordered_map<String, int> key_map = {
+        {U"Ctrl", VK_CONTROL},
+        {U"CTRL", VK_CONTROL},
+        {U"CONTROL", VK_CONTROL},
+        {U"Left Ctrl", VK_LCONTROL},
+        {U"LEFTCTRL", VK_LCONTROL},
+        {U"LCTRL", VK_LCONTROL},
+        {U"LCONTROL", VK_LCONTROL},
+        {U"Right Ctrl", VK_RCONTROL},
+        {U"RIGHTCTRL", VK_RCONTROL},
+        {U"RCTRL", VK_RCONTROL},
+        {U"RCONTROL", VK_RCONTROL},
+        {U"Shift", VK_SHIFT},
+        {U"SHIFT", VK_SHIFT},
+        {U"Left Shift", VK_LSHIFT},
+        {U"LEFTSHIFT", VK_LSHIFT},
+        {U"LSHIFT", VK_LSHIFT},
+        {U"Right Shift", VK_RSHIFT},
+        {U"RIGHTSHIFT", VK_RSHIFT},
+        {U"RSHIFT", VK_RSHIFT},
+        {U"Alt", VK_MENU},
+        {U"ALT", VK_MENU},
+        {U"MENU", VK_MENU},
+        {U"Left Alt", VK_LMENU},
+        {U"LEFTALT", VK_LMENU},
+        {U"LALT", VK_LMENU},
+        {U"LMENU", VK_LMENU},
+        {U"Right Alt", VK_RMENU},
+        {U"RIGHTALT", VK_RMENU},
+        {U"RALT", VK_RMENU},
+        {U"RMENU", VK_RMENU},
+        {U"Space", VK_SPACE},
+        {U"SPACE", VK_SPACE},
+        {U"Backspace", VK_BACK},
+        {U"BACKSPACE", VK_BACK},
+        {U"BACK", VK_BACK},
+        {U"Tab", VK_TAB},
+        {U"TAB", VK_TAB},
+        {U"Enter", VK_RETURN},
+        {U"ENTER", VK_RETURN},
+        {U"RETURN", VK_RETURN},
+        {U"Escape", VK_ESCAPE},
+        {U"ESCAPE", VK_ESCAPE},
+        {U"ESC", VK_ESCAPE},
+        {U"Left", VK_LEFT},
+        {U"LEFT", VK_LEFT},
+        {U"Right", VK_RIGHT},
+        {U"RIGHT", VK_RIGHT},
+        {U"Up", VK_UP},
+        {U"UP", VK_UP},
+        {U"Down", VK_DOWN},
+        {U"DOWN", VK_DOWN},
+        {U"Home", VK_HOME},
+        {U"HOME", VK_HOME},
+        {U"End", VK_END},
+        {U"END", VK_END},
+        {U"PageUp", VK_PRIOR},
+        {U"PAGEUP", VK_PRIOR},
+        {U"PGUP", VK_PRIOR},
+        {U"PRIOR", VK_PRIOR},
+        {U"PageDown", VK_NEXT},
+        {U"PAGEDOWN", VK_NEXT},
+        {U"PGDN", VK_NEXT},
+        {U"NEXT", VK_NEXT},
+        {U"Insert", VK_INSERT},
+        {U"INSERT", VK_INSERT},
+        {U"INS", VK_INSERT},
+        {U"Delete", VK_DELETE},
+        {U"DELETE", VK_DELETE},
+        {U"DEL", VK_DELETE},
+        {U"Cancel", VK_CANCEL},
+        {U"CANCEL", VK_CANCEL},
+        {U"Clear", VK_CLEAR},
+        {U"CLEAR", VK_CLEAR},
+        {U"Pause", VK_PAUSE},
+        {U"PAUSE", VK_PAUSE},
+        {U"CapsLock", VK_CAPITAL},
+        {U"CAPSLOCK", VK_CAPITAL},
+        {U"Kana", VK_KANA},
+        {U"KANA", VK_KANA},
+        {U"HANGUL", VK_KANA},
+#ifdef VK_IME_ON
+        {U"IMEOn", VK_IME_ON},
+        {U"IMEON", VK_IME_ON},
+#endif
+        {U"Junja", VK_JUNJA},
+        {U"JUNJA", VK_JUNJA},
+        {U"Final", VK_FINAL},
+        {U"FINAL", VK_FINAL},
+        {U"Kanji", VK_HANJA},
+        {U"KANJI", VK_HANJA},
+        {U"HANJA", VK_HANJA},
+#ifdef VK_IME_OFF
+        {U"IMEOff", VK_IME_OFF},
+        {U"IMEOFF", VK_IME_OFF},
+#endif
+        {U"Convert", VK_CONVERT},
+        {U"CONVERT", VK_CONVERT},
+        {U"NonConvert", VK_NONCONVERT},
+        {U"NONCONVERT", VK_NONCONVERT},
+        {U"Accept", VK_ACCEPT},
+        {U"ACCEPT", VK_ACCEPT},
+        {U"ModeChange", VK_MODECHANGE},
+        {U"MODECHANGE", VK_MODECHANGE},
+        {U"Print", VK_PRINT},
+        {U"PRINT", VK_PRINT},
+        {U"PrintScreen", VK_SNAPSHOT},
+        {U"PRINTSCREEN", VK_SNAPSHOT},
+        {U"PRTSC", VK_SNAPSHOT},
+        {U"Select", VK_SELECT},
+        {U"SELECT", VK_SELECT},
+        {U"Execute", VK_EXECUTE},
+        {U"EXECUTE", VK_EXECUTE},
+        {U"Help", VK_HELP},
+        {U"HELP", VK_HELP},
+        {U"0x5b", VK_LWIN},
+        {U"0X5B", VK_LWIN},
+        {U"Left Windows", VK_LWIN},
+        {U"LEFTWINDOWS", VK_LWIN},
+        {U"LWIN", VK_LWIN},
+        {U"Left Command", VK_LWIN},
+        {U"LEFTCOMMAND", VK_LWIN},
+        {U"0x5c", VK_RWIN},
+        {U"0X5C", VK_RWIN},
+        {U"Right Windows", VK_RWIN},
+        {U"RIGHTWINDOWS", VK_RWIN},
+        {U"RWIN", VK_RWIN},
+        {U"Right Command", VK_RWIN},
+        {U"RIGHTCOMMAND", VK_RWIN},
+        {U"Apps", VK_APPS},
+        {U"APPS", VK_APPS},
+        {U"Sleep", VK_SLEEP},
+        {U"SLEEP", VK_SLEEP},
+        {U"NumMultiply", VK_MULTIPLY},
+        {U"NUMMULTIPLY", VK_MULTIPLY},
+        {U"NUMSTAR", VK_MULTIPLY},
+        {U"NumAdd", VK_ADD},
+        {U"NUMADD", VK_ADD},
+        {U"NUMPLUS", VK_ADD},
+        {U"NumSeparator", VK_SEPARATOR},
+        {U"NUMSEPARATOR", VK_SEPARATOR},
+        {U"NumSubtract", VK_SUBTRACT},
+        {U"NUMSUBTRACT", VK_SUBTRACT},
+        {U"NUMMINUS", VK_SUBTRACT},
+        {U"NumDecimal", VK_DECIMAL},
+        {U"NUMDECIMAL", VK_DECIMAL},
+        {U"NUMPERIOD", VK_DECIMAL},
+        {U"NumDivide", VK_DIVIDE},
+        {U"NUMDIVIDE", VK_DIVIDE},
+        {U"NUMSLASH", VK_DIVIDE},
+        {U"NumLock", VK_NUMLOCK},
+        {U"NUMLOCK", VK_NUMLOCK},
+        {U"ScrollLock", VK_SCROLL},
+        {U"SCROLLLOCK", VK_SCROLL},
+        {U"NextTrack", VK_MEDIA_NEXT_TRACK},
+        {U"NEXTTRACK", VK_MEDIA_NEXT_TRACK},
+        {U"PreviousTrack", VK_MEDIA_PREV_TRACK},
+        {U"PREVIOUSTRACK", VK_MEDIA_PREV_TRACK},
+        {U"StopMedia", VK_MEDIA_STOP},
+        {U"STOPMEDIA", VK_MEDIA_STOP},
+        {U"PlayPauseMedia", VK_MEDIA_PLAY_PAUSE},
+        {U"PLAYPAUSEMEDIA", VK_MEDIA_PLAY_PAUSE},
+        {U"BrowserBack", VK_BROWSER_BACK},
+        {U"BROWSERBACK", VK_BROWSER_BACK},
+        {U"BrowserForward", VK_BROWSER_FORWARD},
+        {U"BROWSERFORWARD", VK_BROWSER_FORWARD},
+        {U"BrowserRefresh", VK_BROWSER_REFRESH},
+        {U"BROWSERREFRESH", VK_BROWSER_REFRESH},
+        {U"BrowserStop", VK_BROWSER_STOP},
+        {U"BROWSERSTOP", VK_BROWSER_STOP},
+        {U"BrowserSearch", VK_BROWSER_SEARCH},
+        {U"BROWSERSEARCH", VK_BROWSER_SEARCH},
+        {U"BrowserFavorites", VK_BROWSER_FAVORITES},
+        {U"BROWSERFAVORITES", VK_BROWSER_FAVORITES},
+        {U"BrowserHome", VK_BROWSER_HOME},
+        {U"BROWSERHOME", VK_BROWSER_HOME},
+        {U"VolumeMute", VK_VOLUME_MUTE},
+        {U"VOLUMEMUTE", VK_VOLUME_MUTE},
+        {U"VolumeDown", VK_VOLUME_DOWN},
+        {U"VOLUMEDOWN", VK_VOLUME_DOWN},
+        {U"VolumeUp", VK_VOLUME_UP},
+        {U"VOLUMEUP", VK_VOLUME_UP},
+        {U"LaunchMail", VK_LAUNCH_MAIL},
+        {U"LAUNCHMAIL", VK_LAUNCH_MAIL},
+        {U"LaunchMediaSelect", VK_LAUNCH_MEDIA_SELECT},
+        {U"LAUNCHMEDIASELECT", VK_LAUNCH_MEDIA_SELECT},
+        {U"LaunchApp1", VK_LAUNCH_APP1},
+        {U"LAUNCHAPP1", VK_LAUNCH_APP1},
+        {U"LaunchApp2", VK_LAUNCH_APP2},
+        {U"LAUNCHAPP2", VK_LAUNCH_APP2},
+        {U"Semicolon", VK_OEM_1},
+        {U"SEMICOLON", VK_OEM_1},
+        {U"Semicolon_US", VK_OEM_1},
+        {U"SEMICOLONUS", VK_OEM_1},
+        {U"Colon_JIS", VK_OEM_1},
+        {U"COLONJIS", VK_OEM_1},
+        {U"Equal", VK_OEM_PLUS},
+        {U"EQUAL", VK_OEM_PLUS},
+        {U"Equal_US", VK_OEM_PLUS},
+        {U"EQUALUS", VK_OEM_PLUS},
+        {U"Semicolon_JIS", VK_OEM_PLUS},
+        {U"SEMICOLONJIS", VK_OEM_PLUS},
+        {U"Comma", VK_OEM_COMMA},
+        {U"COMMA", VK_OEM_COMMA},
+        {U"Minus", VK_OEM_MINUS},
+        {U"MINUS", VK_OEM_MINUS},
+        {U"Period", VK_OEM_PERIOD},
+        {U"PERIOD", VK_OEM_PERIOD},
+        {U"Slash", VK_OEM_2},
+        {U"SLASH", VK_OEM_2},
+        {U"GraveAccent", VK_OEM_3},
+        {U"GRAVEACCENT", VK_OEM_3},
+        {U"LBracket", VK_OEM_4},
+        {U"LBRACKET", VK_OEM_4},
+        {U"LeftBracket", VK_OEM_4},
+        {U"LEFTBRACKET", VK_OEM_4},
+        {U"Backslash", VK_OEM_5},
+        {U"BACKSLASH", VK_OEM_5},
+        {U"Yen_JIS", VK_OEM_5},
+        {U"YENJIS", VK_OEM_5},
+        {U"RBracket", VK_OEM_6},
+        {U"RBRACKET", VK_OEM_6},
+        {U"RightBracket", VK_OEM_6},
+        {U"RIGHTBRACKET", VK_OEM_6},
+        {U"Apostrophe", VK_OEM_7},
+        {U"APOSTROPHE", VK_OEM_7},
+        {U"Apostrophe_US", VK_OEM_7},
+        {U"APOSTROPHEUS", VK_OEM_7},
+        {U"Caret_JIS", VK_OEM_7},
+        {U"CARETJIS", VK_OEM_7},
+        {U"OEM8", VK_OEM_8},
+        {U"OEM102", VK_OEM_102},
+        {U"Underscore_JIS", VK_OEM_102},
+        {U"UNDERSCOREJIS", VK_OEM_102},
+        {U"Attn", VK_ATTN},
+        {U"ATTN", VK_ATTN},
+        {U"CrSel", VK_CRSEL},
+        {U"CRSEL", VK_CRSEL},
+        {U"ExSel", VK_EXSEL},
+        {U"EXSEL", VK_EXSEL},
+        {U"EraseEOF", VK_EREOF},
+        {U"ERASEEOF", VK_EREOF},
+        {U"Play", VK_PLAY},
+        {U"PLAY", VK_PLAY},
+        {U"Zoom", VK_ZOOM},
+        {U"ZOOM", VK_ZOOM},
+        {U"OEMClear", VK_OEM_CLEAR},
+        {U"OEMCLEAR", VK_OEM_CLEAR},
+    };
+
+    auto it = key_map.find(trimmed);
+    if (it == key_map.end()) {
+        it = key_map.find(token);
+    }
+    if (it == key_map.end() || !windows_shortcut_scannable_vk(it->second)) {
+        return false;
+    }
+    *vk = it->second;
+    return true;
+}
+
+inline bool windows_vk_pressed(int vk) {
+    return (GetAsyncKeyState(vk) & 0x8000) != 0;
+}
+
+enum class Windows_shortcut_hook_backend {
+    none,
+    subclass,
+    raw_wndproc,
+};
+
+enum class Windows_shortcut_hook_backend_reason {
+    none,
+    hwnd_unavailable,
+    cross_thread,
+    subclass_failed,
+    raw_chain_unsafe,
+    raw_install_failed,
+};
+
+// Windows shortcut input records WM keyboard/focus messages instead of relying
+// on per-frame polling edges. Scan codes pair key-up with the original VK even
+// when an IME changes the VK between messages. A
+// same-thread HWND can use SetWindowSubclass; Siv3D commonly exposes the HWND
+// from a different thread, where this uses a guarded raw WndProc observer. That
+// raw observer is still message-based, not polling-based. The WndProc only
+// records state and forwards messages; it must never consume or rewrite them.
+// Shared message state is mutex-protected and copied into a per-frame snapshot.
+// If the message hook becomes unsafe, shortcut detection falls back to polling
+// instead of trying to repair or overwrite a changed WndProc chain.
+#define EGAROUCID_SHORTCUT_DOWN_CHORDS 1
+struct Windows_shortcut_down_chord {
+    std::unordered_set<int> pressed_vks;
+    int down_vk;
+};
+
+struct Windows_shortcut_message_state {
+    // Read-only diagnostics for explicitly requested desktop operation checks.
+    void (*diagnostic_observer)(HWND, UINT, WPARAM, LPARAM) = nullptr;
+    std::unordered_set<int> pressed_vks;
+    std::unordered_set<int> pending_down_vks;
+    std::vector<Windows_shortcut_down_chord> pending_down_chords;
+    std::unordered_map<int, int> pressed_scan_codes;
+    bool focused = false;
+    HWND installed_hwnd = nullptr;
+    WNDPROC previous_wndproc = nullptr;
+    Windows_shortcut_hook_backend hook_backend = Windows_shortcut_hook_backend::none;
+    Windows_shortcut_hook_backend_reason hook_backend_reason = Windows_shortcut_hook_backend_reason::none;
+    bool hook_installed = false;
+    bool hook_install_failed = false;
+    DWORD hook_error = 0;
+    DWORD hook_subclass_error = 0;
+    BOOL hook_subclass_set_return = FALSE;
+    BOOL hook_subclass_get_after_set = FALSE;
+    DWORD hook_subclass_get_after_set_error = 0;
+    DWORD hook_install_thread_id = 0;
+    DWORD hook_hwnd_thread_id = 0;
+    DWORD hook_current_process_id = 0;
+    DWORD hook_hwnd_process_id = 0;
+    uint64_t observed_keyboard_message_count = 0;
+};
+
+struct Windows_shortcut_keyboard_state {
+    bool focused = false;
+    std::unordered_set<int> pressed_vks;
+    std::unordered_set<int> down_vks;
+    std::unordered_set<int> message_down_vks;
+    std::vector<Windows_shortcut_down_chord> down_chords;
+    Windows_shortcut_hook_backend hook_backend = Windows_shortcut_hook_backend::none;
+    Windows_shortcut_hook_backend_reason hook_backend_reason = Windows_shortcut_hook_backend_reason::none;
+    bool input_source_message = false;
+    bool message_state_synchronized = false;
+    bool hook_installed = false;
+    bool hook_install_failed = false;
+    DWORD hook_error = 0;
+    DWORD hook_subclass_error = 0;
+    BOOL hook_subclass_set_return = FALSE;
+    BOOL hook_subclass_get_after_set = FALSE;
+    DWORD hook_subclass_get_after_set_error = 0;
+    DWORD hook_install_thread_id = 0;
+    DWORD hook_hwnd_thread_id = 0;
+    DWORD hook_current_process_id = 0;
+    DWORD hook_hwnd_process_id = 0;
+    bool hook_current_wndproc_matches = false;
+    uint64_t observed_keyboard_message_count = 0;
+};
+
+struct Windows_shortcut_match_details {
+    std::unordered_set<int> expected_vks;
+    std::unordered_set<int> extra_non_modifier_vks;
+    std::unordered_set<int> missing_expected_vks;
+    bool modifier_mismatch = false;
+    bool no_down = false;
+    bool pressed_found = false;
+    bool down_found = false;
+    int pressed_expected_count = 0;
+};
+
+inline Windows_shortcut_message_state& windows_shortcut_message_state() {
+    static Windows_shortcut_message_state state;
+    return state;
+}
+
+inline std::mutex& windows_shortcut_message_state_mutex() {
+    static std::mutex mutex;
+    return mutex;
+}
+
+inline UINT_PTR windows_shortcut_subclass_id() {
+    return 0x4547534B; // 'EGSK'
+}
+
+inline int windows_shortcut_generic_modifier_vk(const int vk) {
+    switch (vk) {
+    case VK_LCONTROL:
+    case VK_RCONTROL:
+        return VK_CONTROL;
+    case VK_LSHIFT:
+    case VK_RSHIFT:
+        return VK_SHIFT;
+    case VK_LMENU:
+    case VK_RMENU:
+        return VK_MENU;
+    default:
+        return 0;
+    }
+}
+
+inline void windows_shortcut_add_vk_with_aliases(std::unordered_set<int>* vks, const int vk) {
+    vks->emplace(vk);
+    const int generic_vk = windows_shortcut_generic_modifier_vk(vk);
+    if (generic_vk != 0) {
+        vks->emplace(generic_vk);
+    }
+}
+
+inline void windows_shortcut_remove_vk_with_aliases(std::unordered_set<int>* vks, const int vk) {
+    auto remove_family = [&](const int generic_vk, const int left_vk, const int right_vk) {
+        vks->erase(generic_vk);
+        vks->erase(left_vk);
+        vks->erase(right_vk);
+    };
+
+    if (vk == VK_CONTROL) {
+        remove_family(VK_CONTROL, VK_LCONTROL, VK_RCONTROL);
+        return;
+    }
+    if (vk == VK_SHIFT) {
+        remove_family(VK_SHIFT, VK_LSHIFT, VK_RSHIFT);
+        return;
+    }
+    if (vk == VK_MENU) {
+        remove_family(VK_MENU, VK_LMENU, VK_RMENU);
+        return;
+    }
+
+    vks->erase(vk);
+    const int generic_vk = windows_shortcut_generic_modifier_vk(vk);
+    if (generic_vk == VK_CONTROL &&
+        vks->find(VK_LCONTROL) == vks->end() && vks->find(VK_RCONTROL) == vks->end()) {
+        vks->erase(VK_CONTROL);
+    } else if (generic_vk == VK_SHIFT &&
+        vks->find(VK_LSHIFT) == vks->end() && vks->find(VK_RSHIFT) == vks->end()) {
+        vks->erase(VK_SHIFT);
+    } else if (generic_vk == VK_MENU &&
+        vks->find(VK_LMENU) == vks->end() && vks->find(VK_RMENU) == vks->end()) {
+        vks->erase(VK_MENU);
+    }
+}
+
+inline void windows_shortcut_refresh_generic_modifier_aliases(std::unordered_set<int>* vks) {
+    if (vks->find(VK_LCONTROL) != vks->end() || vks->find(VK_RCONTROL) != vks->end()) {
+        vks->emplace(VK_CONTROL);
+    }
+    if (vks->find(VK_LSHIFT) != vks->end() || vks->find(VK_RSHIFT) != vks->end()) {
+        vks->emplace(VK_SHIFT);
+    }
+    if (vks->find(VK_LMENU) != vks->end() || vks->find(VK_RMENU) != vks->end()) {
+        vks->emplace(VK_MENU);
+    }
+}
+
+inline void windows_shortcut_clear_message_keys_unlocked(Windows_shortcut_message_state& state) {
+    state.pressed_vks.clear();
+    state.pending_down_vks.clear();
+    state.pending_down_chords.clear();
+    state.pressed_scan_codes.clear();
+}
+
+inline void windows_shortcut_record_down_unlocked(Windows_shortcut_message_state& state, const int vk) {
+    windows_shortcut_add_vk_with_aliases(&state.pending_down_vks, vk);
+    // A down/up pair may both arrive between GUI frames. Keep the chord at
+    // the down event, not a union of keys pressed at different times.
+    state.pending_down_chords.push_back({state.pressed_vks, vk});
+}
+
+inline void windows_shortcut_forget_vk_unlocked(Windows_shortcut_message_state& state, const int vk) {
+    for (auto it = state.pressed_scan_codes.begin(); it != state.pressed_scan_codes.end();) {
+        if (it->second == vk || windows_shortcut_generic_modifier_vk(it->second) == vk) {
+            it = state.pressed_scan_codes.erase(it);
+        } else {
+            ++it;
+        }
+    }
+    windows_shortcut_remove_vk_with_aliases(&state.pressed_vks, vk);
+}
+
+inline void windows_shortcut_reconcile_message_keys_unlocked(Windows_shortcut_message_state& state) {
+    // Repair missing key-up messages without discarding a newly observed down
+    // before the frame can consume it (the physical key may already be up).
+    const auto pressed_vks = state.pressed_vks;
+    for (const int vk : pressed_vks) {
+        if (state.pending_down_vks.find(vk) != state.pending_down_vks.end()) {
+            continue;
+        }
+        // Generic modifier entries are aliases of the held left/right keys.
+        const bool is_alias = std::any_of(state.pressed_vks.begin(), state.pressed_vks.end(),
+            [vk](const int held_vk) { return windows_shortcut_generic_modifier_vk(held_vk) == vk; });
+        if (!is_alias && !windows_vk_pressed(vk)) {
+            windows_shortcut_forget_vk_unlocked(state, vk);
+        }
+    }
+}
+
+inline void windows_shortcut_clear_message_keys() {
+    std::lock_guard<std::mutex> lock(windows_shortcut_message_state_mutex());
+    windows_shortcut_clear_message_keys_unlocked(windows_shortcut_message_state());
+}
+
+inline int windows_shortcut_vk_from_message_scan_code(const LPARAM l_param) {
+    const UINT scan_code = static_cast<UINT>((static_cast<DWORD_PTR>(l_param) >> 16) & 0xFF);
+    const bool extended = ((static_cast<DWORD_PTR>(l_param) >> 24) & 0x01) != 0;
+    if (scan_code != 0) {
+        const UINT mapped_vk = MapVirtualKeyW(scan_code | (extended ? 0xE000 : 0), MAPVK_VSC_TO_VK_EX);
+        if (mapped_vk != 0) {
+            return static_cast<int>(mapped_vk);
+        }
+    }
+    return 0;
+}
+
+inline bool windows_shortcut_message_extended_key(const LPARAM l_param) {
+    return ((static_cast<DWORD_PTR>(l_param) >> 24) & 0x01) != 0;
+}
+
+inline int windows_shortcut_message_scan_code(const LPARAM l_param) {
+    const int scan_code = static_cast<int>((static_cast<DWORD_PTR>(l_param) >> 16) & 0xFF);
+    return scan_code == 0 ? 0 : scan_code | (windows_shortcut_message_extended_key(l_param) ? 0x100 : 0);
+}
+
+inline int windows_shortcut_normalize_message_vk(const WPARAM w_param, const LPARAM l_param) {
+    const int vk = static_cast<int>(w_param) & 0xFF;
+#ifdef VK_PROCESSKEY
+    if (vk == VK_PROCESSKEY) {
+        const int mapped_vk = windows_shortcut_vk_from_message_scan_code(l_param);
+        if (windows_shortcut_scannable_vk(mapped_vk)) {
+            return mapped_vk;
+        }
+    }
+#endif
+    if (vk != VK_SHIFT && vk != VK_CONTROL && vk != VK_MENU) {
+        return vk;
+    }
+
+    const int mapped_vk = windows_shortcut_vk_from_message_scan_code(l_param);
+    if (mapped_vk != 0) {
+        if (mapped_vk == VK_LSHIFT || mapped_vk == VK_RSHIFT ||
+            mapped_vk == VK_LCONTROL || mapped_vk == VK_RCONTROL ||
+            mapped_vk == VK_LMENU || mapped_vk == VK_RMENU) {
+            return mapped_vk;
+        }
+    }
+
+    if (vk == VK_CONTROL) {
+        return windows_shortcut_message_extended_key(l_param) ? VK_RCONTROL : VK_LCONTROL;
+    }
+    if (vk == VK_MENU) {
+        return windows_shortcut_message_extended_key(l_param) ? VK_RMENU : VK_LMENU;
+    }
+    return vk;
+}
+
+inline void windows_shortcut_update_unmapped_process_key_state_unlocked(
+    Windows_shortcut_message_state& state,
+    const bool key_down
+) {
+    for (int vk = VK_BACK; vk <= 0xFE; ++vk) {
+        if (!windows_shortcut_scannable_vk(vk) || windows_shortcut_ime_control_vk(vk)) {
+            continue;
+        }
+        if (windows_vk_pressed(vk)) {
+            if (key_down && state.pressed_vks.find(vk) == state.pressed_vks.end()) {
+                windows_shortcut_add_vk_with_aliases(&state.pressed_vks, vk);
+                windows_shortcut_record_down_unlocked(state, vk);
+            }
+        } else if (state.pressed_vks.find(vk) != state.pressed_vks.end()) {
+            windows_shortcut_forget_vk_unlocked(state, vk);
+        }
+    }
+}
+
+inline void windows_shortcut_observe_message(HWND hwnd, UINT msg, WPARAM w_param, LPARAM l_param) {
+    (void)hwnd;
+    std::lock_guard<std::mutex> lock(windows_shortcut_message_state_mutex());
+    Windows_shortcut_message_state& state = windows_shortcut_message_state();
+    if (state.diagnostic_observer) state.diagnostic_observer(hwnd, msg, w_param, l_param);
+
+    switch (msg) {
+    case WM_KEYDOWN:
+    case WM_SYSKEYDOWN: {
+        ++state.observed_keyboard_message_count;
+        int vk = windows_shortcut_normalize_message_vk(w_param, l_param);
+        if (windows_shortcut_scannable_vk(vk)) {
+            const int scan_code = windows_shortcut_message_scan_code(l_param);
+            if (scan_code != 0) {
+                // Repeats must retain the VK from the first down, too.
+                vk = state.pressed_scan_codes.emplace(scan_code, vk).first->second;
+            }
+            const bool repeated = (HIWORD(l_param) & KF_REPEAT) != 0;
+            windows_shortcut_add_vk_with_aliases(&state.pressed_vks, vk);
+            if (!repeated) {
+                windows_shortcut_record_down_unlocked(state, vk);
+            }
+#ifdef VK_PROCESSKEY
+        } else if ((static_cast<int>(w_param) & 0xFF) == VK_PROCESSKEY) {
+            windows_shortcut_update_unmapped_process_key_state_unlocked(state, true);
+#endif
+        }
+        break;
+    }
+    case WM_KEYUP:
+    case WM_SYSKEYUP: {
+        ++state.observed_keyboard_message_count;
+        int vk = windows_shortcut_normalize_message_vk(w_param, l_param);
+        const int scan_code = windows_shortcut_message_scan_code(l_param);
+        const auto pressed_scan = state.pressed_scan_codes.find(scan_code);
+        if (scan_code != 0 && pressed_scan != state.pressed_scan_codes.end()) {
+            vk = pressed_scan->second;
+            state.pressed_scan_codes.erase(pressed_scan);
+        }
+        if (windows_shortcut_scannable_vk(vk)) {
+            // Main Enter and numpad Enter can share a VK while held together.
+            const bool held_by_other_scan = std::any_of(state.pressed_scan_codes.begin(), state.pressed_scan_codes.end(),
+                [vk](const auto& entry) { return entry.second == vk; });
+            if (!held_by_other_scan) {
+                windows_shortcut_remove_vk_with_aliases(&state.pressed_vks, vk);
+            }
+#ifdef VK_PROCESSKEY
+        } else if ((static_cast<int>(w_param) & 0xFF) == VK_PROCESSKEY) {
+            windows_shortcut_update_unmapped_process_key_state_unlocked(state, false);
+#endif
+        }
+        break;
+    }
+    case WM_SETFOCUS:
+        windows_shortcut_clear_message_keys_unlocked(state);
+        state.focused = true;
+        break;
+    case WM_KILLFOCUS:
+        windows_shortcut_clear_message_keys_unlocked(state);
+        state.focused = false;
+        break;
+    case WM_ACTIVATE:
+        windows_shortcut_clear_message_keys_unlocked(state);
+        state.focused = (LOWORD(w_param) != WA_INACTIVE);
+        break;
+    case WM_ACTIVATEAPP:
+        windows_shortcut_clear_message_keys_unlocked(state);
+        state.focused = (w_param != FALSE);
+        break;
+    case WM_NCDESTROY:
+        windows_shortcut_clear_message_keys_unlocked(state);
+        state.focused = false;
+        break;
+    default:
+        break;
+    }
+}
+
+inline LRESULT CALLBACK windows_shortcut_subclass_proc(HWND hwnd, UINT msg, WPARAM w_param, LPARAM l_param, UINT_PTR subclass_id, DWORD_PTR ref_data) {
+    (void)subclass_id;
+    (void)ref_data;
+    windows_shortcut_observe_message(hwnd, msg, w_param, l_param);
+
+    if (msg == WM_NCDESTROY) {
+        RemoveWindowSubclass(hwnd, &windows_shortcut_subclass_proc, windows_shortcut_subclass_id());
+        std::lock_guard<std::mutex> lock(windows_shortcut_message_state_mutex());
+        Windows_shortcut_message_state& state = windows_shortcut_message_state();
+        state.installed_hwnd = nullptr;
+        state.previous_wndproc = nullptr;
+        state.hook_backend = Windows_shortcut_hook_backend::none;
+        state.hook_backend_reason = Windows_shortcut_hook_backend_reason::none;
+        state.hook_installed = false;
+    }
+
+    return DefSubclassProc(hwnd, msg, w_param, l_param);
+}
+
+inline LRESULT CALLBACK windows_shortcut_raw_wndproc(HWND hwnd, UINT msg, WPARAM w_param, LPARAM l_param) {
+    WNDPROC previous_wndproc = nullptr;
+    {
+        std::lock_guard<std::mutex> lock(windows_shortcut_message_state_mutex());
+        previous_wndproc = windows_shortcut_message_state().previous_wndproc;
+    }
+    windows_shortcut_observe_message(hwnd, msg, w_param, l_param);
+
+    if (msg == WM_NCDESTROY) {
+        std::lock_guard<std::mutex> lock(windows_shortcut_message_state_mutex());
+        Windows_shortcut_message_state& state = windows_shortcut_message_state();
+        state.installed_hwnd = nullptr;
+        state.previous_wndproc = nullptr;
+        state.hook_backend = Windows_shortcut_hook_backend::none;
+        state.hook_backend_reason = Windows_shortcut_hook_backend_reason::none;
+        state.hook_installed = false;
+    }
+
+    if (previous_wndproc != nullptr) {
+        return CallWindowProc(previous_wndproc, hwnd, msg, w_param, l_param);
+    }
+    return DefWindowProc(hwnd, msg, w_param, l_param);
+}
+
+inline bool windows_shortcut_subclass_installed(HWND hwnd) {
+    if (hwnd == nullptr) {
+        return false;
+    }
+    DWORD_PTR ref_data = 0;
+    return GetWindowSubclass(hwnd, &windows_shortcut_subclass_proc, windows_shortcut_subclass_id(), &ref_data) != FALSE;
+}
+
+inline bool windows_shortcut_raw_wndproc_installed(HWND hwnd) {
+    if (hwnd == nullptr) {
+        return false;
+    }
+    SetLastError(0);
+    const LONG_PTR current_wndproc = GetWindowLongPtr(hwnd, GWLP_WNDPROC);
+    return current_wndproc == reinterpret_cast<LONG_PTR>(&windows_shortcut_raw_wndproc);
+}
+
+inline void windows_shortcut_uninstall_message_observer(HWND hwnd) {
+    if (hwnd == nullptr || !IsWindow(hwnd)) {
+        return;
+    }
+    Windows_shortcut_hook_backend hook_backend = Windows_shortcut_hook_backend::none;
+    WNDPROC previous_wndproc = nullptr;
+    {
+        std::lock_guard<std::mutex> lock(windows_shortcut_message_state_mutex());
+        Windows_shortcut_message_state& state = windows_shortcut_message_state();
+        hook_backend = state.hook_backend;
+        previous_wndproc = state.previous_wndproc;
+    }
+    if (hook_backend == Windows_shortcut_hook_backend::subclass) {
+        RemoveWindowSubclass(hwnd, &windows_shortcut_subclass_proc, windows_shortcut_subclass_id());
+    } else if (hook_backend == Windows_shortcut_hook_backend::raw_wndproc &&
+        previous_wndproc != nullptr && windows_shortcut_raw_wndproc_installed(hwnd)) {
+        SetWindowLongPtr(hwnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(previous_wndproc));
+    }
+}
+
+inline bool windows_shortcut_install_subclass_observer(HWND hwnd) {
+    DWORD hwnd_process_id = 0;
+    const DWORD install_thread_id = GetCurrentThreadId();
+    const DWORD hwnd_thread_id = GetWindowThreadProcessId(hwnd, &hwnd_process_id);
+    const DWORD current_process_id = GetCurrentProcessId();
+
+    SetLastError(0);
+    const BOOL installed = SetWindowSubclass(hwnd, &windows_shortcut_subclass_proc, windows_shortcut_subclass_id(), 0);
+    const DWORD error = GetLastError();
+    DWORD_PTR ref_data = 0;
+    SetLastError(0);
+    const BOOL subclass_present = GetWindowSubclass(hwnd, &windows_shortcut_subclass_proc, windows_shortcut_subclass_id(), &ref_data);
+    const DWORD get_subclass_error = GetLastError();
+
+    std::lock_guard<std::mutex> lock(windows_shortcut_message_state_mutex());
+    Windows_shortcut_message_state& state = windows_shortcut_message_state();
+    state.hook_install_thread_id = install_thread_id;
+    state.hook_hwnd_thread_id = hwnd_thread_id;
+    state.hook_current_process_id = current_process_id;
+    state.hook_hwnd_process_id = hwnd_process_id;
+    state.hook_subclass_set_return = installed;
+    state.hook_subclass_get_after_set = subclass_present;
+    state.hook_subclass_get_after_set_error = get_subclass_error;
+    if (!installed) {
+        state.hook_install_failed = true;
+        state.hook_error = error;
+        state.hook_subclass_error = error;
+        state.hook_backend_reason = Windows_shortcut_hook_backend_reason::subclass_failed;
+        return false;
+    }
+
+    state.hook_backend = Windows_shortcut_hook_backend::subclass;
+    state.hook_backend_reason = Windows_shortcut_hook_backend_reason::none;
+    state.previous_wndproc = nullptr;
+    state.hook_installed = true;
+    state.hook_subclass_error = 0;
+    return true;
+}
+
+inline bool windows_shortcut_install_raw_wndproc_observer(HWND hwnd) {
+    std::lock_guard<std::mutex> lock(windows_shortcut_message_state_mutex());
+    Windows_shortcut_message_state& state = windows_shortcut_message_state();
+
+    SetLastError(0);
+    const LONG_PTR current_wndproc = GetWindowLongPtr(hwnd, GWLP_WNDPROC);
+    const DWORD current_error = GetLastError();
+    if (current_wndproc == 0 && current_error != 0) {
+        state.hook_install_failed = true;
+        state.hook_error = current_error;
+        state.hook_backend_reason = Windows_shortcut_hook_backend_reason::raw_install_failed;
+        return false;
+    }
+    if (current_wndproc == reinterpret_cast<LONG_PTR>(&windows_shortcut_raw_wndproc)) {
+        state.hook_backend = Windows_shortcut_hook_backend::raw_wndproc;
+        state.hook_installed = true;
+        return state.previous_wndproc != nullptr;
+    }
+
+    SetLastError(0);
+    const LONG_PTR previous = SetWindowLongPtr(hwnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(&windows_shortcut_raw_wndproc));
+    const DWORD error = GetLastError();
+    if (previous == 0 && error != 0) {
+        state.hook_install_failed = true;
+        state.hook_error = error;
+        state.hook_backend_reason = Windows_shortcut_hook_backend_reason::raw_install_failed;
+        return false;
+    }
+
+    state.previous_wndproc = reinterpret_cast<WNDPROC>(previous);
+    state.hook_backend = Windows_shortcut_hook_backend::raw_wndproc;
+    state.hook_installed = true;
+    return true;
+}
+
+inline bool windows_shortcut_install_message_observer() {
+    HWND hwnd = static_cast<HWND>(Platform::Windows::Window::GetHWND());
+    if (hwnd == nullptr) {
+        std::lock_guard<std::mutex> lock(windows_shortcut_message_state_mutex());
+        Windows_shortcut_message_state& state = windows_shortcut_message_state();
+        state.hook_backend = Windows_shortcut_hook_backend::none;
+        state.hook_backend_reason = Windows_shortcut_hook_backend_reason::hwnd_unavailable;
+        state.hook_installed = false;
+        state.hook_install_failed = false;
+        state.hook_error = 0;
+        state.hook_subclass_error = 0;
+        return false;
+    }
+
+    DWORD hwnd_process_id = 0;
+    const DWORD install_thread_id = GetCurrentThreadId();
+    const DWORD hwnd_thread_id = GetWindowThreadProcessId(hwnd, &hwnd_process_id);
+    const DWORD current_process_id = GetCurrentProcessId();
+    const bool same_thread = (install_thread_id == hwnd_thread_id);
+
+    bool hook_installed = false;
+    HWND installed_hwnd = nullptr;
+    Windows_shortcut_hook_backend hook_backend = Windows_shortcut_hook_backend::none;
+    WNDPROC previous_wndproc = nullptr;
+    {
+        std::lock_guard<std::mutex> lock(windows_shortcut_message_state_mutex());
+        Windows_shortcut_message_state& state = windows_shortcut_message_state();
+        hook_installed = state.hook_installed;
+        installed_hwnd = state.installed_hwnd;
+        hook_backend = state.hook_backend;
+        previous_wndproc = state.previous_wndproc;
+    }
+
+    if (hook_installed && installed_hwnd == hwnd) {
+        if (hook_backend == Windows_shortcut_hook_backend::subclass && windows_shortcut_subclass_installed(hwnd)) {
+            return true;
+        }
+        if (hook_backend == Windows_shortcut_hook_backend::raw_wndproc && windows_shortcut_raw_wndproc_installed(hwnd)) {
+            return true;
+        }
+
+        std::lock_guard<std::mutex> lock(windows_shortcut_message_state_mutex());
+        Windows_shortcut_message_state& state = windows_shortcut_message_state();
+        state.hook_installed = false;
+        state.hook_install_failed = true;
+        state.hook_error = ERROR_INVALID_HOOK_HANDLE;
+        state.hook_backend_reason = Windows_shortcut_hook_backend_reason::raw_chain_unsafe;
+        windows_shortcut_clear_message_keys_unlocked(state);
+        return false;
+    }
+
+    if (!hook_installed && installed_hwnd == hwnd &&
+        hook_backend == Windows_shortcut_hook_backend::raw_wndproc &&
+        previous_wndproc != nullptr) {
+        std::lock_guard<std::mutex> lock(windows_shortcut_message_state_mutex());
+        Windows_shortcut_message_state& state = windows_shortcut_message_state();
+        state.hook_install_failed = true;
+        state.hook_error = ERROR_INVALID_HOOK_HANDLE;
+        state.hook_backend_reason = Windows_shortcut_hook_backend_reason::raw_chain_unsafe;
+        windows_shortcut_clear_message_keys_unlocked(state);
+        return false;
+    }
+
+    if (hook_installed && installed_hwnd != nullptr) {
+        windows_shortcut_uninstall_message_observer(installed_hwnd);
+    }
+
+    {
+        std::lock_guard<std::mutex> lock(windows_shortcut_message_state_mutex());
+        Windows_shortcut_message_state& state = windows_shortcut_message_state();
+        state.installed_hwnd = hwnd;
+        state.previous_wndproc = nullptr;
+        state.hook_backend = Windows_shortcut_hook_backend::none;
+        state.hook_backend_reason = Windows_shortcut_hook_backend_reason::none;
+        state.hook_installed = false;
+        state.hook_install_failed = false;
+        state.hook_error = 0;
+        state.hook_subclass_error = 0;
+        state.hook_subclass_set_return = FALSE;
+        state.hook_subclass_get_after_set = FALSE;
+        state.hook_subclass_get_after_set_error = 0;
+        state.hook_install_thread_id = install_thread_id;
+        state.hook_hwnd_thread_id = hwnd_thread_id;
+        state.hook_current_process_id = current_process_id;
+        state.hook_hwnd_process_id = hwnd_process_id;
+        windows_shortcut_clear_message_keys_unlocked(state);
+    }
+
+    bool observer_installed = false;
+    if (same_thread) {
+        observer_installed = windows_shortcut_install_subclass_observer(hwnd);
+        if (!observer_installed) {
+            observer_installed = windows_shortcut_install_raw_wndproc_observer(hwnd);
+        }
+    } else {
+        {
+            std::lock_guard<std::mutex> lock(windows_shortcut_message_state_mutex());
+            Windows_shortcut_message_state& state = windows_shortcut_message_state();
+            state.hook_backend_reason = Windows_shortcut_hook_backend_reason::cross_thread;
+        }
+        observer_installed = windows_shortcut_install_raw_wndproc_observer(hwnd);
+    }
+
+    if (!observer_installed) {
+        std::lock_guard<std::mutex> lock(windows_shortcut_message_state_mutex());
+        Windows_shortcut_message_state& state = windows_shortcut_message_state();
+        state.hook_installed = false;
+        return false;
+    }
+
+    std::lock_guard<std::mutex> lock(windows_shortcut_message_state_mutex());
+    Windows_shortcut_message_state& state = windows_shortcut_message_state();
+    state.hook_install_failed = false;
+    state.hook_error = 0;
+    state.focused = Window::GetState().focused;
+    return true;
+}
+
+inline bool windows_shortcut_current_wndproc_matches() {
+    bool hook_installed = false;
+    HWND installed_hwnd = nullptr;
+    Windows_shortcut_hook_backend hook_backend = Windows_shortcut_hook_backend::none;
+    {
+        std::lock_guard<std::mutex> lock(windows_shortcut_message_state_mutex());
+        Windows_shortcut_message_state& state = windows_shortcut_message_state();
+        hook_installed = state.hook_installed;
+        installed_hwnd = state.installed_hwnd;
+        hook_backend = state.hook_backend;
+    }
+    if (!hook_installed || installed_hwnd == nullptr) {
+        return false;
+    }
+    if (hook_backend == Windows_shortcut_hook_backend::subclass) {
+        return windows_shortcut_subclass_installed(installed_hwnd);
+    }
+    if (hook_backend == Windows_shortcut_hook_backend::raw_wndproc) {
+        return windows_shortcut_raw_wndproc_installed(installed_hwnd);
+    }
+    return false;
+}
+
+inline std::string windows_shortcut_hook_backend_name(
+    const Windows_shortcut_keyboard_state* keyboard_state
+) {
+    if (keyboard_state == nullptr || !keyboard_state->input_source_message) {
+        return "polling_fallback";
+    }
+    if (keyboard_state->hook_backend == Windows_shortcut_hook_backend::subclass) {
+        return "set_window_subclass";
+    }
+    if (keyboard_state->hook_backend == Windows_shortcut_hook_backend::raw_wndproc) {
+        return "guarded_raw_wndproc";
+    }
+    return "polling_fallback";
+}
+
+inline std::string windows_shortcut_hook_backend_reason_name(
+    const Windows_shortcut_keyboard_state* keyboard_state
+) {
+    if (keyboard_state == nullptr) {
+        return "";
+    }
+    switch (keyboard_state->hook_backend_reason) {
+    case Windows_shortcut_hook_backend_reason::none:
+        return "none";
+    case Windows_shortcut_hook_backend_reason::hwnd_unavailable:
+        return "hwnd_unavailable";
+    case Windows_shortcut_hook_backend_reason::cross_thread:
+        return "cross_thread";
+    case Windows_shortcut_hook_backend_reason::subclass_failed:
+        return "subclass_failed";
+    case Windows_shortcut_hook_backend_reason::raw_chain_unsafe:
+        return "raw_chain_unsafe";
+    case Windows_shortcut_hook_backend_reason::raw_install_failed:
+        return "raw_install_failed";
+    default:
+        return "";
+    }
+}
+
+inline Windows_shortcut_keyboard_state collect_windows_shortcut_keyboard_state() {
+    static std::unordered_set<int> previous_pressed_vks;
+    static bool previous_focused = false;
+
+    Windows_shortcut_keyboard_state state;
+    const bool message_observer_installed = windows_shortcut_install_message_observer();
+    state.hook_current_wndproc_matches = windows_shortcut_current_wndproc_matches();
+
+    if (message_observer_installed) {
+        state.input_source_message = true;
+        const bool window_focused = Window::GetState().focused;
+        {
+            std::lock_guard<std::mutex> lock(windows_shortcut_message_state_mutex());
+            Windows_shortcut_message_state& message_state = windows_shortcut_message_state();
+            state.hook_backend = message_state.hook_backend;
+            state.hook_backend_reason = message_state.hook_backend_reason;
+            state.message_state_synchronized = true;
+            state.hook_installed = message_state.hook_installed;
+            state.hook_install_failed = message_state.hook_install_failed;
+            state.hook_error = message_state.hook_error;
+            state.hook_subclass_error = message_state.hook_subclass_error;
+            state.hook_subclass_set_return = message_state.hook_subclass_set_return;
+            state.hook_subclass_get_after_set = message_state.hook_subclass_get_after_set;
+            state.hook_subclass_get_after_set_error = message_state.hook_subclass_get_after_set_error;
+            state.hook_install_thread_id = message_state.hook_install_thread_id;
+            state.hook_hwnd_thread_id = message_state.hook_hwnd_thread_id;
+            state.hook_current_process_id = message_state.hook_current_process_id;
+            state.hook_hwnd_process_id = message_state.hook_hwnd_process_id;
+            state.observed_keyboard_message_count = message_state.observed_keyboard_message_count;
+            state.focused = window_focused && message_state.focused;
+            if (!state.focused) {
+                windows_shortcut_clear_message_keys_unlocked(message_state);
+            } else {
+                windows_shortcut_reconcile_message_keys_unlocked(message_state);
+            }
+            state.pressed_vks = message_state.pressed_vks;
+            state.down_vks = message_state.pending_down_vks;
+            state.message_down_vks = message_state.pending_down_vks;
+            state.down_chords = std::move(message_state.pending_down_chords);
+            message_state.pending_down_vks.clear();
+            message_state.pending_down_chords.clear();
+        }
+        state.hook_current_wndproc_matches = windows_shortcut_current_wndproc_matches();
+        previous_pressed_vks.clear();
+        previous_focused = state.focused;
+        return state;
+    }
+
+    {
+        std::lock_guard<std::mutex> lock(windows_shortcut_message_state_mutex());
+        Windows_shortcut_message_state& message_state = windows_shortcut_message_state();
+        state.hook_backend = message_state.hook_backend;
+        state.hook_backend_reason = message_state.hook_backend_reason;
+        state.message_state_synchronized = false;
+        state.hook_installed = message_state.hook_installed;
+        state.hook_install_failed = message_state.hook_install_failed;
+        state.hook_error = message_state.hook_error;
+        state.hook_subclass_error = message_state.hook_subclass_error;
+        state.hook_subclass_set_return = message_state.hook_subclass_set_return;
+        state.hook_subclass_get_after_set = message_state.hook_subclass_get_after_set;
+        state.hook_subclass_get_after_set_error = message_state.hook_subclass_get_after_set_error;
+        state.hook_install_thread_id = message_state.hook_install_thread_id;
+        state.hook_hwnd_thread_id = message_state.hook_hwnd_thread_id;
+        state.hook_current_process_id = message_state.hook_current_process_id;
+        state.hook_hwnd_process_id = message_state.hook_hwnd_process_id;
+        state.observed_keyboard_message_count = message_state.observed_keyboard_message_count;
+    }
+
+    state.input_source_message = false;
+    state.focused = Window::GetState().focused;
+    for (int vk = VK_BACK; vk <= 0xFE; ++vk) {
+        if (windows_shortcut_scannable_vk(vk) && windows_vk_pressed(vk)) {
+            state.pressed_vks.emplace(vk);
+        }
+    }
+    windows_shortcut_refresh_generic_modifier_aliases(&state.pressed_vks);
+
+    if (state.focused && previous_focused) {
+        for (const int vk : state.pressed_vks) {
+            if (previous_pressed_vks.find(vk) == previous_pressed_vks.end()) {
+                state.down_vks.emplace(vk);
+            }
+        }
+    }
+
+    previous_pressed_vks = state.pressed_vks;
+    previous_focused = state.focused;
+    return state;
+}
+
+inline Windows_shortcut_keyboard_state get_windows_shortcut_keyboard_state() {
+    static uint64_t cached_frame_count = std::numeric_limits<uint64_t>::max();
+    static Windows_shortcut_keyboard_state cached_state;
+
+    const uint64_t frame_count = Scene::FrameCount();
+    if (cached_frame_count == frame_count) {
+        return cached_state;
+    }
+
+    cached_state = collect_windows_shortcut_keyboard_state();
+    cached_frame_count = frame_count;
+    return cached_state;
+}
+
+inline bool windows_shortcut_vk_pressed(const Windows_shortcut_keyboard_state& keyboard_state, const int vk) {
+    return keyboard_state.pressed_vks.find(vk) != keyboard_state.pressed_vks.end();
+}
+
+inline bool windows_shortcut_vk_down(const Windows_shortcut_keyboard_state& keyboard_state, const int vk) {
+    return keyboard_state.down_vks.find(vk) != keyboard_state.down_vks.end();
+}
+
+inline std::string windows_shortcut_vk_label(const int vk) {
+    String key_name;
+    if (windows_shortcut_vk_to_key_name(vk, &key_name)) {
+        return key_name.narrow();
+    }
+
+    std::ostringstream oss;
+    oss << "VK_0x" << std::uppercase << std::hex << vk;
+    return oss.str();
+}
+
+inline std::string windows_shortcut_vk_set_to_string(const std::unordered_set<int>& vks) {
+    std::string res;
+    for (int vk = VK_BACK; vk <= 0xFE; ++vk) {
+        if (vks.find(vk) == vks.end()) {
+            continue;
+        }
+        if (!res.empty()) {
+            res += "+";
+        }
+        res += windows_shortcut_vk_label(vk);
+    }
+    return res;
+}
+
+inline bool windows_shortcut_key_name_found(const std::vector<String>& keys, const String& key_name) {
+    const String expected_token = windows_shortcut_key_token(key_name);
+    for (const String& key : keys) {
+        if (windows_shortcut_key_token(key) == expected_token) {
+            return true;
+        }
+    }
+    return false;
+}
+
+inline bool windows_shortcut_modifier_family_matches(
+    const Windows_shortcut_keyboard_state& keyboard_state,
+    const std::vector<String>& keys,
+    const String& generic_name,
+    const String& left_name,
+    const String& right_name,
+    const int generic_vk,
+    const int left_vk,
+    const int right_vk
+) {
+    const bool needs_generic = windows_shortcut_key_name_found(keys, generic_name);
+    const bool needs_left = windows_shortcut_key_name_found(keys, left_name);
+    const bool needs_right = windows_shortcut_key_name_found(keys, right_name);
+    const bool generic_pressed = windows_shortcut_vk_pressed(keyboard_state, generic_vk);
+    const bool left_pressed = windows_shortcut_vk_pressed(keyboard_state, left_vk);
+    const bool right_pressed = windows_shortcut_vk_pressed(keyboard_state, right_vk);
+    const bool any_pressed = generic_pressed || left_pressed || right_pressed;
+
+    if (!needs_generic && !needs_left && !needs_right) {
+        return !any_pressed;
+    }
+    if (needs_left || needs_right) {
+        return left_pressed == needs_left && right_pressed == needs_right;
+    }
+
+    return any_pressed;
+}
+
+inline bool windows_shortcut_modifier_state_matches(
+    const Windows_shortcut_keyboard_state& keyboard_state,
+    const std::vector<String>& keys
+) {
+    return windows_shortcut_modifier_family_matches(keyboard_state, keys, U"Ctrl", U"Left Ctrl", U"Right Ctrl", VK_CONTROL, VK_LCONTROL, VK_RCONTROL) &&
+        windows_shortcut_modifier_family_matches(keyboard_state, keys, U"Shift", U"Left Shift", U"Right Shift", VK_SHIFT, VK_LSHIFT, VK_RSHIFT) &&
+        windows_shortcut_modifier_family_matches(keyboard_state, keys, U"Alt", U"Left Alt", U"Right Alt", VK_MENU, VK_LMENU, VK_RMENU);
+}
+
+inline bool windows_shortcut_expected_key_down_found(
+    const Windows_shortcut_keyboard_state& keyboard_state,
+    const std::unordered_set<int>& expected_vks
+) {
+    bool has_expected_non_modifier = false;
+    for (const int vk : expected_vks) {
+        if (windows_shortcut_modifier_vk(vk)) {
+            continue;
+        }
+        has_expected_non_modifier = true;
+        if (windows_shortcut_vk_down(keyboard_state, vk)) {
+            return true;
+        }
+    }
+    if (has_expected_non_modifier) {
+        return false;
+    }
+    for (const int vk : expected_vks) {
+        if (windows_shortcut_vk_down(keyboard_state, vk)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+inline bool get_windows_shortcut_match_details(
+    const Shortcut_key_elem& elem,
+    const Windows_shortcut_keyboard_state& keyboard_state,
+    Windows_shortcut_match_details* details
+) {
+    *details = Windows_shortcut_match_details();
+    if (elem.keys.empty()) {
+        return false;
+    }
+
+    for (const String& key : elem.keys) {
+        int vk = 0;
+        if (!shortcut_key_name_to_windows_vk(key, &vk)) {
+            return false;
+        }
+        details->expected_vks.emplace(vk);
+    }
+
+    if (!keyboard_state.focused) {
+        return true;
+    }
+
+    for (const int vk : keyboard_state.pressed_vks) {
+        if (!windows_shortcut_modifier_vk(vk) &&
+            details->expected_vks.find(vk) == details->expected_vks.end() &&
+            !windows_shortcut_ime_control_vk(vk)) {
+            details->extra_non_modifier_vks.emplace(vk);
+        }
+    }
+    for (const int vk : details->expected_vks) {
+        if (windows_shortcut_vk_pressed(keyboard_state, vk)) {
+            ++details->pressed_expected_count;
+        } else {
+            details->missing_expected_vks.emplace(vk);
+        }
+    }
+
+    details->modifier_mismatch = !windows_shortcut_modifier_state_matches(keyboard_state, elem.keys);
+    details->pressed_found = !details->modifier_mismatch && details->extra_non_modifier_vks.empty();
+    for (const int vk : details->expected_vks) {
+        details->pressed_found &= windows_shortcut_vk_pressed(keyboard_state, vk);
+    }
+    details->down_found = details->pressed_found && windows_shortcut_expected_key_down_found(keyboard_state, details->expected_vks);
+    details->no_down = details->pressed_found && !details->down_found;
+    if (!details->down_found) {
+        for (const auto& chord : keyboard_state.down_chords) {
+            Windows_shortcut_keyboard_state at_down;
+            at_down.focused = keyboard_state.focused;
+            at_down.pressed_vks = chord.pressed_vks;
+            windows_shortcut_add_vk_with_aliases(&at_down.down_vks, chord.down_vk);
+            Windows_shortcut_match_details tap_details;
+            // at_down has no queued chords, so this only checks that event.
+            get_windows_shortcut_match_details(elem, at_down, &tap_details);
+            if (tap_details.down_found) {
+                details->down_found = true;
+                details->no_down = false;
+                break;
+            }
+        }
+    }
+    return true;
+}
+
+inline std::vector<String> get_windows_shortcut_inputs_for_diagnostics(const Windows_shortcut_keyboard_state* keyboard_state = nullptr) {
+    std::vector<String> keys;
+    auto vk_is_pressed = [&](const int vk) {
+        if (keyboard_state != nullptr) {
+            return keyboard_state->pressed_vks.find(vk) != keyboard_state->pressed_vks.end();
+        }
+        return windows_vk_pressed(vk);
+    };
+    auto append_if_pressed = [&](const String& name, const int vk) {
+        if (vk_is_pressed(vk)) {
+            keys.emplace_back(name);
+        }
+    };
+
+    append_if_pressed(U"Ctrl", VK_CONTROL);
+    append_if_pressed(U"Shift", VK_SHIFT);
+    append_if_pressed(U"Alt", VK_MENU);
+
+    for (int vk = VK_BACK; vk <= 0xFE; ++vk) {
+        if (!windows_shortcut_scannable_vk(vk) || windows_shortcut_modifier_vk(vk) || !vk_is_pressed(vk)) {
+            continue;
+        }
+        String key_name;
+        if (windows_shortcut_vk_to_key_name(vk, &key_name)) {
+            keys.emplace_back(key_name);
+        }
+    }
+    return keys;
+}
+
+inline bool windows_gui_paste_tap() {
+    Shortcut_key_elem paste;
+    paste.keys = {U"Ctrl", U"V"};
+    Windows_shortcut_match_details details;
+    return get_windows_shortcut_match_details(paste, get_windows_shortcut_keyboard_state(), &details) && details.down_found;
+}
+#endif
+
+inline void shortcut_diagnostic_log(
+    const std::vector<String>& raw_keys,
+    const bool raw_down_found,
+    const String& shortcut_name_down,
+    const String& shortcut_name_pressed
+#if SIV3D_PLATFORM(WINDOWS)
+    ,
+    const Windows_shortcut_keyboard_state* windows_keyboard_state = nullptr,
+    const Shortcut_key_elem* windows_candidate = nullptr,
+    const Windows_shortcut_match_details* windows_details = nullptr,
+    const bool legacy_string_matcher_used = false,
+    const char* legacy_string_matcher_reason = ""
+#endif
+) {
+#if SIV3D_PLATFORM(WINDOWS)
+    char* env_path = nullptr;
+    size_t env_path_size = 0;
+    if (_dupenv_s(&env_path, &env_path_size, "EGAROUCID_SHORTCUT_DIAG_LOG") != 0 || env_path == nullptr || env_path[0] == '\0') {
+        if (env_path) {
+            free(env_path);
+        }
+        return;
+    }
+    const std::string path = env_path;
+    free(env_path);
+#else
+    const char* env_path = std::getenv("EGAROUCID_SHORTCUT_DIAG_LOG");
+    if (env_path == nullptr || env_path[0] == '\0') {
+        return;
+    }
+    const std::string path = env_path;
+#endif
+
+    std::string raw = shortcut_key_list_to_string(raw_keys);
+#if SIV3D_PLATFORM(WINDOWS)
+    std::string normalized = shortcut_key_list_to_string(get_windows_shortcut_inputs_for_diagnostics(windows_keyboard_state));
+#else
+    std::string normalized = raw;
+#endif
+    if (raw.empty() && normalized.empty() &&
+        shortcut_name_down == SHORTCUT_KEY_UNDEFINED &&
+        shortcut_name_pressed == SHORTCUT_KEY_UNDEFINED) {
+        return;
+    }
+
+    static std::string previous_line;
+    std::ostringstream oss;
+    oss << "raw=" << raw
+        << "\trawDown=" << (raw_down_found ? "1" : "0")
+        << "\twin=" << normalized
+#if SIV3D_PLATFORM(WINDOWS)
+        << "\tinput_source=" << ((windows_keyboard_state != nullptr && windows_keyboard_state->input_source_message) ? "message" : "polling_fallback")
+        << "\thook_backend=" << windows_shortcut_hook_backend_name(windows_keyboard_state)
+        << "\thook_backend_reason=" << windows_shortcut_hook_backend_reason_name(windows_keyboard_state)
+        << "\thook_installed=" << ((windows_keyboard_state != nullptr && windows_keyboard_state->hook_installed) ? "1" : "0")
+        << "\thook_error=" << ((windows_keyboard_state != nullptr && windows_keyboard_state->hook_install_failed) ? std::to_string(windows_keyboard_state->hook_error) : "")
+        << "\thook_subclass_error=" << (windows_keyboard_state != nullptr &&
+            (windows_keyboard_state->hook_subclass_error != 0 ||
+                windows_keyboard_state->hook_backend == Windows_shortcut_hook_backend::raw_wndproc) ?
+            std::to_string(windows_keyboard_state->hook_subclass_error) : "")
+        << "\thook_subclass_set_return=" << (windows_keyboard_state != nullptr ? std::to_string(windows_keyboard_state->hook_subclass_set_return != FALSE ? 1 : 0) : "")
+        << "\thook_subclass_get_after_set=" << (windows_keyboard_state != nullptr ? std::to_string(windows_keyboard_state->hook_subclass_get_after_set != FALSE ? 1 : 0) : "")
+        << "\thook_subclass_get_after_set_error=" << (windows_keyboard_state != nullptr ? std::to_string(windows_keyboard_state->hook_subclass_get_after_set_error) : "")
+        << "\thook_install_thread_id=" << (windows_keyboard_state != nullptr ? std::to_string(windows_keyboard_state->hook_install_thread_id) : "")
+        << "\thook_hwnd_thread_id=" << (windows_keyboard_state != nullptr ? std::to_string(windows_keyboard_state->hook_hwnd_thread_id) : "")
+        << "\thook_same_thread=" << (windows_keyboard_state != nullptr && windows_keyboard_state->hook_install_thread_id == windows_keyboard_state->hook_hwnd_thread_id ? "1" : "0")
+        << "\thook_current_process_id=" << (windows_keyboard_state != nullptr ? std::to_string(windows_keyboard_state->hook_current_process_id) : "")
+        << "\thook_hwnd_process_id=" << (windows_keyboard_state != nullptr ? std::to_string(windows_keyboard_state->hook_hwnd_process_id) : "")
+        << "\thook_same_process=" << (windows_keyboard_state != nullptr && windows_keyboard_state->hook_current_process_id == windows_keyboard_state->hook_hwnd_process_id ? "1" : "0")
+        << "\thook_current_wndproc_matches=" << ((windows_keyboard_state != nullptr && windows_keyboard_state->hook_current_wndproc_matches) ? "1" : "0")
+        << "\tmessage_state_synchronized=" << ((windows_keyboard_state != nullptr && windows_keyboard_state->message_state_synchronized) ? "1" : "0")
+        << "\tobserved_keyboard_message_count=" << (windows_keyboard_state != nullptr ? std::to_string(windows_keyboard_state->observed_keyboard_message_count) : "")
+        << "\tfocused=" << ((windows_keyboard_state != nullptr && windows_keyboard_state->focused) ? "1" : "0")
+        << "\tpressed_vks=" << (windows_keyboard_state != nullptr ? windows_shortcut_vk_set_to_string(windows_keyboard_state->pressed_vks) : "")
+        << "\tdown_vks=" << (windows_keyboard_state != nullptr ? windows_shortcut_vk_set_to_string(windows_keyboard_state->down_vks) : "")
+        << "\tmessage_down_vks=" << (windows_keyboard_state != nullptr ? windows_shortcut_vk_set_to_string(windows_keyboard_state->message_down_vks) : "")
+        << "\texpected_vks=" << (windows_details != nullptr ? windows_shortcut_vk_set_to_string(windows_details->expected_vks) : "")
+        << "\textra_non_modifier_vks=" << (windows_details != nullptr ? windows_shortcut_vk_set_to_string(windows_details->extra_non_modifier_vks) : "")
+        << "\tmissing_expected_vks=" << (windows_details != nullptr ? windows_shortcut_vk_set_to_string(windows_details->missing_expected_vks) : "")
+        << "\tmodifier_mismatch=" << ((windows_details != nullptr && windows_details->modifier_mismatch) ? "1" : "0")
+        << "\tno_down=" << ((windows_details != nullptr && windows_details->no_down) ? "1" : "0")
+        << "\tlegacy_string_matcher_used=" << (legacy_string_matcher_used ? "1" : "0")
+        << "\tlegacy_string_matcher_reason=" << legacy_string_matcher_reason
+        << "\tcandidate=" << (windows_candidate != nullptr ? windows_candidate->name.narrow() : String(SHORTCUT_KEY_UNDEFINED).narrow())
+#endif
+        << "\tdown=" << shortcut_name_down.narrow()
+        << "\tpressed=" << shortcut_name_pressed.narrow();
+
+    const std::string line = oss.str();
+    if (line == previous_line) {
+        return;
+    }
+    previous_line = line;
+
+    std::ofstream fout(path, std::ios::app);
+    if (fout) {
+        fout << line << '\n';
+    }
+}
+
+inline bool shortcut_diagnostic_only_mode() {
+#if SIV3D_PLATFORM(WINDOWS)
+    char* value = nullptr;
+    size_t value_size = 0;
+    const bool enabled = (_dupenv_s(&value, &value_size, "EGAROUCID_SHORTCUT_DIAG_ONLY") == 0 &&
+        value != nullptr && value[0] == '1' && value[1] == '\0');
+    if (value) {
+        free(value);
+    }
+    return enabled;
+#else
+    const char* value = std::getenv("EGAROUCID_SHORTCUT_DIAG_ONLY");
+    return value != nullptr && value[0] == '1' && value[1] == '\0';
+#endif
+}
+
+inline void clear_shortcut_result_for_diagnostic_only(String* shortcut_name_down, String* shortcut_name_pressed) {
+    if (shortcut_diagnostic_only_mode()) {
+        *shortcut_name_down = SHORTCUT_KEY_UNDEFINED;
+        *shortcut_name_pressed = SHORTCUT_KEY_UNDEFINED;
+    }
+}
+
+class Shortcut_keys {
+public:
+    std::vector<Shortcut_key_elem> shortcut_keys;
+private:
+    const Directories* directories = nullptr;
+    std::vector<Shortcut_key_elem> current_default_shortcut_keys;
+public:
+    void set_default() {
+        refresh_default_shortcut_keys();
+        shortcut_keys = current_default_shortcut_keys;
+    }
+
+    void set_empty() {
+        refresh_default_shortcut_keys();
+        shortcut_keys = current_default_shortcut_keys;
+        for (Shortcut_key_elem &elem: shortcut_keys) {
+            elem.keys.clear();
+        }
+    }
+
+    void init(String file, const Directories* directories_) {
+        directories = directories_;
+        set_empty();
+        JSON json = JSON::Load(file);
+        if (not json) {
+            set_default();
+        } else {
+            std::unordered_set<String> name_list;
+            std::unordered_set<String> loaded_name_list;
+            for (Shortcut_key_elem &elem: current_default_shortcut_keys) {
+                name_list.emplace(elem.name);
+            }
+            for (const auto& object: json) {
+                if (name_list.find(object.key) == name_list.end()) {
+                    std::cerr << "ERR shortcut key name not found " << object.key.narrow() << std::endl;
+                    continue;
+                }
+                // JSON::arrayView() and getString() throw for other types: an edited / broken file stopped the app at startup.
+                // Values of other types are ignored (the default key of this function is used), as in the other settings files.
+                if (not object.value.isArray()) {
+                    std::cerr << "ERR shortcut key value is not an array " << object.key.narrow() << std::endl;
+                    continue;
+                }
+                loaded_name_list.emplace(object.key);
+                for (int i = 0; i < (int)shortcut_keys.size(); ++i) {
+                    if (shortcut_keys[i].name == object.key) {
+                        shortcut_keys[i].keys.clear();
+                        for (const auto &key_name: object.value.arrayView()) {
+                            if (key_name.isString()) {
+                                shortcut_keys[i].keys.emplace_back(key_name.getString());
+                            }
+                        }
+                    }
+                }
+            }
+            for (int i = 0; i < (int)shortcut_keys.size(); ++i) {
+                if (shortcut_keys[i].keys.size()) {
+                    for (int j = i + 1; j < (int)shortcut_keys.size(); ++j) {
+                        if (shortcut_keys[j].keys.size() == shortcut_keys[i].keys.size()) {
+                            bool duplicate = true;
+                            for (String &key: shortcut_keys[j].keys) {
+                                if (std::find(shortcut_keys[i].keys.begin(), shortcut_keys[i].keys.end(), key) == shortcut_keys[i].keys.end()) {
+                                    duplicate = false;
+                                }
+                            }
+                            if (duplicate) {
+                                shortcut_keys[j].keys.clear();
+                                std::cerr << "shortcut key duplication found: " << shortcut_keys[i].name.narrow() << " " << shortcut_keys[j].name.narrow() << " deleted " << shortcut_keys[j].name.narrow() << std::endl;
+                            }
+                        }
+                    }
+                }
+            }
+            auto shortcut_conflicts = [&](const std::vector<String>& lhs, const std::vector<String>& rhs) {
+                if (lhs.size() != rhs.size()) {
+                    return false;
+                }
+                for (const String& key : lhs) {
+                    if (std::find(rhs.begin(), rhs.end(), key) == rhs.end()) {
+                        return false;
+                    }
+                }
+                return true;
+            };
+            for (int i = 0; i < (int)shortcut_keys.size(); ++i) {
+                if (loaded_name_list.find(shortcut_keys[i].name) != loaded_name_list.end()) {
+                    continue;
+                }
+                const std::vector<String>& default_keys = current_default_shortcut_keys[i].keys;
+                if (default_keys.empty()) {
+                    continue;
+                }
+                bool conflicted = false;
+                for (int j = 0; j < (int)shortcut_keys.size(); ++j) {
+                    if (i == j || shortcut_keys[j].keys.empty()) {
+                        continue;
+                    }
+                    if (shortcut_conflicts(default_keys, shortcut_keys[j].keys)) {
+                        conflicted = true;
+                        break;
+                    }
+                }
+                if (!conflicted) {
+                    shortcut_keys[i].keys = default_keys;
+                }
+            }
+        }
+    }
+
+    void init(String file) {
+        init(file, directories);
+    }
+
+    void sync_dynamic_shortcut_keys(const Directories* directories_) {
+        directories = directories_;
+        std::unordered_map<String, std::vector<String>> current_keys;
+        for (const Shortcut_key_elem& elem : shortcut_keys) {
+            current_keys[elem.name] = elem.keys;
+        }
+
+        refresh_default_shortcut_keys();
+        shortcut_keys = current_default_shortcut_keys;
+        for (Shortcut_key_elem& elem : shortcut_keys) {
+            auto it = current_keys.find(elem.name);
+            if (it != current_keys.end()) {
+                elem.keys = it->second;
+            }
+        }
+    }
+
+    void save_settings(String file) {
+        JSON json;
+        for (const Shortcut_key_elem &elem: shortcut_keys) {
+            Array<JSON> arrayJSON;
+            for (String key: elem.keys) {
+                arrayJSON << key;
+            }
+            json[elem.name] = arrayJSON;
+        }
+        json.save(file);
+    }
+
+    void check_shortcut_key(String *shortcut_name_down, String *shortcut_name_pressed) {
+        bool down_found = false;
+        std::vector<String> keys = get_all_inputs(&down_found);
+        *shortcut_name_down = SHORTCUT_KEY_UNDEFINED;
+        *shortcut_name_pressed = SHORTCUT_KEY_UNDEFINED;
+#if SIV3D_PLATFORM(WINDOWS)
+        const Windows_shortcut_keyboard_state windows_keyboard_state = get_windows_shortcut_keyboard_state();
+        Windows_shortcut_match_details best_windows_details;
+        const Shortcut_key_elem* best_windows_candidate = nullptr;
+#endif
+        for (const Shortcut_key_elem &elem: shortcut_keys) {
+#if SIV3D_PLATFORM(WINDOWS)
+            Windows_shortcut_match_details windows_details;
+            if (get_windows_shortcut_match_details(elem, windows_keyboard_state, &windows_details)) {
+                if (windows_details.pressed_expected_count > 0 &&
+                    (best_windows_candidate == nullptr ||
+                        windows_details.pressed_expected_count > best_windows_details.pressed_expected_count ||
+                        (windows_details.pressed_expected_count == best_windows_details.pressed_expected_count &&
+                            windows_details.missing_expected_vks.size() < best_windows_details.missing_expected_vks.size()))) {
+                    best_windows_candidate = &elem;
+                    best_windows_details = windows_details;
+                }
+                if (windows_details.pressed_found || windows_details.down_found) {
+                    if (windows_details.down_found) {
+                        *shortcut_name_down = elem.name;
+                    }
+                    if (windows_details.pressed_found) {
+                        *shortcut_name_pressed = elem.name;
+                    }
+                    shortcut_diagnostic_log(keys, down_found, *shortcut_name_down, *shortcut_name_pressed, &windows_keyboard_state, &elem, &windows_details);
+                    clear_shortcut_result_for_diagnostic_only(shortcut_name_down, shortcut_name_pressed);
+                    return;
+                }
+                continue;
+            }
+#endif
+            if (keys.size() && keys.size() == elem.keys.size()) {
+                bool matched = true;
+                for (const String& key : keys) {
+                    //std::cerr << key.narrow() << " " << (std::find(elem.keys.begin(), elem.keys.end(), key) == elem.keys.end()) << std::endl;
+                    if (std::find(elem.keys.begin(), elem.keys.end(), key) == elem.keys.end()) {
+                        matched = false;
+                    }
+                }
+                if (matched) {
+                    if (down_found) {
+                        *shortcut_name_down = elem.name;
+                    }
+                    *shortcut_name_pressed = elem.name;
+#if SIV3D_PLATFORM(WINDOWS)
+                    shortcut_diagnostic_log(
+                        keys,
+                        down_found,
+                        *shortcut_name_down,
+                        *shortcut_name_pressed,
+                        &windows_keyboard_state,
+                        best_windows_candidate,
+                        best_windows_candidate != nullptr ? &best_windows_details : nullptr,
+                        true,
+                        "unsupported_shortcut_name"
+                    );
+#else
+                    shortcut_diagnostic_log(keys, down_found, *shortcut_name_down, *shortcut_name_pressed);
+#endif
+                    clear_shortcut_result_for_diagnostic_only(shortcut_name_down, shortcut_name_pressed);
+                    return;
+                }
+            }
+        }
+#if SIV3D_PLATFORM(WINDOWS)
+        shortcut_diagnostic_log(keys, down_found, *shortcut_name_down, *shortcut_name_pressed, &windows_keyboard_state, best_windows_candidate, best_windows_candidate != nullptr ? &best_windows_details : nullptr);
+#else
+        shortcut_diagnostic_log(keys, down_found, *shortcut_name_down, *shortcut_name_pressed);
+#endif
+    }
+
+    String get_shortcut_key_str(String name) {
+        for (const Shortcut_key_elem &elem: shortcut_keys) {
+            if (elem.name == name) {
+                return generate_key_str(elem.keys);
+            }
+        }
+        return SHORTCUT_KEY_UNDEFINED;
+    }
+
+    String get_shortcut_key_description(String name) {
+        for (const Shortcut_key_elem &elem: shortcut_keys) {
+            if (elem.name == name) {
+                String res;
+                for (int i = 0; i < (int)elem.description_keys.size(); ++i) {
+                    res += language.get(elem.description_keys[i]);
+                    if (i < (int)elem.description_keys.size() - 1) {
+                        res += U"> ";
+                    }
+                }
+                if (!elem.description_suffix.isEmpty()) {
+                    if (!res.isEmpty()) {
+                        res += U"> ";
+                    }
+                    res += elem.description_suffix;
+                }
+                return res;
+            }
+        }
+        return SHORTCUT_KEY_UNDEFINED;
+    }
+
+    void change(int idx, std::vector<String> keys) {
+        shortcut_keys[idx].keys.clear();
+        for (String key: keys) {
+            shortcut_keys[idx].keys.emplace_back(key);
+        }
+    }
+
+    void del(int idx) {
+        shortcut_keys[idx].keys.clear();
+    }
+
+private:
+    void refresh_default_shortcut_keys() {
+        current_default_shortcut_keys = shortcut_keys_default;
+        std::vector<Shortcut_key_elem> ai_profile_shortcut_keys;
+        append_ai_profile_shortcut_key_elems(&ai_profile_shortcut_keys, directories);
+        auto insert_pos = std::find_if(
+            current_default_shortcut_keys.begin(),
+            current_default_shortcut_keys.end(),
+            [](const Shortcut_key_elem& elem) { return elem.name == U"ai_profile_load"; });
+        if (insert_pos != current_default_shortcut_keys.end()) {
+            ++insert_pos;
+        }
+        current_default_shortcut_keys.insert(insert_pos, ai_profile_shortcut_keys.begin(), ai_profile_shortcut_keys.end());
+
+        std::vector<Shortcut_key_elem> display_profile_shortcut_keys;
+        append_display_profile_shortcut_key_elems(&display_profile_shortcut_keys, directories);
+        auto display_insert_pos = std::find_if(
+            current_default_shortcut_keys.begin(),
+            current_default_shortcut_keys.end(),
+            [](const Shortcut_key_elem& elem) { return elem.name == U"display_profile_load"; });
+        if (display_insert_pos != current_default_shortcut_keys.end()) {
+            ++display_insert_pos;
+        }
+        current_default_shortcut_keys.insert(display_insert_pos, display_profile_shortcut_keys.begin(), display_profile_shortcut_keys.end());
+    }
+};
+
+Shortcut_keys shortcut_keys;

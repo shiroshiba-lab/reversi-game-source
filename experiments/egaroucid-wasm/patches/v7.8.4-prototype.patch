@@ -1,0 +1,57 @@
+diff --git a/src/Egaroucid_for_Web.cpp b/src/Egaroucid_for_Web.cpp
+--- a/src/Egaroucid_for_Web.cpp
++++ b/src/Egaroucid_for_Web.cpp
+@@ -77,15 +77,44 @@ extern "C" int init_ai(int *percentage) {
+-extern "C" int ai_js(int *arr_board, int level, int ai_player) {
+-    cout << "start AI" << endl;
+-    int i, n_stones, policy;
++Search_result last_search_result;
++
++extern "C" int ai_js(int *arr_board, int level, int ai_player, int use_book) {
++    int n_stones;
+     Board b;
+     Search_result result;
+-    cout << endl;
+     n_stones = input_board(&b, arr_board, ai_player);
+-    b.print();
+-    cout << "ply " << n_stones - 3 << endl;
+-    result = ai(b, level, true, false, true);
+-    cout << "searched policy " << idx_to_coord(result.policy) << " value " << result.value << " nps " << result.nps << endl;
++    result = ai(b, level, use_book != 0, false, false);
++    last_search_result = result;
+     int res = output_coord(result.policy, result.value);
+-    cout << "res " << res << endl;
+     return res;
+ }
++
++extern "C" void set_seed(unsigned int seed) {
++    raw_myrandom.seed(seed);
++}
++
++extern "C" int get_last_depth() {
++    return last_search_result.depth;
++}
++
++extern "C" int get_last_book_hit() {
++    return last_search_result.depth == SEARCH_BOOK;
++}
++
++extern "C" int get_last_is_end_search() {
++    return last_search_result.is_end_search;
++}
++
++extern "C" int get_last_score() {
++    return last_search_result.value;
++}
++
++extern "C" unsigned int get_last_nodes_low() {
++    if (last_search_result.depth <= 0 || last_search_result.depth == SEARCH_BOOK)
++        return 0;
++    return static_cast<unsigned int>(last_search_result.nodes & 0xffffffffULL);
++}
++
++extern "C" unsigned int get_last_nodes_high() {
++    if (last_search_result.depth <= 0 || last_search_result.depth == SEARCH_BOOK)
++        return 0;
++    return static_cast<unsigned int>(last_search_result.nodes >> 32);
++}

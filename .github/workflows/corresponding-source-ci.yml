@@ -1,0 +1,64 @@
+name: 対応ソース検証
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corresponding-source-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: source・artifact再構築
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: ソースを取得
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Node.jsを準備
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: 公開Git treeを検査
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          test "$(git rev-list --count HEAD)" = "1"
+          test -z "$(git show -s --format=%P HEAD)"
+
+          export_root="${RUNNER_TEMP}/reversi-public-source"
+          mkdir -p "$export_root"
+          git archive --format=tar HEAD | tar -xf - -C "$export_root"
+          node "$export_root/scripts/verify-release1-source-snapshot.mjs" "$export_root"
+
+      - name: 依存関係を固定版でインストール
+        run: npm ci
+
+      - name: Egaroucid JS・WASMを固定toolchainで再構築
+        run: node scripts/rebuild-release1-egaroucid.mjs
+
+      - name: v2 Lint・型チェック・Unit・Production build
+        run: npm run check:v2
+
+      - name: 高重大度以上の依存脆弱性監査
+        run: npm run audit:v2
+
+      - name: 製品artifact hashを照合
+        run: node scripts/verify-release1-product-build.mjs

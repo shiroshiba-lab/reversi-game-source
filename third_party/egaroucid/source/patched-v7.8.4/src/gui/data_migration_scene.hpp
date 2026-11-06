@@ -1,0 +1,354 @@
+/*
+    Egaroucid Project
+
+    @file data_migration_scene.hpp
+        Data migration scenes
+    @date 2026
+    @author Takuto Yamana
+    @license GPL-3.0-or-later
+*/
+
+#pragma once
+#include <future>
+#include <iostream>
+#include "./../engine/engine_all.hpp"
+#include "close_scene.hpp"
+#include "book_scene.hpp"
+#include "function/function_all.hpp"
+#if SIV3D_PLATFORM(WINDOWS)
+#include <Windows.h>
+#include <shellapi.h>
+#endif
+
+inline String data_migration_input_path(const TextAreaEditState& text_area) {
+    return data_migration_slash_path(text_area.text.replaced(U"\r", U"").replaced(U"\n", U"").trimmed());
+}
+
+inline bool data_migration_return_pressed(const TextAreaEditState& text_area) {
+    return path_text_area_return_pressed(text_area);
+}
+
+inline String data_migration_message_from_result(const Data_migration_result& result) {
+    if (result.succeeded) {
+        return language.get("data_migration", "complete");
+    }
+    switch (result.error) {
+        case Data_migration_error::invalid_destination:
+            return language.get("data_migration", "directory_not_found");
+        case Data_migration_error::invalid_source:
+            return language.get("data_migration", "invalid_backup");
+        case Data_migration_error::unsupported_zip:
+            return language.get("data_migration", "zip_not_supported");
+        case Data_migration_error::unsafe_source:
+            return language.get("data_migration", "unsafe_source");
+        case Data_migration_error::copy_failed:
+            return language.get("data_migration", "failed");
+        case Data_migration_error::none:
+        default:
+            return language.get("data_migration", "failed");
+    }
+}
+
+inline bool data_migration_backup_folder_valid(const String& path) {
+    if (!FileSystem::IsDirectory(path)) {
+        return false;
+    }
+    return FileSystem::IsDirectory(data_migration_join_path(path, U"appdata")) &&
+        FileSystem::IsDirectory(data_migration_join_path(path, U"document"));
+}
+
+inline String data_migration_default_export_destination() {
+    return data_migration_slash_path(FileSystem::GetFolderPath(SpecialFolder::Desktop));
+}
+
+inline void data_migration_open_folder(const String& path) {
+#if SIV3D_PLATFORM(WINDOWS)
+    ShellExecuteW(nullptr, L"open", path.toWstr().c_str(), nullptr, nullptr, SW_SHOWNORMAL);
+#else
+    System::LaunchBrowser(path);
+#endif
+}
+
+inline void reload_egaroucid_settings_after_data_import(Common_resources* data) {
+    init_settings(&data->directories, &data->resources, &data->settings);
+    init_user_settings(&data->settings, &data->user_settings);
+
+    std::string lang_file = EXE_DIRECTORY_PATH + "resources/languages/" + data->settings.lang_name + ".json";
+    if (!language.init(lang_file)) {
+        data->settings.lang_name = DEFAULT_LANGUAGE;
+        lang_file = EXE_DIRECTORY_PATH + "resources/languages/" + data->settings.lang_name + ".json";
+        language.init(lang_file);
+    }
+    data->fonts.init(data->settings.lang_name);
+    if (!opening_init(data->settings.lang_name)) {
+        opening_init(DEFAULT_OPENING_LANG_NAME);
+    }
+
+    shortcut_keys.init(U"{}shortcut_key.json"_fmt(Unicode::Widen(data->directories.appdata_dir)), &data->directories);
+    shortcut_buttons.init(U"{}shortcut_button.json"_fmt(Unicode::Widen(data->directories.appdata_dir)));
+    mouse_additional_buttons.init(U"{}mouse_additional_button.json"_fmt(Unicode::Widen(data->directories.appdata_dir)));
+
+    data->menu_elements.init(&data->settings, &data->resources);
+    data->menu = create_menu(&data->menu_elements, &data->resources, data->fonts.font, data->settings.lang_name);
+    data->book_information.changed = false;
+    data->graph_resources.need_init = false;
+}
+
+struct Data_migration_export_task_result {
+    Data_migration_result migration_result;
+    Settings saved_settings;
+};
+
+inline Data_migration_export_task_result save_and_export_egaroucid_settings_data(
+    Menu_elements menu_elements,
+    Settings settings,
+    Directories directories,
+    User_settings user_settings,
+    Book_information book_information,
+    Window_state window_state,
+    String destination_dir
+) {
+    save_app_data(menu_elements, &settings, directories, user_settings, book_information, window_state);
+
+    Data_migration_export_task_result result;
+    result.migration_result = export_egaroucid_settings_data(directories, destination_dir);
+    result.saved_settings = settings;
+    return result;
+}
+
+class Export_settings_data : public App::Scene {
+private:
+    Button back_button;
+    Button default_button;
+    Button export_button;
+    Button open_folder_button;
+    TextAreaEditState text_area;
+    std::future<Data_migration_export_task_result> export_future;
+    Data_migration_result result;
+    bool exporting{ false };
+    bool finished{ false };
+
+    void init_buttons() {
+        back_button.init(BUTTON3_1_SX, BUTTON3_SY, BUTTON3_WIDTH, BUTTON3_HEIGHT, BUTTON3_RADIUS, language.get("common", "back"), 25, getData().fonts.font, getData().colors.white, getData().colors.black);
+        default_button.init(BUTTON3_2_SX, BUTTON3_SY, BUTTON3_WIDTH, BUTTON3_HEIGHT, BUTTON3_RADIUS, language.get("common", "use_default"), 25, getData().fonts.font, getData().colors.white, getData().colors.black);
+        export_button.init(BUTTON3_3_SX, BUTTON3_SY, BUTTON3_WIDTH, BUTTON3_HEIGHT, BUTTON3_RADIUS, language.get("data_migration", "export"), 25, getData().fonts.font, getData().colors.white, getData().colors.black);
+        open_folder_button.init(BUTTON3_2_SX, BUTTON3_SY, BUTTON3_WIDTH, BUTTON3_HEIGHT, BUTTON3_RADIUS, language.get("data_migration", "open_folder"), 25, getData().fonts.font, getData().colors.white, getData().colors.black);
+    }
+
+public:
+    Export_settings_data(const InitData& init) : IScene{ init } {
+        set_scene_ime_enabled(true);
+        init_buttons();
+        set_path_textarea_text(text_area, data_migration_default_export_destination());
+    }
+
+    void update() override {
+        if (System::GetUserActions() & UserAction::CloseButtonClicked) {
+            changeScene(U"Close", SCENE_FADE_TIME);
+            return;
+        }
+
+        Scene::SetBackground(getData().colors.green);
+        const int icon_width = SCENE_ICON_WIDTH;
+        getData().resources.icon.scaled((double)icon_width / getData().resources.icon.width()).draw(X_CENTER - icon_width / 2, 20);
+        getData().resources.logo.scaled((double)icon_width / getData().resources.logo.width()).draw(X_CENTER - icon_width / 2, 20 + icon_width);
+        const int sy = 20 + icon_width + 40;
+
+        if (exporting) {
+            getData().fonts.font(language.get("data_migration", "exporting")).draw(25, Arg::topCenter(X_CENTER, sy), getData().colors.white);
+            if (export_future.wait_for(std::chrono::seconds(0)) == std::future_status::ready) {
+                const Data_migration_export_task_result task_result = export_future.get();
+                result = task_result.migration_result;
+                getData().settings = task_result.saved_settings;
+                exporting = false;
+                finished = true;
+            }
+        } else if (finished) {
+            getData().fonts.font(data_migration_message_from_result(result)).draw(25, Arg::topCenter(X_CENTER, sy), getData().colors.white);
+            if (!result.path.isEmpty()) {
+                getData().fonts.font(result.path).draw(14, Arg::topCenter(X_CENTER, sy + 45), getData().colors.white);
+            }
+            back_button.move(GO_BACK_BUTTON_BACK_SX, GO_BACK_BUTTON_SY);
+            open_folder_button.move(GO_BACK_BUTTON_GO_SX, GO_BACK_BUTTON_SY);
+            back_button.draw();
+            if (result.succeeded && FileSystem::IsDirectory(result.path)) {
+                open_folder_button.draw();
+                if (open_folder_button.clicked()) {
+                    data_migration_open_folder(result.path);
+                }
+            }
+            if (back_button.clicked() || gui_textarea_ime::escape_pressed_for_scene_change()) {
+                changeScene(U"Main_scene", SCENE_FADE_TIME);
+            }
+        } else {
+            getData().fonts.font(language.get("data_migration", "export_title")).draw(25, Arg::topCenter(X_CENTER, sy), getData().colors.white);
+            getData().fonts.font(language.get("data_migration", "export_description")).draw(14, Arg::topCenter(X_CENTER, sy + 38), getData().colors.white);
+
+            text_area.active = true;
+            path_text_area_with_ime_candidate_window(text_area, Vec2{ X_CENTER - 300, sy + 65 }, SizeF{600, 60}, TEXTBOX_MAX_CHARS);
+            if (DragDrop::HasNewFilePaths()) {
+                set_path_textarea_text(text_area, DragDrop::GetDroppedFilePaths()[0].path);
+            }
+
+            const String destination_dir = data_migration_input_path(text_area);
+            const bool valid_dir = FileSystem::IsDirectory(destination_dir);
+            const bool forbidden_dir = valid_dir && data_migration_export_destination_forbidden(destination_dir, getData().directories);
+            if (valid_dir && !forbidden_dir) {
+                export_button.enable();
+            } else {
+                export_button.disable();
+                const String message = forbidden_dir ? language.get("data_migration", "export_destination_forbidden") : language.get("data_migration", "directory_not_found");
+                getData().fonts.font(message).draw(15, Arg::topCenter(X_CENTER, sy + 180), getData().colors.white);
+            }
+
+            back_button.draw();
+            if (back_button.clicked() || gui_textarea_ime::escape_pressed_for_scene_change()) {
+                changeScene(U"Main_scene", SCENE_FADE_TIME);
+            }
+            default_button.draw();
+            if (default_button.clicked()) {
+                set_path_textarea_text(text_area, data_migration_default_export_destination());
+            }
+            export_button.draw();
+            if (valid_dir && !forbidden_dir && (export_button.clicked() || data_migration_return_pressed(text_area))) {
+                update_current_window_position(&getData().window_state);
+                export_future = std::async(
+                    std::launch::async,
+                    save_and_export_egaroucid_settings_data,
+                    getData().menu_elements,
+                    getData().settings,
+                    getData().directories,
+                    getData().user_settings,
+                    getData().book_information,
+                    getData().window_state,
+                    destination_dir
+                );
+                exporting = true;
+            }
+        }
+    }
+
+    void draw() const override {
+    }
+};
+
+class Import_settings_data : public App::Scene {
+private:
+    Button back_button;
+    Button import_button;
+    TextAreaEditState text_area;
+    std::future<Data_migration_result> import_future;
+    std::future<bool> book_reload_future;
+    Data_migration_result result;
+    bool importing{ false };
+    bool book_reloading{ false };
+    bool book_reload_failed{ false };
+    bool finished{ false };
+
+    void init_buttons() {
+        back_button.init(GO_BACK_BUTTON_BACK_SX, GO_BACK_BUTTON_SY, GO_BACK_BUTTON_WIDTH, GO_BACK_BUTTON_HEIGHT, GO_BACK_BUTTON_RADIUS, language.get("common", "back"), 25, getData().fonts.font, getData().colors.white, getData().colors.black);
+        import_button.init(GO_BACK_BUTTON_GO_SX, GO_BACK_BUTTON_SY, GO_BACK_BUTTON_WIDTH, GO_BACK_BUTTON_HEIGHT, GO_BACK_BUTTON_RADIUS, language.get("data_migration", "import"), 25, getData().fonts.font, getData().colors.white, getData().colors.black);
+    }
+
+public:
+    Import_settings_data(const InitData& init) : IScene{ init } {
+        set_scene_ime_enabled(true);
+        init_buttons();
+    }
+
+    void update() override {
+        if (System::GetUserActions() & UserAction::CloseButtonClicked) {
+            changeScene(U"Close", SCENE_FADE_TIME);
+            return;
+        }
+
+        Scene::SetBackground(getData().colors.green);
+        const int icon_width = SCENE_ICON_WIDTH;
+        getData().resources.icon.scaled((double)icon_width / getData().resources.icon.width()).draw(X_CENTER - icon_width / 2, 20);
+        getData().resources.logo.scaled((double)icon_width / getData().resources.logo.width()).draw(X_CENTER - icon_width / 2, 20 + icon_width);
+        const int sy = 20 + icon_width + 40;
+
+        if (importing) {
+            getData().fonts.font(language.get("data_migration", "importing")).draw(25, Arg::topCenter(X_CENTER, sy), getData().colors.white);
+            if (import_future.wait_for(std::chrono::seconds(0)) == std::future_status::ready) {
+                result = import_future.get();
+                importing = false;
+                if (result.succeeded) {
+                    reload_egaroucid_settings_after_data_import(&getData());
+                    init_buttons();
+                    // The book in memory is replaced with the imported book file (settings.book_file was reloaded above).
+                    // In v7.8.3 the old book stayed in memory until restart; when it was changed before the restart
+                    // (book learning, adding a position, ...), closing the app saved the old book with the change
+                    // to settings.book_file, i.e. over the imported book (it was left only in the .bak file).
+                    // Same procedure as Refer_book (book_scene.hpp).
+                    const std::string book_file = getData().settings.book_file;
+                    book_reload_future = std::async(std::launch::async, [book_file]() {
+                        delete_book();
+                        return import_book(book_file);
+                    });
+                    book_reloading = true;
+                } else {
+                    finished = true;
+                }
+            }
+        } else if (book_reloading) {
+            getData().fonts.font(language.get("data_migration", "importing")).draw(25, Arg::topCenter(X_CENTER, sy), getData().colors.white);
+            if (book_reload_future.wait_for(std::chrono::seconds(0)) == std::future_status::ready) {
+                book_reload_failed = !book_reload_future.get();
+                getData().book_information.changed = false;
+                getData().graph_resources.need_init = false;
+                book_reloading = false;
+                finished = true;
+            }
+        } else if (finished) {
+            if (book_reload_failed) {
+                getData().fonts.font(language.get("book", "import_failed")).draw(15, Arg::topCenter(X_CENTER, sy + 70), getData().colors.white);
+            }
+            getData().fonts.font(data_migration_message_from_result(result)).draw(25, Arg::topCenter(X_CENTER, sy), getData().colors.white);
+            if (result.succeeded) {
+                getData().fonts.font(language.get("data_migration", "restart_recommended")).draw(15, Arg::topCenter(X_CENTER, sy + 45), getData().colors.white);
+            }
+            back_button.move((WINDOW_SIZE_X - GO_BACK_BUTTON_WIDTH) / 2, GO_BACK_BUTTON_SY);
+            back_button.draw();
+            if (back_button.clicked() || gui_textarea_ime::escape_pressed_for_scene_change()) {
+                changeScene(U"Main_scene", SCENE_FADE_TIME);
+            }
+        } else {
+            getData().fonts.font(language.get("data_migration", "import_title")).draw(25, Arg::topCenter(X_CENTER, sy), getData().colors.white);
+            getData().fonts.font(language.get("data_migration", "import_description")).draw(14, Arg::topCenter(X_CENTER, sy + 38), getData().colors.white);
+            getData().fonts.font(language.get("data_migration", "import_warning")).draw(13, Arg::topCenter(X_CENTER, sy + 60), getData().colors.white);
+
+            text_area.active = true;
+            path_text_area_with_ime_candidate_window(text_area, Vec2{ X_CENTER - 300, sy + 85 }, SizeF{600, 60}, TEXTBOX_MAX_CHARS);
+            bool path_dragged = false;
+            if (DragDrop::HasNewFilePaths()) {
+                set_path_textarea_text(text_area, DragDrop::GetDroppedFilePaths()[0].path);
+                path_dragged = true;
+            }
+
+            const String backup_root = data_migration_input_path(text_area);
+            const bool zip_selected = backup_root.lowercased().ends_with(U".zip");
+            const bool valid_backup = data_migration_backup_folder_valid(backup_root);
+            if (valid_backup) {
+                import_button.enable();
+            } else {
+                import_button.disable();
+                const String message = zip_selected ? language.get("data_migration", "zip_not_supported") : language.get("data_migration", "invalid_backup");
+                getData().fonts.font(message).draw(15, Arg::topCenter(X_CENTER, sy + 200), getData().colors.white);
+            }
+
+            back_button.draw();
+            if (back_button.clicked() || gui_textarea_ime::escape_pressed_for_scene_change()) {
+                changeScene(U"Main_scene", SCENE_FADE_TIME);
+            }
+            import_button.draw();
+            if (valid_backup && (import_button.clicked() || data_migration_return_pressed(text_area) || path_dragged)) {
+                import_future = std::async(std::launch::async, import_egaroucid_settings_data, getData().directories, backup_root);
+                importing = true;
+            }
+        }
+    }
+
+    void draw() const override {
+    }
+};

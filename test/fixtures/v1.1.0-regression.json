@@ -1,0 +1,273 @@
+{
+  "schemaVersion": 1,
+  "targetVersion": "1.1.0",
+  "boardEncoding": {
+    ".": 0,
+    "B": 1,
+    "W": 2,
+    "coordinate": "A1 is index 0; index = row * 8 + column"
+  },
+  "ruleScenarios": [
+    {
+      "id": "initial",
+      "purpose": "initial board, black first, initial legal moves and counts",
+      "board": [
+        "........",
+        "........",
+        "........",
+        "...WB...",
+        "...BW...",
+        "........",
+        "........",
+        "........"
+      ],
+      "turn": 1,
+      "legalMoves": [19, 26, 37, 44],
+      "counts": { "black": 2, "white": 2, "empty": 60 }
+    },
+    {
+      "id": "eight-directions",
+      "purpose": "one move flips in all eight directions",
+      "board": [
+        "........",
+        ".B.B.B..",
+        "..WWW...",
+        ".BW.WB..",
+        "..WWW...",
+        ".B.B.B..",
+        "........",
+        "........"
+      ],
+      "turn": 1,
+      "move": 27,
+      "flips": [18, 19, 20, 26, 28, 34, 35, 36],
+      "afterBoard": [
+        "........",
+        ".B.B.B..",
+        "..BBB...",
+        ".BBBBB..",
+        "..BBB...",
+        ".B.B.B..",
+        "........",
+        "........"
+      ]
+    },
+    {
+      "id": "two-directions",
+      "purpose": "one move flips horizontal and vertical lines together",
+      "board": [
+        ".B......",
+        ".B......",
+        ".BWB....",
+        "...WB...",
+        "...BW...",
+        "........",
+        "........",
+        "........"
+      ],
+      "turn": 2,
+      "move": 20,
+      "legalMoves": [0, 11, 16, 20, 29, 34, 43],
+      "flips": [19, 28],
+      "afterBoard": [
+        ".B......",
+        ".B......",
+        ".BWWW...",
+        "...WW...",
+        "...BW...",
+        "........",
+        "........",
+        "........"
+      ]
+    },
+    {
+      "id": "corner-and-edge",
+      "purpose": "corner A1 is legal and flips the adjacent edge stone",
+      "board": [
+        ".WB.....",
+        "........",
+        "........",
+        "...BW...",
+        "...WB...",
+        "........",
+        "........",
+        "........"
+      ],
+      "turn": 1,
+      "move": 0,
+      "flips": [1],
+      "afterBoard": [
+        "BBB.....",
+        "........",
+        "........",
+        "...BW...",
+        "...WB...",
+        "........",
+        "........",
+        "........"
+      ]
+    },
+    {
+      "id": "pass-after-move",
+      "purpose": "white must pass while black can continue; pass does not add a move",
+      "board": [
+        ".WBBBBBB",
+        "BBBBBBBB",
+        "BBBBBBBB",
+        "BBBBBBBB",
+        "BBBBBBBB",
+        "BBBBBBBB",
+        "BBBBBBBB",
+        "BBBBBBW."
+      ],
+      "turn": 1,
+      "move": 0,
+      "flips": [1],
+      "afterBoard": [
+        "BBBBBBBB",
+        "BBBBBBBB",
+        "BBBBBBBB",
+        "BBBBBBBB",
+        "BBBBBBBB",
+        "BBBBBBBB",
+        "BBBBBBBB",
+        "BBBBBBW."
+      ],
+      "resolution": { "nextTurn": 1, "passes": [2], "finished": false, "winner": null },
+      "counts": { "black": 62, "white": 1, "empty": 1 }
+    },
+    {
+      "id": "ended-with-empty",
+      "purpose": "two consecutive passes end a game even with an empty square",
+      "board": [
+        ".BBBBBBB",
+        "BBBBBBBB",
+        "BBBBBBBB",
+        "BBBBBBBB",
+        "BBBBBBBB",
+        "BBBBBBBB",
+        "BBBBBBBB",
+        "BBBBBBBB"
+      ],
+      "previousTurn": 1,
+      "resolution": { "nextTurn": null, "passes": [2, 1], "finished": true, "winner": 1 },
+      "counts": { "black": 63, "white": 0, "empty": 1 }
+    },
+    {
+      "id": "full-white-win",
+      "purpose": "white winner and stone count on a full board",
+      "board": [
+        "BWWWWWWW",
+        "WWWWWWWW",
+        "WWWWWWWW",
+        "WWWWWWWW",
+        "WWWWWWWW",
+        "WWWWWWWW",
+        "WWWWWWWW",
+        "WWWWWWWW"
+      ],
+      "previousTurn": 2,
+      "resolution": { "nextTurn": null, "passes": [], "finished": true, "winner": 2 },
+      "counts": { "black": 1, "white": 63, "empty": 0 }
+    },
+    {
+      "id": "full-draw",
+      "purpose": "draw and stone count on a full board",
+      "board": [
+        "BWBWBWBW",
+        "WBWBWBWB",
+        "BWBWBWBW",
+        "WBWBWBWB",
+        "BWBWBWBW",
+        "WBWBWBWB",
+        "BWBWBWBW",
+        "WBWBWBWB"
+      ],
+      "previousTurn": 2,
+      "resolution": { "nextTurn": null, "passes": [], "finished": true, "winner": "draw" },
+      "counts": { "black": 32, "white": 32, "empty": 0 }
+    }
+  ],
+  "cpuPositions": [
+    {
+      "id": "opening-initial",
+      "phase": "opening",
+      "purpose": "initial position",
+      "benchmark": true,
+      "board": ["........", "........", "........", "...WB...", "...BW...", "........", "........", "........"],
+      "turn": 1,
+      "legalMoves": [19, 26, 37, 44],
+      "expectedFixedMoves": { "easy": 19, "normal": 19, "advanced": 19, "expert": 19 }
+    },
+    {
+      "id": "corner-available",
+      "phase": "opening",
+      "purpose": "a corner is immediately available",
+      "benchmark": true,
+      "board": [".WB.....", "........", "........", "...BW...", "...WB...", "........", "........", "........"],
+      "turn": 1,
+      "legalMoves": [0, 20, 29, 34, 43],
+      "expectedFixedMoves": { "easy": 0, "normal": 0, "advanced": 0, "expert": 0 }
+    },
+    {
+      "id": "avoid-corner-risk",
+      "phase": "opening",
+      "purpose": "search levels avoid an unsafe corner-adjacent choice",
+      "benchmark": true,
+      "board": ["........", "...W....", "..WW....", "...WB...", "...BBB..", "........", "........", "........"],
+      "turn": 1,
+      "legalMoves": [3, 9, 10, 26],
+      "expectedFixedMoves": { "easy": 3, "normal": 3, "advanced": 26, "expert": 26 }
+    },
+    {
+      "id": "middle-many-moves",
+      "phase": "middle",
+      "purpose": "high branching factor",
+      "benchmark": true,
+      "board": [".W......", ".W...W..", ".WWW.W..", "WWWWWWB.", "..BBBW..", "..BWBWW.", "...W.B..", "......B."],
+      "turn": 1,
+      "legalMoves": [0, 5, 8, 10, 11, 12, 14, 16, 20, 22, 38, 39, 47, 50, 52, 54, 58, 59, 60],
+      "expectedFixedMoves": { "easy": 0, "normal": 0, "advanced": 20, "expert": 0 }
+    },
+    {
+      "id": "middle-few-moves",
+      "phase": "middle",
+      "purpose": "low branching factor in the middle game",
+      "benchmark": true,
+      "board": [".W......", "BW...W..", "BWWW.W..", "BWBWWWB.", "B.WBWW..", "..WBWWW.", "..WBWB..", "..BB..B."],
+      "turn": 2,
+      "legalMoves": [23, 31, 33, 39, 54, 60, 61],
+      "expectedFixedMoves": { "easy": 23, "normal": 60, "advanced": 33, "expert": 61 }
+    },
+    {
+      "id": "single-legal-move",
+      "phase": "endgame",
+      "purpose": "exactly one legal move",
+      "benchmark": false,
+      "board": [".WBBBBBB", "BBBBBBBB", "BBBBBBBB", "BBBBBBBB", "BBBBBBBB", "BBBBBBBB", "BBBBBBBB", "BBBBBBBB"],
+      "turn": 1,
+      "legalMoves": [0],
+      "expectedFixedMoves": { "easy": 0, "normal": 0, "advanced": 0, "expert": 0 }
+    },
+    {
+      "id": "pass-no-legal-move",
+      "phase": "endgame",
+      "purpose": "the side to move must pass",
+      "benchmark": false,
+      "board": [".WBBBBBB", "BBBBBBBB", "BBBBBBBB", "BBBBBBBB", "BBBBBBBB", "BBBBBBBB", "BBBBBBBB", "BBBBBBBB"],
+      "turn": 2,
+      "legalMoves": [],
+      "expectedFixedMoves": { "easy": null, "normal": null, "advanced": null, "expert": null }
+    },
+    {
+      "id": "endgame-exact",
+      "phase": "endgame",
+      "purpose": "expert can complete an eight-empty exact search",
+      "benchmark": true,
+      "board": [".W.WWWWB", "W.WBBBBB", "BWBWBBBB", ".BBWWWWB", "WBBWWWBB", "B.BBWWBB", "BBBWWWWB", ".BWWW..W"],
+      "turn": 1,
+      "legalMoves": [0, 2, 9, 24, 61, 62],
+      "expectedFixedMoves": { "easy": 0, "normal": 0, "advanced": 0, "expert": 2 }
+    }
+  ]
+}

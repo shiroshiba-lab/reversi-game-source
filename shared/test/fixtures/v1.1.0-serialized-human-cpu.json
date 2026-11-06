@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "gameId": "game-contract",
+  "board": [
+    0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 2, 1, 0, 0, 0,
+    0, 0, 0, 1, 2, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0
+  ],
+  "mode": "human-cpu",
+  "turn": 1,
+  "humanColor": 2,
+  "cpuLevelBlack": "expert",
+  "cpuLevelWhite": null,
+  "speed": 500,
+  "status": "playing",
+  "moveCount": 0,
+  "lastMove": null,
+  "winner": null,
+  "generationId": 1,
+  "cpuThinking": true,
+  "lastCpuSearch": null,
+  "message": "対局を開始しました。黒の手番です。",
+  "messageKind": "info"
+}

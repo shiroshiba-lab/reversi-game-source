@@ -1,0 +1,855 @@
+/*
+    Egaroucid Project
+
+    @file silent_load.hpp
+        Load before GUI wake up
+    @date 2021-2026
+    @author Takuto Yamana
+    @license GPL-3.0-or-later
+*/
+
+#pragma once
+#include <iostream>
+#include <future>
+#include "./../engine/engine_all.hpp"
+#include "function/function_all.hpp"
+#if SIV3D_PLATFORM(WINDOWS)
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <Windows.h>
+#endif
+
+std::string get_default_language() {
+    std::string default_language = System::DefaultLanguage().narrow();
+    std::string res = "english";
+    if (default_language == "ja-JP") { // japanese
+        res = "japanese";
+    }
+    if (default_language == "zh-CN" || default_language == "zh-cmn-Hans") { // simplified Chinese
+        res = "simplified_chinese";
+    }
+    if (default_language == "zh-TW" || default_language == "zh-HK" || default_language == "zh-cmn-Hant") { // traditional Chinese
+        res = "traditional_chinese_taiwan";
+    }
+    return res;
+}
+
+void sync_ai_loss_curves_from_scalar(Settings* settings) {
+    int max_loss = std::clamp(settings->max_loss, 0, AI_MAX_LOSS_INF);
+    int loss_percentage = std::clamp(settings->loss_percentage, 0, AI_LOSS_PERCENTAGE_INF);
+    settings->max_loss = max_loss;
+    settings->loss_percentage = loss_percentage;
+    settings->max_loss_by_move.fill(max_loss);
+    settings->loss_percentage_by_move.fill(loss_percentage);
+}
+
+void init_default_settings(const Directories* directories, const Resources* resources, Settings* settings) {
+    //std::cerr << "use default settings" << std::endl;
+    settings->n_threads = std::min(32, (int)std::thread::hardware_concurrency());
+    settings->auto_update_check = 1;
+    settings->lang_name = get_default_language();
+    settings->book_file = directories->document_dir + "book" + BOOK_EXTENSION;
+    settings->use_book = true;
+    settings->level = DEFAULT_LEVEL;
+    settings->ai_put_black = false;
+    settings->ai_put_white = false;
+    settings->use_disc_hint = true;
+    settings->use_umigame_value = false;
+    settings->n_disc_hint = SHOW_ALL_HINT;
+    settings->show_legal = true;
+    settings->show_graph = true;
+    settings->show_opening_on_cell = true;
+    settings->show_log = true;
+    settings->book_learn_depth = 30;
+    settings->book_learn_error_per_move = 2;
+    settings->book_learn_error_sum = 2;
+    settings->show_stable_discs = false;
+    settings->show_to_be_flipped_discs = false;
+    settings->show_last_flipped_discs = false;
+    settings->change_book_by_right_click = false;
+    settings->show_last_move = true;
+    settings->show_next_move = true;
+#if USE_CHANGEABLE_HASH_LEVEL
+    settings->hash_level = DEFAULT_HASH_LEVEL;
+#endif
+    //settings->book_acc_level = 0;
+    settings->accept_ai_loss = false;
+    settings->max_loss = 2;
+    settings->loss_percentage = 30;
+    sync_ai_loss_curves_from_scalar(settings);
+    settings->pause_when_pass = true;
+    settings->force_specified_openings = false;
+    settings->show_next_move_change_view = false;
+    settings->change_color_type = false;
+    settings->show_play_ordering = false;
+    settings->generate_random_board_moves = 20;
+    settings->show_book_accuracy = false;
+    settings->use_book_learn_depth = true;
+    settings->use_book_learn_error_per_move = true;
+    settings->use_book_learn_error_sum = true;
+    settings->umigame_value_depth = 60;
+    settings->umigame_value_score_min = UMIGAME_VALUE_SCORE_MIN;
+    settings->umigame_value_score_max = UMIGAME_VALUE_SCORE_MAX;
+    settings->umigame_value_integration_error = 0;
+    settings->show_graph_value = true;
+    settings->show_graph_sum_of_loss = false;
+    settings->show_random_board_graph = false;
+    settings->book_learn_error_leaf = 2;
+    settings->use_book_learn_error_leaf = true;
+    settings->show_opening_name = true;
+    settings->show_principal_variation = true;
+    settings->show_timer = false;
+    settings->timer_time_limit_min = TIMER_TIME_LIMIT_DEFAULT;
+    settings->show_laser_pointer = false;
+    settings->show_ai_focus = false;
+    settings->pv_length = 7;
+    settings->screenshot_saving_dir = directories->document_dir + "screenshots/";
+    settings->board_image_mark = BOARD_IMAGE_BRECT;
+    settings->board_image_coordinate = BOARD_IMAGE_COORDINATE_INCLUDE;
+    settings->board_image_color = BOARD_IMAGE_COLOR_DEFAULT;
+    settings->board_image_outer_frame_color = BOARD_IMAGE_OUTER_FRAME_WHITE;
+    settings->input_game_last_subfolder.clear();
+    settings->opening_setting_last_subfolder.clear();
+    settings->othello_quest_username.clear();
+    settings->othello_quest_mode = 0;
+    settings->enable_recycle_bin = true;
+    settings->window_scale = 1.0;
+    settings->window_pos_x = 0;
+    settings->window_pos_y = 0;
+    settings->has_window_pos = false;
+    settings->show_value_when_ai_calculating = false;
+    // settings->generate_random_board_score_range = 64;
+    settings->generate_random_board_score_range_min = -64;
+    settings->generate_random_board_score_range_max = 64;
+    settings->show_hint_level = true;
+    settings->show_endgame_error = false;
+    settings->show_endgame_error_40_to_60 = true;
+    settings->show_endgame_error_41_to_60 = false;
+    settings->hint_colorize = false;
+    settings->play_ordering_board_format = true;
+    settings->play_ordering_transcript_format = false;
+    settings->auto_save_ai_profile_mode = PROFILE_AUTO_SAVE_MODE_OVERWRITE;
+    settings->ai_profile_file = "default.json";
+    settings->ai_profile_name = "default";
+    settings->auto_save_display_profile_mode = PROFILE_AUTO_SAVE_MODE_OVERWRITE;
+    settings->display_profile_file = "default.json";
+    settings->display_profile_name = "default";
+}
+
+int init_settings_import_int(JSON &json, String key, int* res) {
+    if (json[key].getType() != JSONValueType::Number) {
+        return ERR_IMPORT_SETTINGS;
+    }
+    *res = (int)json[key].get<double>();
+    return ERR_OK;
+}
+
+int init_settings_import_bool(JSON &json, String key, bool* res) {
+    if (json[key].getType() != JSONValueType::Bool) {
+        return ERR_IMPORT_SETTINGS;
+    }
+    *res = json[key].get<bool>();
+    return ERR_OK;
+}
+
+int init_settings_import_str(JSON &json, String key, std::string* res) {
+    if (json[key].getType() != JSONValueType::String) {
+        return ERR_IMPORT_SETTINGS;
+    }
+    *res = json[key].getString().narrow();
+    return ERR_OK;
+}
+
+// For texts that are only displayed / saved again (profile names): kept in UTF-8.
+// narrow() converts to the ANSI code page, which changes characters outside it (e.g. Korean or
+// emoji on Japanese Windows) to '?', and the changed name was written back to the profile file
+// when the modified profile was saved on exit (close_scene.hpp).
+int init_settings_import_str_utf8(JSON &json, String key, std::string* res) {
+    if (json[key].getType() != JSONValueType::String) {
+        return ERR_IMPORT_SETTINGS;
+    }
+    *res = json[key].getString().toUTF8();
+    return ERR_OK;
+}
+
+int init_settings_import_double(JSON &json, String key, double* res) {
+    if (json[key].getType() != JSONValueType::Number) {
+        return ERR_IMPORT_SETTINGS;
+    }
+    *res = json[key].get<double>();
+    return ERR_OK;
+}
+
+int init_settings_import_int(TextReader* reader, int* res) {
+    String line;
+    int pre_res = *res;
+    if (reader->readLine(line)) {
+        try {
+            *res = Parse<int32>(line);
+            return ERR_OK;
+        }
+        catch (const ParseError& e) {
+            *res = pre_res;
+            return ERR_IMPORT_SETTINGS;
+        }
+    } else {
+        *res = pre_res;
+        return ERR_IMPORT_SETTINGS;
+    }
+}
+
+int init_settings_import_bool(TextReader* reader, bool* res) {
+    String line;
+    if (reader->readLine(line)) {
+        try {
+            int int_res = Parse<int32>(line);
+            if (int_res != 0 && int_res != 1) {
+                return ERR_IMPORT_SETTINGS;
+            }
+            *res = (bool)int_res;
+            return ERR_OK;
+        }
+        catch (const ParseError& e) {
+            return ERR_IMPORT_SETTINGS;
+        }
+    } else {
+        return ERR_IMPORT_SETTINGS;
+    }
+}
+
+int init_settings_import_str(TextReader* reader, std::string* res) {
+    String line;
+    if (reader->readLine(line)) {
+        *res = line.narrow();
+        return ERR_OK;
+    } else {
+        return ERR_IMPORT_SETTINGS;
+    }
+}
+
+void import_text_settings(const Directories* directories, const Resources* resources, Settings* settings) {
+    TextReader reader(U"{}setting.txt"_fmt(Unicode::Widen(directories->appdata_dir)));
+    if (!reader) {
+        std::cerr << "err-1" << std::endl;
+        return;
+    } else {
+        if (init_settings_import_int(&reader, &settings->n_threads) != ERR_OK) {
+            std::cerr << "err0" << std::endl;
+            return;
+        }
+        if (init_settings_import_bool(&reader, &settings->auto_update_check) != ERR_OK) {
+            std::cerr << "err1" << std::endl;
+            return;
+        }
+        if (init_settings_import_str(&reader, &settings->lang_name) != ERR_OK) {
+            std::cerr << "err2" << std::endl;
+            return;
+        }
+        if (init_settings_import_str(&reader, &settings->book_file) != ERR_OK) {
+            std::cerr << "err3" << std::endl;
+            return;
+        }
+        if (init_settings_import_bool(&reader, &settings->use_book) != ERR_OK) {
+            std::cerr << "err4" << std::endl;
+            return;
+        }
+        if (init_settings_import_int(&reader, &settings->level) != ERR_OK) {
+            std::cerr << "err5" << std::endl;
+            return;
+        }
+        if (init_settings_import_bool(&reader, &settings->ai_put_black) != ERR_OK) {
+            std::cerr << "err6" << std::endl;
+            return;
+        }
+        if (init_settings_import_bool(&reader, &settings->ai_put_white) != ERR_OK) {
+            std::cerr << "err7" << std::endl;
+            return;
+        }
+        if (init_settings_import_bool(&reader, &settings->use_disc_hint) != ERR_OK) {
+            std::cerr << "err8" << std::endl;
+            return;
+        }
+        if (init_settings_import_bool(&reader, &settings->use_umigame_value) != ERR_OK) {
+            std::cerr << "err9" << std::endl;
+            return;
+        }
+        if (init_settings_import_int(&reader, &settings->n_disc_hint) != ERR_OK) {
+            std::cerr << "err10" << std::endl;
+            return;
+        }
+        if (init_settings_import_bool(&reader, &settings->show_legal) != ERR_OK) {
+            std::cerr << "err11" << std::endl;
+            return;
+        }
+        if (init_settings_import_bool(&reader, &settings->show_graph) != ERR_OK) {
+            std::cerr << "err12" << std::endl;
+            return;
+        }
+        if (init_settings_import_bool(&reader, &settings->show_opening_on_cell) != ERR_OK) {
+            std::cerr << "err13" << std::endl;
+            return;
+        }
+        if (init_settings_import_bool(&reader, &settings->show_log) != ERR_OK) {
+            std::cerr << "err14" << std::endl;
+            return;
+        }
+        if (init_settings_import_int(&reader, &settings->book_learn_depth) != ERR_OK) {
+            std::cerr << "err15" << std::endl;
+            return;
+        }
+        if (init_settings_import_int(&reader, &settings->book_learn_error_per_move) != ERR_OK) {
+            std::cerr << "err16" << std::endl;
+            return;
+        }
+        if (init_settings_import_bool(&reader, &settings->show_stable_discs) != ERR_OK) {
+            std::cerr << "err17" << std::endl;
+            return;
+        }
+        if (init_settings_import_bool(&reader, &settings->change_book_by_right_click) != ERR_OK) {
+            std::cerr << "err18" << std::endl;
+            return;
+        }
+        if (init_settings_import_bool(&reader, &settings->show_last_move) != ERR_OK) {
+            std::cerr << "err20" << std::endl;
+            return;
+        }
+        if (init_settings_import_bool(&reader, &settings->show_next_move) != ERR_OK) {
+            std::cerr << "err21" << std::endl;
+            return;
+        }
+#if USE_CHANGEABLE_HASH_LEVEL
+        if (init_settings_import_int(&reader, &settings->hash_level) != ERR_OK) {
+            std::cerr << "err22" << std::endl;
+            return;
+        } else {
+            settings->hash_level = std::max(settings->hash_level, DEFAULT_HASH_LEVEL);
+        }
+#endif
+        // if (init_settings_import_int(&reader, &settings->book_acc_level) != ERR_OK) {
+        //     std::cerr << "err23" << std::endl;
+        //     return;
+        // }
+        if (init_settings_import_bool(&reader, &settings->pause_when_pass) != ERR_OK) {
+            std::cerr << "err24" << std::endl;
+            return;
+        }
+        if (init_settings_import_int(&reader, &settings->book_learn_error_sum) != ERR_OK) {
+            std::cerr << "err25" << std::endl;
+            return;
+        }
+        if (init_settings_import_bool(&reader, &settings->show_next_move_change_view) != ERR_OK) {
+            std::cerr << "err26" << std::endl;
+            return;
+        }
+        if (init_settings_import_bool(&reader, &settings->change_color_type) != ERR_OK) {
+            std::cerr << "err27" << std::endl;
+            return;
+        }
+        if (init_settings_import_bool(&reader, &settings->show_play_ordering) != ERR_OK) {
+            std::cerr << "err28" << std::endl;
+            return;
+        }
+        if (init_settings_import_int(&reader, &settings->generate_random_board_moves) != ERR_OK) {
+            std::cerr << "err29" << std::endl;
+            return;
+        }
+    }
+}
+
+void init_settings(const Directories* directories, const Resources* resources, Settings* settings) {
+    init_default_settings(directories, resources, settings);
+    JSON setting_json = JSON::Load(U"{}setting.json"_fmt(Unicode::Widen(directories->appdata_dir)));
+    const bool setting_json_exists = (setting_json.size() != 0);
+    if (!setting_json_exists) {
+        std::cerr << "json not found, try legacy txt settings" << std::endl;
+        import_text_settings(directories, resources, settings);
+    } else {
+        if (init_settings_import_int(setting_json, U"n_threads", &settings->n_threads) != ERR_OK) {
+            std::cerr << "err0" << std::endl;
+        }
+        if (init_settings_import_bool(setting_json, AUTO_UPDATE_CHECK_SETTING_KEY, &settings->auto_update_check) != ERR_OK) {
+            std::cerr << "err1" << std::endl;
+        }
+        if (init_settings_import_str(setting_json, U"lang_name", &settings->lang_name) != ERR_OK) {
+            std::cerr << "err2" << std::endl;
+        }
+        if (init_settings_import_str(setting_json, U"book_file", &settings->book_file) != ERR_OK) {
+            std::cerr << "err3" << std::endl;
+        }
+        if (init_settings_import_bool(setting_json, U"use_book", &settings->use_book) != ERR_OK) {
+            std::cerr << "err4" << std::endl;
+        }
+        if (init_settings_import_int(setting_json, U"level", &settings->level) != ERR_OK) {
+            std::cerr << "err5" << std::endl;
+        }
+        if (init_settings_import_bool(setting_json, U"ai_put_black", &settings->ai_put_black) != ERR_OK) {
+            std::cerr << "err6" << std::endl;
+        }
+        if (init_settings_import_bool(setting_json, U"ai_put_white", &settings->ai_put_white) != ERR_OK) {
+            std::cerr << "err7" << std::endl;
+        }
+        if (init_settings_import_bool(setting_json, U"use_disc_hint", &settings->use_disc_hint) != ERR_OK) {
+            std::cerr << "err8" << std::endl;
+        }
+        if (init_settings_import_bool(setting_json, U"use_umigame_value", &settings->use_umigame_value) != ERR_OK) {
+            std::cerr << "err9" << std::endl;
+        }
+        if (init_settings_import_int(setting_json, U"n_disc_hint", &settings->n_disc_hint) != ERR_OK) {
+            std::cerr << "err10" << std::endl;
+        }
+        if (init_settings_import_bool(setting_json, U"show_legal", &settings->show_legal) != ERR_OK) {
+            std::cerr << "err11" << std::endl;
+        }
+        if (init_settings_import_bool(setting_json, U"show_graph", &settings->show_graph) != ERR_OK) {
+            std::cerr << "err12" << std::endl;
+        }
+        if (init_settings_import_bool(setting_json, U"show_opening_on_cell", &settings->show_opening_on_cell) != ERR_OK) {
+            std::cerr << "err13" << std::endl;
+        }
+        if (init_settings_import_bool(setting_json, U"show_log", &settings->show_log) != ERR_OK) {
+            std::cerr << "err14" << std::endl;
+        }
+        if (init_settings_import_int(setting_json, U"book_learn_depth", &settings->book_learn_depth) != ERR_OK) {
+            std::cerr << "err15" << std::endl;
+        }
+        if (init_settings_import_int(setting_json, U"book_learn_error_per_move", &settings->book_learn_error_per_move) != ERR_OK) {
+            std::cerr << "err16" << std::endl;
+        }
+        if (init_settings_import_bool(setting_json, U"show_stable_discs", &settings->show_stable_discs) != ERR_OK) {
+            std::cerr << "err17" << std::endl;
+        }
+        if (init_settings_import_bool(setting_json, U"show_to_be_flipped_discs", &settings->show_to_be_flipped_discs) != ERR_OK) {
+            std::cerr << "err19" << std::endl;
+        }
+        if (init_settings_import_bool(setting_json, U"show_last_flipped_discs", &settings->show_last_flipped_discs) != ERR_OK) {
+            std::cerr << "err19-1" << std::endl;
+        }
+        if (init_settings_import_bool(setting_json, U"change_book_by_right_click", &settings->change_book_by_right_click) != ERR_OK) {
+            std::cerr << "err18" << std::endl;
+        }
+        if (init_settings_import_bool(setting_json, U"show_last_move", &settings->show_last_move) != ERR_OK) {
+            std::cerr << "err20" << std::endl;
+        }
+        if (init_settings_import_bool(setting_json, U"show_next_move", &settings->show_next_move) != ERR_OK) {
+            std::cerr << "err21" << std::endl;
+        }
+#if USE_CHANGEABLE_HASH_LEVEL
+        if (init_settings_import_int(setting_json, U"hash_level", &settings->hash_level) != ERR_OK) {
+            std::cerr << "err22" << std::endl;
+        } else {
+            settings->hash_level = std::max(settings->hash_level, DEFAULT_HASH_LEVEL);
+        }
+#endif
+        // if (init_settings_import_int(setting_json, U"book_acc_level", &settings->book_acc_level) != ERR_OK) {
+        //     std::cerr << "err23" << std::endl;
+        // }
+        if (init_settings_import_bool(setting_json, U"pause_when_pass", &settings->pause_when_pass) != ERR_OK) {
+            std::cerr << "err24" << std::endl;
+        }
+        if (init_settings_import_int(setting_json, U"book_learn_error_sum", &settings->book_learn_error_sum) != ERR_OK) {
+            std::cerr << "err25" << std::endl;
+        }
+        if (init_settings_import_bool(setting_json, U"show_next_move_change_view", &settings->show_next_move_change_view) != ERR_OK) {
+            std::cerr << "err26" << std::endl;
+        }
+        if (init_settings_import_bool(setting_json, U"change_color_type", &settings->change_color_type) != ERR_OK) {
+            std::cerr << "err27" << std::endl;
+        }
+        if (init_settings_import_bool(setting_json, U"show_play_ordering", &settings->show_play_ordering) != ERR_OK) {
+            std::cerr << "err28" << std::endl;
+        }
+        if (init_settings_import_int(setting_json, U"generate_random_board_moves", &settings->generate_random_board_moves) != ERR_OK) {
+            std::cerr << "err29" << std::endl;
+        }
+        if (init_settings_import_bool(setting_json, U"show_book_accuracy", &settings->show_book_accuracy) != ERR_OK) {
+            std::cerr << "err30" << std::endl;
+        }
+        if (init_settings_import_bool(setting_json, U"use_book_learn_depth", &settings->use_book_learn_depth) != ERR_OK) {
+            std::cerr << "err31" << std::endl;
+        }
+        if (init_settings_import_bool(setting_json, U"use_book_learn_error_per_move", &settings->use_book_learn_error_per_move) != ERR_OK) {
+            std::cerr << "err32" << std::endl;
+        }
+        if (init_settings_import_bool(setting_json, U"use_book_learn_error_sum", &settings->use_book_learn_error_sum) != ERR_OK) {
+            std::cerr << "err33" << std::endl;
+        }
+        if (init_settings_import_int(setting_json, U"umigame_value_depth", &settings->umigame_value_depth) != ERR_OK) {
+            std::cerr << "err34" << std::endl;
+        }
+        init_settings_import_int(setting_json, U"umigame_value_score_min", &settings->umigame_value_score_min);
+        init_settings_import_int(setting_json, U"umigame_value_score_max", &settings->umigame_value_score_max);
+        init_settings_import_int(setting_json, U"umigame_value_integration_error", &settings->umigame_value_integration_error);
+        if (init_settings_import_bool(setting_json, U"show_graph_value", &settings->show_graph_value) != ERR_OK) {
+            std::cerr << "err35" << std::endl;
+        }
+        if (init_settings_import_bool(setting_json, U"show_graph_sum_of_loss", &settings->show_graph_sum_of_loss) != ERR_OK) {
+            std::cerr << "err36" << std::endl;
+        }
+        init_settings_import_bool(setting_json, U"show_random_board_graph", &settings->show_random_board_graph);
+        if (init_settings_import_int(setting_json, U"book_learn_error_leaf", &settings->book_learn_error_leaf) != ERR_OK) {
+            std::cerr << "err37" << std::endl;
+        }
+        if (init_settings_import_bool(setting_json, U"use_book_learn_error_leaf", &settings->use_book_learn_error_leaf) != ERR_OK) {
+            std::cerr << "err38" << std::endl;
+        }
+        if (init_settings_import_bool(setting_json, U"show_opening_name", &settings->show_opening_name) != ERR_OK) {
+            std::cerr << "err39" << std::endl;
+        }
+        if (init_settings_import_bool(setting_json, U"show_principal_variation", &settings->show_principal_variation) != ERR_OK) {
+            std::cerr << "err40" << std::endl;
+        }
+        if (init_settings_import_bool(setting_json, U"show_timer", &settings->show_timer) != ERR_OK) {
+            std::cerr << "err40-1" << std::endl;
+        }
+        init_settings_import_int(setting_json, U"timer_time_limit_min", &settings->timer_time_limit_min);
+        if (init_settings_import_bool(setting_json, U"show_laser_pointer", &settings->show_laser_pointer) != ERR_OK) {
+            std::cerr << "err41" << std::endl;
+        }
+        if (init_settings_import_bool(setting_json, U"show_ai_focus", &settings->show_ai_focus) != ERR_OK) {
+            std::cerr << "err42" << std::endl;
+        }
+        if (init_settings_import_int(setting_json, U"pv_length", &settings->pv_length) != ERR_OK) {
+            std::cerr << "err43" << std::endl;
+        }
+        if (init_settings_import_str(setting_json, U"screenshot_saving_dir", &settings->screenshot_saving_dir) != ERR_OK) {
+            std::cerr << "err44" << std::endl;
+        }
+        if (init_settings_import_bool(setting_json, U"accept_ai_loss", &settings->accept_ai_loss) != ERR_OK) {
+            std::cerr << "err45" << std::endl;
+        }
+        if (init_settings_import_int(setting_json, U"max_loss", &settings->max_loss) != ERR_OK) {
+            std::cerr << "err46" << std::endl;
+        }
+        if (init_settings_import_int(setting_json, U"loss_percentage", &settings->loss_percentage) != ERR_OK) {
+            std::cerr << "err47" << std::endl;
+        }
+        if (init_settings_import_bool(setting_json, U"force_specified_openings", &settings->force_specified_openings) != ERR_OK) {
+            std::cerr << "err48" << std::endl;
+        }
+        if (init_settings_import_bool(setting_json, U"show_value_when_ai_calculating", &settings->show_value_when_ai_calculating) != ERR_OK) {
+            std::cerr << "err49" << std::endl;
+        }
+        // not used
+        // if (init_settings_import_int(setting_json, U"generate_random_board_score_range", &settings->generate_random_board_score_range) != ERR_OK) {
+        //     std::cerr << "err50" << std::endl;
+        // }
+        if (init_settings_import_bool(setting_json, U"show_hint_level", &settings->show_hint_level) != ERR_OK) {
+            std::cerr << "err51" << std::endl;
+        }
+        int n_random_board_range_failed = 0;
+        if (init_settings_import_int(setting_json, U"generate_random_board_score_range_min", &settings->generate_random_board_score_range_min) != ERR_OK) {
+            std::cerr << "err52" << std::endl;
+            ++n_random_board_range_failed;
+        }
+        if (init_settings_import_int(setting_json, U"generate_random_board_score_range_max", &settings->generate_random_board_score_range_max) != ERR_OK) {
+            std::cerr << "err53" << std::endl;
+            ++n_random_board_range_failed;
+        }
+        int generate_random_board_score_range;
+        if (n_random_board_range_failed == 2 && init_settings_import_int(setting_json, U"generate_random_board_score_range", &generate_random_board_score_range) == ERR_OK) {
+            settings->generate_random_board_score_range_min = -generate_random_board_score_range;
+            settings->generate_random_board_score_range_max = generate_random_board_score_range;
+            std::cerr << "use abs generate_random_board_score_range" << std::endl;
+        }
+        if (init_settings_import_bool(setting_json, U"show_endgame_error", &settings->show_endgame_error) != ERR_OK) {
+            std::cerr << "err54" << std::endl;
+        }
+        if (init_settings_import_bool(setting_json, U"show_endgame_error_40_to_60", &settings->show_endgame_error_40_to_60) != ERR_OK) {
+            std::cerr << "err54-1" << std::endl;
+        }
+        if (init_settings_import_bool(setting_json, U"show_endgame_error_41_to_60", &settings->show_endgame_error_41_to_60) != ERR_OK) {
+            settings->show_endgame_error_41_to_60 = !settings->show_endgame_error_40_to_60;
+        }
+        if (settings->show_endgame_error_40_to_60 == settings->show_endgame_error_41_to_60) {
+            settings->show_endgame_error_40_to_60 = true;
+            settings->show_endgame_error_41_to_60 = false;
+        }
+        if (init_settings_import_bool(setting_json, U"hint_colorize", &settings->hint_colorize) != ERR_OK) {
+            std::cerr << "err55" << std::endl;
+        }
+        if (init_settings_import_bool(setting_json, U"play_ordering_board_format", &settings->play_ordering_board_format) != ERR_OK) {
+            std::cerr << "err56" << std::endl;
+        }
+        if (init_settings_import_bool(setting_json, U"play_ordering_transcript_format", &settings->play_ordering_transcript_format) != ERR_OK) {
+            std::cerr << "err57" << std::endl;
+        }
+        if (init_settings_import_str(setting_json, U"ai_profile_file", &settings->ai_profile_file) != ERR_OK) {
+            settings->ai_profile_file = "default.json";
+        }
+        init_settings_import_int(setting_json, U"auto_save_ai_profile_mode", &settings->auto_save_ai_profile_mode);
+        init_settings_import_str_utf8(setting_json, U"ai_profile_name", &settings->ai_profile_name);
+        if (init_settings_import_str(setting_json, U"display_profile_file", &settings->display_profile_file) != ERR_OK) {
+            settings->display_profile_file = "default.json";
+        }
+        init_settings_import_int(setting_json, U"auto_save_display_profile_mode", &settings->auto_save_display_profile_mode);
+        init_settings_import_str_utf8(setting_json, U"display_profile_name", &settings->display_profile_name);
+        init_settings_import_str(setting_json, U"input_game_last_subfolder", &settings->input_game_last_subfolder);
+        init_settings_import_str(setting_json, U"opening_setting_last_subfolder", &settings->opening_setting_last_subfolder);
+        init_settings_import_str(setting_json, U"othello_quest_username", &settings->othello_quest_username);
+        init_settings_import_int(setting_json, U"othello_quest_mode", &settings->othello_quest_mode);
+        init_settings_import_bool(setting_json, U"enable_recycle_bin", &settings->enable_recycle_bin);
+        init_settings_import_int(setting_json, U"board_image_mark", &settings->board_image_mark);
+        init_settings_import_int(setting_json, U"board_image_coordinate", &settings->board_image_coordinate);
+        init_settings_import_int(setting_json, U"board_image_color", &settings->board_image_color);
+        init_settings_import_int(setting_json, U"board_image_outer_frame_color", &settings->board_image_outer_frame_color);
+        init_settings_import_double(setting_json, U"window_scale", &settings->window_scale);
+        const bool has_window_pos_x = init_settings_import_int(setting_json, U"window_pos_x", &settings->window_pos_x) == ERR_OK;
+        const bool has_window_pos_y = init_settings_import_int(setting_json, U"window_pos_y", &settings->window_pos_y) == ERR_OK;
+        settings->has_window_pos = has_window_pos_x && has_window_pos_y;
+    }
+    settings->window_scale = std::clamp(settings->window_scale, WINDOW_SCALE_MIN, WINDOW_SCALE_MAX);
+    settings->board_image_mark = std::clamp(settings->board_image_mark, BOARD_IMAGE_BRECT, BOARD_IMAGE_MARK_MAX);
+    settings->board_image_coordinate = std::clamp(settings->board_image_coordinate, BOARD_IMAGE_COORDINATE_INCLUDE, BOARD_IMAGE_COORDINATE_EXCLUDE);
+    settings->board_image_color = std::clamp(settings->board_image_color, BOARD_IMAGE_COLOR_DEFAULT, BOARD_IMAGE_COLOR_MONOCHROME);
+    settings->board_image_outer_frame_color = std::clamp(settings->board_image_outer_frame_color, BOARD_IMAGE_OUTER_FRAME_WHITE, BOARD_IMAGE_OUTER_FRAME_DARK);
+    settings->othello_quest_mode = std::clamp(settings->othello_quest_mode, 0, 2);
+    settings->auto_save_ai_profile_mode = std::clamp(settings->auto_save_ai_profile_mode, PROFILE_AUTO_SAVE_MODE_OVERWRITE, PROFILE_AUTO_SAVE_MODE_NEW);
+    settings->auto_save_display_profile_mode = std::clamp(settings->auto_save_display_profile_mode, PROFILE_AUTO_SAVE_MODE_OVERWRITE, PROFILE_AUTO_SAVE_MODE_NEW);
+    settings->timer_time_limit_min = std::clamp(settings->timer_time_limit_min, TIMER_TIME_LIMIT_MIN, TIMER_TIME_LIMIT_MAX);
+    if (setting_json[U"umigame_value_score_slider_version"].getType() != JSONValueType::Number) {
+        settings->umigame_value_score_min = migrate_legacy_umigame_score_slider_value(settings->umigame_value_score_min);
+        settings->umigame_value_score_max = migrate_legacy_umigame_score_slider_value(settings->umigame_value_score_max);
+    }
+    settings->umigame_value_score_min = normalize_umigame_score_slider_value(settings->umigame_value_score_min);
+    settings->umigame_value_score_max = normalize_umigame_score_slider_value(settings->umigame_value_score_max);
+    settings->umigame_value_score_min = std::clamp(settings->umigame_value_score_min, UMIGAME_VALUE_SCORE_MIN, UMIGAME_VALUE_SCORE_MAX - UMIGAME_VALUE_SCORE_MIN_GAP);
+    settings->umigame_value_score_max = std::clamp(settings->umigame_value_score_max, UMIGAME_VALUE_SCORE_MIN + UMIGAME_VALUE_SCORE_MIN_GAP, UMIGAME_VALUE_SCORE_MAX);
+    if (settings->umigame_value_score_min > settings->umigame_value_score_max - UMIGAME_VALUE_SCORE_MIN_GAP) {
+        settings->umigame_value_score_min = settings->umigame_value_score_max - UMIGAME_VALUE_SCORE_MIN_GAP;
+    }
+    settings->umigame_value_integration_error = std::clamp(settings->umigame_value_integration_error, UMIGAME_VALUE_INTEGRATION_ERROR_MIN, UMIGAME_VALUE_INTEGRATION_ERROR_MAX);
+
+    // Keep compatibility with legacy scalar settings when profiles or curves are absent.
+    sync_ai_loss_curves_from_scalar(settings);
+
+    ensure_default_ai_profile(*directories, *settings, setting_json_exists);
+    load_ai_profile_into_settings(*directories, settings);
+    ensure_default_display_profile(*directories, *settings, setting_json_exists);
+    load_display_profile_into_settings(*directories, settings);
+}
+
+void init_directories(Directories* directories) {
+    // system directory
+#if GUI_PORTABLE_MODE
+    directories->document_dir = "./document/";
+    directories->appdata_dir = "./appdata/";
+#else
+    directories->document_dir = FileSystem::GetFolderPath(SpecialFolder::Documents).narrow() + "Egaroucid/";
+    directories->appdata_dir = FileSystem::GetFolderPath(SpecialFolder::LocalAppData).narrow() + "Egaroucid/";
+#endif
+    std::cerr << "document_dir " << directories->document_dir << " appdata_dir " << directories->appdata_dir << std::endl;
+
+    // file directories
+    directories->eval_file = EXE_DIRECTORY_PATH + "resources/eval.egev2";
+    directories->eval_mo_end_file = EXE_DIRECTORY_PATH + "resources/eval_move_ordering_end.egev";
+}
+
+int init_resources_silent_load(Resources* resources, Settings* settings, Fonts *fonts, bool *stop_loading) {
+    // language json
+    std::cerr << "loading language list" << std::endl;
+    if (!language_name.init(resources->language_names)) {
+        return ERR_SILENT_LOAD_LANG_JSON_NOT_LOADED;
+    }
+
+    if (*stop_loading) {
+        return ERR_SILENT_LOAD_TERMINATED;
+    }
+
+    // language
+    std::cerr << "loading language pack" << std::endl;
+    std::string lang_file = EXE_DIRECTORY_PATH + "resources/languages/" + settings->lang_name + ".json";
+    if (!language.init(lang_file)) {
+        std::cerr << "language file not found. use alternative language" << std::endl;
+        settings->lang_name = DEFAULT_LANGUAGE;
+        lang_file = EXE_DIRECTORY_PATH + "resources/languages/" + settings->lang_name + ".json";
+        if (!language.init(lang_file)) {
+            return ERR_SILENT_LOAD_LANG_NOT_LOADED;
+        }
+    }
+
+    if (*stop_loading) {
+        return ERR_SILENT_LOAD_TERMINATED;
+    }
+
+    // font
+    std::cerr << "loading font" << std::endl;
+    fonts->init(settings->lang_name);
+
+    if (*stop_loading) {
+        return ERR_SILENT_LOAD_TERMINATED;
+    }
+
+    // textures
+    std::cerr << "loading textures (1)" << std::endl;
+    Texture icon(Unicode::Widen(EXE_DIRECTORY_PATH + "resources/img/icon.png"), TextureDesc::Mipped);
+    Texture logo(Unicode::Widen(EXE_DIRECTORY_PATH + "resources/img/logo.png"), TextureDesc::Mipped);
+    if (icon.isEmpty() || logo.isEmpty()) {
+        return ERR_SILENT_LOAD_TEXTURE_NOT_LOADED;
+    }
+    resources->icon = icon;
+    resources->logo = logo;
+
+    if (*stop_loading) {
+        return ERR_SILENT_LOAD_TERMINATED;
+    }
+
+    return ERR_OK;
+
+}
+
+void init_user_settings(Settings* settings, User_settings *user_settings) {
+    user_settings->screenshot_saving_dir = settings->screenshot_saving_dir;
+    user_settings->input_game_last_subfolder = settings->input_game_last_subfolder;
+    user_settings->opening_setting_last_subfolder = settings->opening_setting_last_subfolder;
+    user_settings->othello_quest_username = settings->othello_quest_username;
+    user_settings->othello_quest_mode = settings->othello_quest_mode;
+    user_settings->enable_recycle_bin = settings->enable_recycle_bin;
+}
+
+int silent_load(Directories* directories, Resources* resources, Settings* settings, User_settings *user_settings, Fonts *fonts, bool *stop_loading) {
+    init_directories(directories);
+    init_settings(directories, resources, settings);
+    init_user_settings(settings, user_settings);
+    return init_resources_silent_load(resources, settings, fonts, stop_loading);
+}
+
+Size get_scaled_window_size(double window_scale) {
+    window_scale = std::clamp(window_scale, WINDOW_SCALE_MIN, WINDOW_SCALE_MAX);
+    return Size{
+        static_cast<int>(std::round(WINDOW_SIZE_X * window_scale)),
+        static_cast<int>(std::round(WINDOW_SIZE_Y * window_scale))
+    };
+}
+
+bool is_window_bounds_in_work_area(const Rect& window_bounds) {
+    for (const MonitorInfo& monitor : System::EnumerateMonitors()) {
+        const Rect& work_area = monitor.workArea;
+        if (work_area.x <= window_bounds.x &&
+            work_area.y <= window_bounds.y &&
+            window_bounds.x + window_bounds.w <= work_area.x + work_area.w &&
+            window_bounds.y + window_bounds.h <= work_area.y + work_area.h) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool is_windows_7_or_earlier() {
+#if SIV3D_PLATFORM(WINDOWS)
+    using RtlGetVersionFunc = LONG(WINAPI*)(OSVERSIONINFOW*);
+    const HMODULE ntdll = ::GetModuleHandleW(L"ntdll.dll");
+    if (!ntdll) {
+        return false;
+    }
+
+    const auto rtl_get_version = reinterpret_cast<RtlGetVersionFunc>(::GetProcAddress(ntdll, "RtlGetVersion"));
+    if (!rtl_get_version) {
+        return false;
+    }
+
+    OSVERSIONINFOW version_info{};
+    version_info.dwOSVersionInfoSize = sizeof(version_info);
+    if (rtl_get_version(&version_info) != 0) {
+        return false;
+    }
+
+    return version_info.dwMajorVersion < 6 ||
+        (version_info.dwMajorVersion == 6 && version_info.dwMinorVersion <= 1);
+#else
+    return false;
+#endif
+}
+
+void apply_default_window_settings(Window_state* window_state) {
+    Window::Resize(Size{ WINDOW_SIZE_X, WINDOW_SIZE_Y }, Centering::Yes);
+    window_state->window_scale = 1.0;
+    window_state->window_pos_x = 0;
+    window_state->window_pos_y = 0;
+    window_state->has_window_pos = false;
+}
+
+void apply_saved_window_settings(const Settings& settings, Window_state* window_state) {
+    if (is_windows_7_or_earlier()) {
+        return;
+    }
+
+    const double window_scale = std::clamp(settings.window_scale, WINDOW_SCALE_MIN, WINDOW_SCALE_MAX);
+    const Size saved_window_size = get_scaled_window_size(window_scale);
+    if (!Window::Resize(saved_window_size, settings.has_window_pos ? Centering::No : Centering::Yes)) {
+        apply_default_window_settings(window_state);
+        return;
+    }
+
+    const Rect resized_window_bounds = Window::GetState().bounds;
+    const Rect saved_window_bounds = settings.has_window_pos
+        ? Rect{ settings.window_pos_x, settings.window_pos_y, resized_window_bounds.w, resized_window_bounds.h }
+        : resized_window_bounds;
+    if (!is_window_bounds_in_work_area(saved_window_bounds)) {
+        apply_default_window_settings(window_state);
+        return;
+    }
+
+    window_state->window_scale = window_scale;
+    if (settings.has_window_pos) {
+        Window::SetPos(Point{ settings.window_pos_x, settings.window_pos_y });
+        window_state->window_pos_x = settings.window_pos_x;
+        window_state->window_pos_y = settings.window_pos_y;
+        window_state->has_window_pos = true;
+    } else {
+        window_state->window_pos_x = resized_window_bounds.x;
+        window_state->window_pos_y = resized_window_bounds.y;
+        window_state->has_window_pos = false;
+    }
+}
+
+class Silent_load : public App::Scene {
+private:
+    bool loading;
+    bool loaded;
+    int load_code;
+    bool stop_loading;
+    std::future<int> silent_load_future;
+    Font err_font{ FontMethod::MSDF, FONT_DEFAULT_SIZE };
+public:
+    Silent_load(const InitData& init) : IScene{ init } {
+        // set_scene_ime_enabled(false); // important for enabling IME after loading
+        stop_loading = false;
+        silent_load_future = std::async(std::launch::async, silent_load, &getData().directories, &getData().resources, &getData().settings, &getData().user_settings, &getData().fonts, &stop_loading);
+        loading = true;
+        loaded = false;
+    }
+
+    void update() override {
+        if (System::GetUserActions() & UserAction::CloseButtonClicked) {
+            stop_loading = true;
+            if (silent_load_future.valid()) {
+                silent_load_future.get();
+            }
+            System::Exit();
+        }
+        if (loading) {
+            if (silent_load_future.wait_for(std::chrono::seconds(0)) == std::future_status::ready) {
+                load_code = silent_load_future.get();
+                loaded = load_code == ERR_OK;
+                if (loaded) {
+                    apply_saved_window_settings(getData().settings, &getData().window_state);
+                }
+                loading = false;
+            }
+        } else {
+            if (loaded) {
+                std::cerr << "silent loaded" << std::endl;
+                // changeScene(U"Load", SCENE_FADE_TIME);
+                changeScene(U"Load", 0);
+            } else {
+                String err_str = U"BASIC DATA NOT LOADED. PLEASE RE-INSTALL.\nERROR CODE: " + Format(load_code);
+                err_font(err_str).draw(20, Arg::leftCenter(LEFT_LEFT, Y_CENTER), Palette::White);
+            }
+        }
+    }
+
+    void draw() const override {
+        Scene::SetBackground(Color(36, 153, 114));
+    }
+};
