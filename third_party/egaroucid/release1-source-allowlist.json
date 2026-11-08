@@ -26,6 +26,8 @@
     "scripts/create-release1-source-snapshot.mjs",
     "scripts/create-release1-public-source-tree.mjs",
     "scripts/create-release1-publication-package.mjs",
+    "scripts/release-version.mjs",
+    "scripts/verify-public-release-history.mjs",
     "scripts/verify-release1-source-snapshot.mjs",
     "scripts/verify-release1-product-build.mjs",
     "scripts/rebuild-release1-egaroucid.mjs",

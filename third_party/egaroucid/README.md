@@ -45,7 +45,7 @@ The fixed Emscripten container runs without network access. The rebuild must rep
 
 ## Release 1-04 public source
 
-The approved public corresponding-source repository is <https://github.com/shiroshiba-lab/reversi-game-source>, with product/source tag `v2.0.0`. The product license screen and NOTICE link to the matching GitHub Release page. The public Git tree and complete Release Asset contain:
+The approved public corresponding-source repository is <https://github.com/shiroshiba-lab/reversi-game-source>. The published baseline is `v2.0.0`; the next prepared product/source tag is `v2.0.1`. The product license screen and NOTICE link to the matching versioned GitHub Release page. The public Git tree and complete Release Asset contain:
 
 1. The complete fixed v7.8.4 source, including Book and evaluation headers.
 2. The applied patch, exact build script, lockfile/build inputs, Worker adapter and protocol, and the distributed React/TypeScript source.

@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "purpose": "Release 1 product asset pair for Reversi Board v2.0.0",
+  "purpose": "Product asset pair for Reversi Board v2.0.1",
   "variant": "64m-max128m",
   "release": {
-    "productVersion": "v2.0.0",
-    "correspondingSource": "https://github.com/shiroshiba-lab/reversi-game-source/releases/tag/v2.0.0"
+    "productVersion": "v2.0.1",
+    "correspondingSource": "https://github.com/shiroshiba-lab/reversi-game-source/releases/tag/v2.0.1"
   },
   "source": {
     "repository": "https://github.com/Nyanyan/Egaroucid",

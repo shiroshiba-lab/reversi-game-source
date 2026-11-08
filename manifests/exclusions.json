@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "sourceCommit": "0121472213611b34684a7c1bb287a5cb17fb9d58",
+  "sourceCommit": "75699fb960f70c5840031f90d43b5482d46f32d0",
   "sourceBasis": {
-    "privateBaseCommit": "0121472213611b34684a7c1bb287a5cb17fb9d58",
-    "includesAllowlistedWorktreeChanges": true,
-    "allowlistedWorktreeStatusSha256": "4ac0d0a1dd4c9e432a9ab893d20f99ba5312c2e3b007c9babe473cd7fb5db52b",
+    "privateBaseCommit": "75699fb960f70c5840031f90d43b5482d46f32d0",
+    "includesAllowlistedWorktreeChanges": false,
+    "allowlistedWorktreeStatusSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "note": "The manifests are the authoritative byte inventory. Worktree status is recorded only as a non-sensitive provenance fingerprint."
   },
   "allowlist": "third_party/egaroucid/release1-source-allowlist.json",

@@ -123,7 +123,11 @@ export function SetupScreen({ settings, cpuAvailability, onStart }: Props) {
           <p>本アプリの「高性能AI」（Level 0〜15）には、<a href="https://www.egaroucid.nyanyan.dev/ja/web/" target="_blank" rel="noreferrer">Egaroucid for Web</a>を、WASMのメモリ設定調整や専用Web Workerへの組み込みなどの改変を加えて利用しています。</p>
           <details>
             <summary>ライセンス文書と改変の詳細</summary>
-            <p>Egaroucid for WebはTakuto Yamana氏とコントリビューターによる外部ソフトウェアで、GPL-3.0-or-laterの条件で利用しています。本アプリの動作を作者が保証するものではありません。</p>
+            <p>Egaroucid for Webは、Takuto Yamana氏とコントリビューターの皆さまが開発し、GPL-3.0-or-laterの条件で公開しているソフトウェアです。</p>
+            <p>本アプリ向けの改変・組み込みはリバーシ盤の開発者が行っており、Egaroucidの開発者の皆さまが本アプリの動作を保証するものではありません。</p>
+            <p>素晴らしいソフトウェアを公開してくださった皆さまに感謝いたします。</p>
+            <p>Egaroucidの公式サイトでは、世界最強クラスのAIを搭載したデスクトップ版や、開発者による技術解説なども紹介されています。</p>
+            <p><a href="https://www.egaroucid.nyanyan.dev/ja/" target="_blank" rel="noreferrer">Egaroucid公式サイト</a></p>
             <p>主な変更は、再現可能な乱数seedと探索診断、Book切替引数、通常探索時の診断出力抑制、Emscriptenでの初期64 MiB／最大128 MiBのWASM build、専用Workerでの初期化・探索・中止・timeout・応答検証です。</p>
             <ul>
               <li><a href={CORRESPONDING_SOURCE_RELEASE_URL} target="_blank" rel="noreferrer">対応ソース（{PRODUCT_VERSION}）</a></li>

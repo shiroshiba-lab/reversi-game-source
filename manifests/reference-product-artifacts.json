@@ -1,18 +1,18 @@
 {
   "schemaVersion": 1,
-  "sourceCommit": "0121472213611b34684a7c1bb287a5cb17fb9d58",
+  "sourceCommit": "75699fb960f70c5840031f90d43b5482d46f32d0",
   "sourceBasis": {
-    "privateBaseCommit": "0121472213611b34684a7c1bb287a5cb17fb9d58",
-    "includesAllowlistedWorktreeChanges": true,
-    "allowlistedWorktreeStatusSha256": "4ac0d0a1dd4c9e432a9ab893d20f99ba5312c2e3b007c9babe473cd7fb5db52b",
+    "privateBaseCommit": "75699fb960f70c5840031f90d43b5482d46f32d0",
+    "includesAllowlistedWorktreeChanges": false,
+    "allowlistedWorktreeStatusSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "note": "The manifests are the authoritative byte inventory. Worktree status is recorded only as a non-sensitive provenance fingerprint."
   },
   "purpose": "Reference product build created from the private source tree before snapshot assembly",
   "files": [
     {
-      "path": "frontend/dist/assets/index-ADPoY2hi.js",
-      "bytes": 268000,
-      "sha256": "b37fe953fadf5a5ee4bdfc8142fedb06c28d398ead59379955790e0e4adf77ae",
+      "path": "frontend/dist/assets/index-DX1VDJyd.js",
+      "bytes": 268645,
+      "sha256": "f3f5c99f28e38aad5a2c4b5c2704adc5f274545c930623183961ce1564e2f660",
       "mode": "0644"
     },
     {
@@ -41,8 +41,8 @@
     },
     {
       "path": "frontend/dist/egaroucid/artifact-manifest.json",
-      "bytes": 2034,
-      "sha256": "5831e5c2c985cd74a5565eaf59af94454eabdaf78ec7464c8cd4c05b1a650319",
+      "bytes": 2024,
+      "sha256": "9265e565333a75d6302bba07939951d52a093bd9aa35e373e4728442171d4497",
       "mode": "0644"
     },
     {
@@ -72,13 +72,13 @@
     {
       "path": "frontend/dist/egaroucid/NOTICE.txt",
       "bytes": 1543,
-      "sha256": "7aad0a90498840f3863282e8a967908a26aeff8e17427a3b7866b3c1a2a8bba1",
+      "sha256": "7bf6775db9e9ea1f160d756aba84268aca97a1aa84385db7f3e2bef42cb66cb1",
       "mode": "0644"
     },
     {
       "path": "frontend/dist/index.html",
       "bytes": 580,
-      "sha256": "5273f1626ecbbefebbf379572758439a79d03555ecac499f8f35f96c30b13c04",
+      "sha256": "c74319817bd0d8959134355639a0320f6a498ee6658dcd5cf3c90f6cc2dcddcb",
       "mode": "0644"
     }
   ]

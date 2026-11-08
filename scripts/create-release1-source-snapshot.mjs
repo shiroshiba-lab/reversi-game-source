@@ -4,15 +4,20 @@ import { createReadStream } from 'node:fs';
 import { copyFile, cp, lstat, mkdir, readFile, readdir, stat, writeFile } from 'node:fs/promises';
 import { basename, dirname, relative, resolve, sep } from 'node:path';
 import process from 'node:process';
+import {
+  PRODUCT_VERSION as releaseVersion,
+  PUBLIC_REPOSITORY as publicRepository,
+  RELEASE_URL as releaseUrl,
+  correspondingSourceArchiveName,
+  correspondingSourceChecksumName,
+  correspondingSourceManifestName,
+} from './release-version.mjs';
 
 const repositoryRoot = resolve(import.meta.dirname, '..');
 const allowlistPath = resolve(repositoryRoot, 'third_party/egaroucid/release1-source-allowlist.json');
 const allowlist = JSON.parse(await readFile(allowlistPath, 'utf8'));
 const upstreamArchive = resolve(process.env.RELEASE1_EGAROUCID_ARCHIVE ?? '/tmp/egaroucid-v7.8.4.tar.gz');
 const timestamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
-const releaseVersion = 'v2.0.0';
-const publicRepository = 'https://github.com/shiroshiba-lab/reversi-game-source';
-const releaseUrl = `${publicRepository}/releases/tag/${releaseVersion}`;
 
 const capture = (command, args, options = {}) => new Promise((resolveRun, reject) => {
   let stdout = '';
@@ -55,7 +60,7 @@ const sourceBasis = {
   allowlistedWorktreeStatusSha256: createHash('sha256').update(allowlistedWorktreeStatus).digest('hex'),
   note: 'The manifests are the authoritative byte inventory. Worktree status is recorded only as a non-sensitive provenance fingerprint.',
 };
-const defaultName = `release1-04-${sourceCommit.slice(0, 12)}-${timestamp}`;
+const defaultName = `release-${releaseVersion}-source-${sourceCommit.slice(0, 12)}-${timestamp}`;
 const requestedRoot = process.argv[2] ?? resolve(repositoryRoot, '.release1-local', defaultName);
 const outputRoot = resolve(repositoryRoot, requestedRoot);
 const allowedOutputParent = `${resolve(repositoryRoot, '.release1-local')}${sep}`;
@@ -100,7 +105,7 @@ const readme = `# リバーシ盤 ${releaseVersion} 対応ソース
 
 このリポジトリは、リバーシ盤 ${releaseVersion} で配布するReact／TypeScript版frontendと、
 改変して組み込んだEgaroucid for Web v7.8.4の対応ソースです。private開発Commit
-\`${sourceCommit}\` を基準に、Release 1-04の公開準備修正を含む履歴なしsnapshotとして生成しています。
+\`${sourceCommit}\` を基準に、${releaseVersion}の公開準備修正を含む履歴なしsnapshotとして生成しています。
 内容はmanifestのpath／size／mode／SHA-256 inventoryで固定します。リバーシ盤の本番切替は別工程であり、
 このsource release自体は本番アプリのデプロイではありません。
 
@@ -136,7 +141,7 @@ emsdk等は各ライセンスに従います。詳細は \`LICENSE\`、
 
 Public Git treeでは通常Gitの単一file制限を超える固定upstream archiveと、重複する未改変treeを
 履歴から除外します。これらを含む完全snapshotは ${releaseUrl} の
-\`reversi-board-v2.0.0-corresponding-source.tar.gz\` から取得できます。同Releaseにはarchiveの
+\`${correspondingSourceArchiveName}\` から取得できます。同Releaseにはarchiveの
 SHA-256とmanifestも添付します。Git treeには改変済み完全ソース、patch、Book、評価値、build手順が
 含まれるため、archiveとは独立して製品artifactを再構築できます。
 
@@ -253,7 +258,7 @@ const files = await inventory(sourceRoot, new Set(['manifests/source-files.json'
 const sourceManifest = {
   schemaVersion: 1,
   distribution: 'full-release-asset',
-  purpose: 'Reversi Board v2.0.0 complete corresponding-source Release Asset inventory; this manifest intentionally excludes itself',
+  purpose: `Reversi Board ${releaseVersion} complete corresponding-source Release Asset inventory; this manifest intentionally excludes itself`,
   sourceCommit,
   sourceBasis,
   releaseVersion,
@@ -268,7 +273,7 @@ await writeFile(sourceManifestPath, `${JSON.stringify(sourceManifest, null, 2)}\
 
 await run(process.execPath, [resolve(sourceRoot, 'scripts/verify-release1-source-snapshot.mjs'), sourceRoot]);
 
-const archiveName = 'reversi-board-v2.0.0-corresponding-source.tar.gz';
+const archiveName = correspondingSourceArchiveName;
 const outputArchive = resolve(outputRoot, archiveName);
 await run('tar', [
   '--sort=name', '--mtime=@0', '--owner=0', '--group=0', '--numeric-owner',
@@ -293,9 +298,9 @@ const archiveManifest = {
 };
 const archiveManifestPath = resolve(outputRoot, 'archive-manifest.json');
 await writeFile(archiveManifestPath, `${JSON.stringify(archiveManifest, null, 2)}\n`);
-const checksumPath = resolve(outputRoot, 'reversi-board-v2.0.0-corresponding-source.sha256');
+const checksumPath = resolve(outputRoot, correspondingSourceChecksumName);
 await writeFile(checksumPath, `${archiveManifest.sha256}  ${archiveName}\n`);
-const publishedSourceManifestPath = resolve(outputRoot, 'reversi-board-v2.0.0-source-files.json');
+const publishedSourceManifestPath = resolve(outputRoot, correspondingSourceManifestName);
 await copyFile(sourceManifestPath, publishedSourceManifestPath);
 
 const publicTreeRoot = resolve(outputRoot, 'public-git-tree');

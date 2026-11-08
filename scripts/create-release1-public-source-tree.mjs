@@ -60,7 +60,7 @@ const files = await collect(outputRoot);
 const sourceManifest = {
   schemaVersion: 1,
   distribution: 'public-git-tree',
-  purpose: 'Reversi Board v2.0.0 public corresponding-source Git tree inventory; this manifest intentionally excludes itself',
+  purpose: `Reversi Board ${archiveManifest.releaseVersion} public corresponding-source Git tree inventory; this manifest intentionally excludes itself`,
   sourceCommit: archiveManifest.sourceCommit,
   sourceBasis: archiveManifest.sourceBasis,
   releaseVersion: archiveManifest.releaseVersion,

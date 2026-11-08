@@ -1,36 +1,36 @@
 {
   "schemaVersion": 1,
   "distribution": "public-git-tree",
-  "purpose": "Reversi Board v2.0.0 public corresponding-source Git tree inventory; this manifest intentionally excludes itself",
-  "sourceCommit": "0121472213611b34684a7c1bb287a5cb17fb9d58",
+  "purpose": "Reversi Board v2.0.1 public corresponding-source Git tree inventory; this manifest intentionally excludes itself",
+  "sourceCommit": "75699fb960f70c5840031f90d43b5482d46f32d0",
   "sourceBasis": {
-    "privateBaseCommit": "0121472213611b34684a7c1bb287a5cb17fb9d58",
-    "includesAllowlistedWorktreeChanges": true,
-    "allowlistedWorktreeStatusSha256": "4ac0d0a1dd4c9e432a9ab893d20f99ba5312c2e3b007c9babe473cd7fb5db52b",
+    "privateBaseCommit": "75699fb960f70c5840031f90d43b5482d46f32d0",
+    "includesAllowlistedWorktreeChanges": false,
+    "allowlistedWorktreeStatusSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "note": "The manifests are the authoritative byte inventory. Worktree status is recorded only as a non-sensitive provenance fingerprint."
   },
-  "releaseVersion": "v2.0.0",
+  "releaseVersion": "v2.0.1",
   "publicRepository": "https://github.com/shiroshiba-lab/reversi-game-source",
   "upstreamCommit": "3b1c6ad380209162c2ad07aefe5c1fc6fd8072cb",
-  "allowlistSha256": "6e2d452a80a6fa4b103bfa1f8b11a62b9c857e90531d7689685cb49d6dba5d6b",
+  "allowlistSha256": "cb0e9eb5c47a86fd7e9c80c7ed21b74260bc2e5a25ef2ae4c618042914adaca9",
   "releaseAsset": {
-    "archive": "reversi-board-v2.0.0-corresponding-source.tar.gz",
-    "bytes": 539088748,
-    "sha256": "a1a8239e58140a89babe75388dd2c7c66dcac01bb2b9e36429262a89b61a8e32",
-    "sourceManifestSha256": "bcca1fe299674cd82a271e2b333ef1b8c5a5cd420b5f4d78057fee44ce4a4bd0",
+    "archive": "reversi-board-v2.0.1-corresponding-source.tar.gz",
+    "bytes": 539096880,
+    "sha256": "b1c4ece578fc743ef9f6d74bad5ad32bafdc080de31a7b24ce0ee08ec8e7e799",
+    "sourceManifestSha256": "9381c88b0fed7cf858e23adda31af96efec52773017d8625125a53bbeabae304",
     "note": "The Release Asset contains the fixed upstream archive and byte-exact unmodified upstream tree omitted from normal Git history."
   },
   "gitTreeExclusions": [
     "third_party/egaroucid/source/archives/Egaroucid-v7.8.4.tar.gz",
     "third_party/egaroucid/source/upstream-v7.8.4/"
   ],
-  "fileCount": 2463,
-  "totalBytes": 347526594,
+  "fileCount": 2466,
+  "totalBytes": 347543027,
   "files": [
     {
       "path": ".github/workflows/corresponding-source-ci.yml",
-      "bytes": 1731,
-      "sha256": "f7b754a8e73b6157577220c4655dec1239bb7513e8cb566bafa9226e6e82b5db",
+      "bytes": 2020,
+      "sha256": "ebb45a81fefbac5ae0373d2b5bb473e97d7e2aa619db8cee87efaf1323282218",
       "mode": "0644"
     },
     {
@@ -65,8 +65,14 @@
     },
     {
       "path": "frontend/e2e/react.spec.js",
-      "bytes": 37602,
-      "sha256": "44843aacfd5ed9f9a8d6dbfb61c2e5f37650d566222c78a4a14dc6b802b2e0a0",
+      "bytes": 39584,
+      "sha256": "0f778b992683d63b4586b558627981e1e61d0265cd0be550d3e97351c8696bb6",
+      "mode": "0644"
+    },
+    {
+      "path": "frontend/e2e/release1-caddy.spec.js",
+      "bytes": 3870,
+      "sha256": "fb4e576afc01408059bbec5d33130614e3f5e07aefac28c3efeca4fb6035507e",
       "mode": "0644"
     },
     {
@@ -84,7 +90,7 @@
     {
       "path": "frontend/package.json",
       "bytes": 460,
-      "sha256": "fa40328d83520516e4ca537a9d6c20a28eaff0ccf9a3b16fbf8360d4184d536e",
+      "sha256": "7ed80e72adb81559d68ed2f4366aa0848712d790b243a4a056f976127f5b131a",
       "mode": "0644"
     },
     {
@@ -101,8 +107,8 @@
     },
     {
       "path": "frontend/public/egaroucid/artifact-manifest.json",
-      "bytes": 2034,
-      "sha256": "5831e5c2c985cd74a5565eaf59af94454eabdaf78ec7464c8cd4c05b1a650319",
+      "bytes": 2024,
+      "sha256": "9265e565333a75d6302bba07939951d52a093bd9aa35e373e4728442171d4497",
       "mode": "0644"
     },
     {
@@ -132,13 +138,13 @@
     {
       "path": "frontend/public/egaroucid/NOTICE.txt",
       "bytes": 1543,
-      "sha256": "7aad0a90498840f3863282e8a967908a26aeff8e17427a3b7866b3c1a2a8bba1",
+      "sha256": "7bf6775db9e9ea1f160d756aba84268aca97a1aa84385db7f3e2bef42cb66cb1",
       "mode": "0644"
     },
     {
       "path": "frontend/src/App.test.tsx",
-      "bytes": 8255,
-      "sha256": "6ac0bd3580c3c864bbe571130ed15c2aa35cd10c6dd550a0bae2cfc43577e853",
+      "bytes": 9423,
+      "sha256": "c48daefd6562c97f5611b4155b5bd08c938bba59201bee06ab4b3f2eed251f8a",
       "mode": "0644"
     },
     {
@@ -173,8 +179,8 @@
     },
     {
       "path": "frontend/src/components/SetupScreen.tsx",
-      "bytes": 10919,
-      "sha256": "334f886c21856c44007e69943681f19d56575d17c4e9804d2f8ea7a3d34dd0db",
+      "bytes": 11509,
+      "sha256": "f3f235dd153f39668b6cf87f910dee4f46218ac37dabf34fff70530e910adaac",
       "mode": "0644"
     },
     {
@@ -312,7 +318,7 @@
     {
       "path": "frontend/src/release.ts",
       "bytes": 271,
-      "sha256": "07952b1c7e78f056e8ea03b9cb898669a3dbda69364a95672ab9a1b0ec039f70",
+      "sha256": "56e48ef76d11568bb4541103b233f0335620902523e1274eaf6038c1624562de",
       "mode": "0644"
     },
     {
@@ -347,26 +353,26 @@
     },
     {
       "path": "manifests/exclusions.json",
-      "bytes": 1687,
-      "sha256": "6a5577225d08b6674aff8c0c38ad0117ee33e5afda099e3d9c8d1c8fea7daa48",
+      "bytes": 1688,
+      "sha256": "948fa7a869587ce4bd4dd9a82d5fe09dd8db272e6e0291d08925421de7bbbb7c",
       "mode": "0644"
     },
     {
       "path": "manifests/reference-product-artifacts.json",
-      "bytes": 2942,
-      "sha256": "f5e4e8d47c9717da3f249600a9b2b27e40faa817c0c89ec5281133b51bca94c8",
+      "bytes": 2943,
+      "sha256": "5163784e8e9bdb96089c1475e788c4eb7817b560902fc1e6bbe4b5b0e6d43889",
       "mode": "0644"
     },
     {
       "path": "package-lock.json",
       "bytes": 135938,
-      "sha256": "6fe704cc03d99c8a8af08bd69b01bdfeb823a59edeb691816d8c42a758d0f8f6",
+      "sha256": "7a52c328559669627a478de83a2634548b38fdec2ab632933320193ec3df693d",
       "mode": "0644"
     },
     {
       "path": "package.json",
-      "bytes": 3213,
-      "sha256": "9fc245ee1b7d70e2d6266f256b6c062dd9a68d50ff8f42abab642de27c88dc5d",
+      "bytes": 3288,
+      "sha256": "99f0177b23bc0a8d1c4a3502028e8ddaea87b6fb8d4d5c2f0aba9fa2c49fc817",
       "mode": "0644"
     },
     {
@@ -383,32 +389,38 @@
     },
     {
       "path": "README.md",
-      "bytes": 4114,
-      "sha256": "0e1029f1ebd656e5cb24a44beb8a0011cf4ae4da9bf867546596f64c2bfb37e4",
+      "bytes": 4108,
+      "sha256": "f176a5cbc95e12ae900a87080ba4779b29e591a382b65066b33103b15f4b93aa",
       "mode": "0644"
     },
     {
       "path": "scripts/create-release1-public-source-tree.mjs",
-      "bytes": 4732,
-      "sha256": "fc6df47b6c371abce43f542867e8e92b8e9f28fb3980bd4b76cb3a8be057e8b8",
+      "bytes": 4759,
+      "sha256": "98c9747a4f7f0ef0b3dfe99468566919e1c497aa54359ff20df8b5b082add419",
       "mode": "0644"
     },
     {
       "path": "scripts/create-release1-publication-package.mjs",
-      "bytes": 10424,
-      "sha256": "ce3a0a3f86a970978de49d4983747bfeb7360372ffe04cfb5a2242d2db8c4b65",
+      "bytes": 14605,
+      "sha256": "8031e1ba62dbb03e729148c102ccd128a554cb1c95b8d3d5785962065e2141de",
       "mode": "0644"
     },
     {
       "path": "scripts/create-release1-source-snapshot.mjs",
-      "bytes": 15155,
-      "sha256": "09771a4c5ae421818aa2d53f236646e652244481be8d00908b9fe0dd6ca94723",
+      "bytes": 15193,
+      "sha256": "d63487c5fabc2972b244194ddbb1f5a295ccaf70a5904f0004aae29d4e4de706",
       "mode": "0644"
     },
     {
       "path": "scripts/rebuild-release1-egaroucid.mjs",
       "bytes": 5315,
       "sha256": "4d32d973f6ad41ba87e5450d52f873e22379f87c90306cde4f4c1ce741059611",
+      "mode": "0644"
+    },
+    {
+      "path": "scripts/release-version.mjs",
+      "bytes": 892,
+      "sha256": "0561fe741b5a1077bb314f3e7983e791d22485bd564c9c880bb5f7a5bc29494e",
       "mode": "0644"
     },
     {
@@ -421,6 +433,12 @@
       "path": "scripts/verify-egaroucid-assets.mjs",
       "bytes": 2856,
       "sha256": "51ccc01e60908e1fe1c0b2308548044d07f03ddd9c5f82b0c7be17d60607f8fb",
+      "mode": "0644"
+    },
+    {
+      "path": "scripts/verify-public-release-history.mjs",
+      "bytes": 3189,
+      "sha256": "4bd4fd4bab53d9b5ce78acac1499a08a5fd852f1a37807d31f6c52ca641a7c61",
       "mode": "0644"
     },
     {
@@ -515,14 +533,14 @@
     },
     {
       "path": "third_party/egaroucid/README.md",
-      "bytes": 4638,
-      "sha256": "e7581010dc4309b9e686aee2b35a311f6834ea80a910be268723b10ff7c45ba0",
+      "bytes": 4700,
+      "sha256": "c690f971105f7d0a23ef81596c5363d16de9c3244322f6b9b5526410c27dde93",
       "mode": "0644"
     },
     {
       "path": "third_party/egaroucid/release1-source-allowlist.json",
-      "bytes": 2571,
-      "sha256": "6e2d452a80a6fa4b103bfa1f8b11a62b9c857e90531d7689685cb49d6dba5d6b",
+      "bytes": 2655,
+      "sha256": "cb0e9eb5c47a86fd7e9c80c7ed21b74260bc2e5a25ef2ae4c618042914adaca9",
       "mode": "0644"
     },
     {

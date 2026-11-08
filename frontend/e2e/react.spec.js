@@ -101,13 +101,35 @@ test('CPU表示・難易度説明・クレジット・開始ボタン余白を�
   await expect(officialLink).toHaveAttribute('href', 'https://www.egaroucid.nyanyan.dev/ja/web/');
   await page.getByText('ライセンス文書と改変の詳細').focus();
   await page.getByText('ライセンス文書と改変の詳細').press('Enter');
+  await expect(page.getByText('Egaroucid for Webは、Takuto Yamana氏とコントリビューターの皆さまが開発し、GPL-3.0-or-laterの条件で公開しているソフトウェアです。')).toBeVisible();
+  await expect(page.getByText('本アプリ向けの改変・組み込みはリバーシ盤の開発者が行っており、Egaroucidの開発者の皆さまが本アプリの動作を保証するものではありません。')).toBeVisible();
+  await expect(page.getByText('素晴らしいソフトウェアを公開してくださった皆さまに感謝いたします。')).toBeVisible();
+  await expect(page.getByText('Egaroucidの公式サイトでは、世界最強クラスのAIを搭載したデスクトップ版や、開発者による技術解説なども紹介されています。')).toBeVisible();
+  await expect(page.getByText(/Egaroucid for WebはTakuto Yamana氏とコントリビューターによる外部ソフトウェア/)).toHaveCount(0);
+  const egaroucidSiteLink = page.getByRole('link', { name: 'Egaroucid公式サイト' });
+  await expect(egaroucidSiteLink).toHaveAttribute('href', 'https://www.egaroucid.nyanyan.dev/ja/');
+  await expect(egaroucidSiteLink).toHaveAttribute('target', '_blank');
+  await expect(egaroucidSiteLink).toHaveAttribute('rel', 'noreferrer');
   for (const href of ['egaroucid/NOTICE.txt', 'egaroucid/GPL-3.0.txt', 'egaroucid/Emscripten-LICENSE.txt', 'egaroucid/emsdk-LICENSE.txt']) {
     const response = await page.request.get(`/${href}`);
     expect(response.ok()).toBe(true);
   }
-  const sourceLink = page.getByRole('link', { name: '対応ソース（v2.0.0）' });
-  await expect(sourceLink).toHaveAttribute('href', 'https://github.com/shiroshiba-lab/reversi-game-source/releases/tag/v2.0.0');
+  const sourceLink = page.getByRole('link', { name: '対応ソース（v2.0.1）' });
+  await expect(sourceLink).toHaveAttribute('href', 'https://github.com/shiroshiba-lab/reversi-game-source/releases/tag/v2.0.1');
   await expect(page.getByText('この公開リポジトリはEgaroucid公式リポジトリではありません。', { exact: false })).toBeVisible();
+});
+
+test('ライセンス詳細が320px級と393px級で横にはみ出さず公式サイトリンクを操作できる', async ({ page }) => {
+  for (const viewport of [{ width: 320, height: 568 }, { width: 393, height: 852 }]) {
+    await page.setViewportSize(viewport);
+    await page.goto('/');
+    await page.getByText('ライセンス文書と改変の詳細').press('Enter');
+    await expectNoHorizontalOverflow(page);
+    const egaroucidSiteLink = page.getByRole('link', { name: 'Egaroucid公式サイト' });
+    await egaroucidSiteLink.focus();
+    await expect(egaroucidSiteLink).toBeFocused();
+    await expect(egaroucidSiteLink).toBeInViewport();
+  }
 });
 
 test('Egaroucid Level 0〜15を製品UIから選び、全Levelが合法な初手を返す', async ({ page }) => {

@@ -33,6 +33,7 @@
     "release1:serve": "node scripts/serve-release1-staging.mjs",
     "release1:verify-static": "node scripts/verify-release1-static-delivery.mjs",
     "release1:verify-rc": "node scripts/verify-release1-rc.mjs",
+    "release1:validate-caddy": "node scripts/validate-release1-caddy.mjs",
     "audit:v2": "npm audit --audit-level=high",
     "check:v2": "npm run verify:egaroucid && npm run lint:v2 && npm run typecheck:v2 && npm run test:v2 && npm run build:v2"
   },

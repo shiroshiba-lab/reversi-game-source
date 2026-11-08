@@ -1,8 +1,8 @@
-# リバーシ盤 v2.0.0 対応ソース
+# リバーシ盤 v2.0.1 対応ソース
 
-このリポジトリは、リバーシ盤 v2.0.0 で配布するReact／TypeScript版frontendと、
+このリポジトリは、リバーシ盤 v2.0.1 で配布するReact／TypeScript版frontendと、
 改変して組み込んだEgaroucid for Web v7.8.4の対応ソースです。private開発Commit
-`0121472213611b34684a7c1bb287a5cb17fb9d58` を基準に、Release 1-04の公開準備修正を含む履歴なしsnapshotとして生成しています。
+`75699fb960f70c5840031f90d43b5482d46f32d0` を基準に、v2.0.1の公開準備修正を含む履歴なしsnapshotとして生成しています。
 内容はmanifestのpath／size／mode／SHA-256 inventoryで固定します。リバーシ盤の本番切替は別工程であり、
 このsource release自体は本番アプリのデプロイではありません。
 
@@ -37,8 +37,8 @@ emsdk等は各ライセンスに従います。詳細は `LICENSE`、
 - `manifests/source-files.json`: path／size／mode／SHA-256 source inventory
 
 Public Git treeでは通常Gitの単一file制限を超える固定upstream archiveと、重複する未改変treeを
-履歴から除外します。これらを含む完全snapshotは https://github.com/shiroshiba-lab/reversi-game-source/releases/tag/v2.0.0 の
-`reversi-board-v2.0.0-corresponding-source.tar.gz` から取得できます。同Releaseにはarchiveの
+履歴から除外します。これらを含む完全snapshotは https://github.com/shiroshiba-lab/reversi-game-source/releases/tag/v2.0.1 の
+`reversi-board-v2.0.1-corresponding-source.tar.gz` から取得できます。同Releaseにはarchiveの
 SHA-256とmanifestも添付します。Git treeには改変済み完全ソース、patch、Book、評価値、build手順が
 含まれるため、archiveとは独立して製品artifactを再構築できます。
 
