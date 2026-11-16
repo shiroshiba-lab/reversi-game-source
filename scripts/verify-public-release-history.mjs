@@ -5,6 +5,7 @@ import {
   PREVIOUS_PRODUCT_VERSION,
   PREVIOUS_PUBLIC_COMMIT,
   PREVIOUS_PUBLIC_TAG_OBJECT,
+  PUBLIC_ROOT_COMMIT,
   PRODUCT_VERSION,
 } from './release-version.mjs';
 
@@ -31,14 +32,15 @@ const parents = parentLine.split(' ').slice(1);
 const previousTagType = await capture(['cat-file', '-t', `refs/tags/${PREVIOUS_PRODUCT_VERSION}`]);
 const previousTagObject = await capture(['rev-parse', `refs/tags/${PREVIOUS_PRODUCT_VERSION}`]);
 const previousTagCommit = await capture(['rev-parse', `refs/tags/${PREVIOUS_PRODUCT_VERSION}^{}`]);
+const previousCommitCount = Number(await capture(['rev-list', '--count', PREVIOUS_PUBLIC_COMMIT]));
 
 if (previousTagType !== 'tag') throw new Error(`${PREVIOUS_PRODUCT_VERSION} must remain an annotated tag`);
 if (previousTagObject !== PREVIOUS_PUBLIC_TAG_OBJECT) throw new Error(`${PREVIOUS_PRODUCT_VERSION} tag object changed`);
 if (previousTagCommit !== PREVIOUS_PUBLIC_COMMIT) throw new Error(`${PREVIOUS_PRODUCT_VERSION} tag target changed`);
-if (rootCommits.length !== 1 || rootCommits[0] !== PREVIOUS_PUBLIC_COMMIT) {
+if (rootCommits.length !== 1 || rootCommits[0] !== PUBLIC_ROOT_COMMIT) {
   throw new Error('public history must retain the single approved v2.0.0 root commit');
 }
-if (commitCount !== 2 || parents.length !== 1 || parents[0] !== PREVIOUS_PUBLIC_COMMIT) {
+if (commitCount !== previousCommitCount + 1 || parents.length !== 1 || parents[0] !== PREVIOUS_PUBLIC_COMMIT) {
   throw new Error(`${PRODUCT_VERSION} must be exactly one normal commit after ${PREVIOUS_PRODUCT_VERSION}`);
 }
 

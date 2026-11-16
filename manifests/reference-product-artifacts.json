@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "sourceCommit": "75699fb960f70c5840031f90d43b5482d46f32d0",
+  "sourceCommit": "0801fc6cbfe0a5598fb51c54af68ae023adf72b4",
   "sourceBasis": {
-    "privateBaseCommit": "75699fb960f70c5840031f90d43b5482d46f32d0",
+    "privateBaseCommit": "0801fc6cbfe0a5598fb51c54af68ae023adf72b4",
     "includesAllowlistedWorktreeChanges": false,
     "allowlistedWorktreeStatusSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "note": "The manifests are the authoritative byte inventory. Worktree status is recorded only as a non-sensitive provenance fingerprint."
@@ -10,15 +10,15 @@
   "purpose": "Reference product build created from the private source tree before snapshot assembly",
   "files": [
     {
-      "path": "frontend/dist/assets/index-DX1VDJyd.js",
-      "bytes": 268645,
-      "sha256": "f3f5c99f28e38aad5a2c4b5c2704adc5f274545c930623183961ce1564e2f660",
-      "mode": "0644"
-    },
-    {
       "path": "frontend/dist/assets/index-SARgcqeU.css",
       "bytes": 18129,
       "sha256": "cb31923dabfbbb4efb63197e38908d11a14e98ccdd5884a12910b0200c366973",
+      "mode": "0644"
+    },
+    {
+      "path": "frontend/dist/assets/index-Vckjf0Wr.js",
+      "bytes": 268645,
+      "sha256": "1fac9d18d41d2f7b67c73defa882719b63535c9c72cd15767c289c05d2112bdc",
       "mode": "0644"
     },
     {
@@ -78,7 +78,7 @@
     {
       "path": "frontend/dist/index.html",
       "bytes": 580,
-      "sha256": "c74319817bd0d8959134355639a0320f6a498ee6658dcd5cf3c90f6cc2dcddcb",
+      "sha256": "41834fffd8c08395167831c0133407147617e9d3cbb9cd8c105b895b1c7287fd",
       "mode": "0644"
     }
   ]

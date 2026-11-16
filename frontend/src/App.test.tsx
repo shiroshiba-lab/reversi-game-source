@@ -52,7 +52,7 @@ describe('React画面と操作', () => {
     expect(screen.getByRole('button', { name: /対局をはじめる/ })).toBeDisabled();
   });
 
-  it('v2.0.1の対応ソースとライセンス文書への導線を表示する', () => {
+  it('v2.0.2の対応ソースとライセンス文書への導線を表示する', () => {
     render(<App />);
     fireEvent.click(screen.getByText('ライセンス文書と改変の詳細'));
     expect(screen.getByText('Egaroucid for Webは、Takuto Yamana氏とコントリビューターの皆さまが開発し、GPL-3.0-or-laterの条件で公開しているソフトウェアです。')).toBeInTheDocument();
@@ -64,9 +64,9 @@ describe('React画面と操作', () => {
       'href',
       'https://www.egaroucid.nyanyan.dev/ja/',
     );
-    expect(screen.getByRole('link', { name: '対応ソース（v2.0.1）' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: '対応ソース（v2.0.2）' })).toHaveAttribute(
       'href',
-      'https://github.com/shiroshiba-lab/reversi-game-source/releases/tag/v2.0.1',
+      'https://github.com/shiroshiba-lab/reversi-game-source/releases/tag/v2.0.2',
     );
     expect(screen.getByRole('link', { name: /NOTICE/ })).toHaveAttribute('href', 'egaroucid/NOTICE.txt');
   });

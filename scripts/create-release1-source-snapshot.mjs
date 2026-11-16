@@ -147,8 +147,8 @@ SHA-256とmanifestも添付します。Git treeには改変済み完全ソース
 
 ## 必要環境
 
-- Node.js 24.21.0
-- npm 11.19.0
+- Node.js 24.22.3
+- npm 11.21.2
 - Docker互換runtime
 - manifestでdigest固定したEmscripten 4.0.22 image
 

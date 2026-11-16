@@ -114,8 +114,8 @@ test('CPU表示・難易度説明・クレジット・開始ボタン余白を�
     const response = await page.request.get(`/${href}`);
     expect(response.ok()).toBe(true);
   }
-  const sourceLink = page.getByRole('link', { name: '対応ソース（v2.0.1）' });
-  await expect(sourceLink).toHaveAttribute('href', 'https://github.com/shiroshiba-lab/reversi-game-source/releases/tag/v2.0.1');
+  const sourceLink = page.getByRole('link', { name: '対応ソース（v2.0.2）' });
+  await expect(sourceLink).toHaveAttribute('href', 'https://github.com/shiroshiba-lab/reversi-game-source/releases/tag/v2.0.2');
   await expect(page.getByText('この公開リポジトリはEgaroucid公式リポジトリではありません。', { exact: false })).toBeVisible();
 });
 

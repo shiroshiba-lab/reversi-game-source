@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "sourceCommit": "75699fb960f70c5840031f90d43b5482d46f32d0",
+  "sourceCommit": "0801fc6cbfe0a5598fb51c54af68ae023adf72b4",
   "sourceBasis": {
-    "privateBaseCommit": "75699fb960f70c5840031f90d43b5482d46f32d0",
+    "privateBaseCommit": "0801fc6cbfe0a5598fb51c54af68ae023adf72b4",
     "includesAllowlistedWorktreeChanges": false,
     "allowlistedWorktreeStatusSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "note": "The manifests are the authoritative byte inventory. Worktree status is recorded only as a non-sensitive provenance fingerprint."

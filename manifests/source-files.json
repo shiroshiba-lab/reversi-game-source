@@ -1,23 +1,23 @@
 {
   "schemaVersion": 1,
   "distribution": "public-git-tree",
-  "purpose": "Reversi Board v2.0.1 public corresponding-source Git tree inventory; this manifest intentionally excludes itself",
-  "sourceCommit": "75699fb960f70c5840031f90d43b5482d46f32d0",
+  "purpose": "Reversi Board v2.0.2 public corresponding-source Git tree inventory; this manifest intentionally excludes itself",
+  "sourceCommit": "0801fc6cbfe0a5598fb51c54af68ae023adf72b4",
   "sourceBasis": {
-    "privateBaseCommit": "75699fb960f70c5840031f90d43b5482d46f32d0",
+    "privateBaseCommit": "0801fc6cbfe0a5598fb51c54af68ae023adf72b4",
     "includesAllowlistedWorktreeChanges": false,
     "allowlistedWorktreeStatusSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "note": "The manifests are the authoritative byte inventory. Worktree status is recorded only as a non-sensitive provenance fingerprint."
   },
-  "releaseVersion": "v2.0.1",
+  "releaseVersion": "v2.0.2",
   "publicRepository": "https://github.com/shiroshiba-lab/reversi-game-source",
   "upstreamCommit": "3b1c6ad380209162c2ad07aefe5c1fc6fd8072cb",
   "allowlistSha256": "cb0e9eb5c47a86fd7e9c80c7ed21b74260bc2e5a25ef2ae4c618042914adaca9",
   "releaseAsset": {
-    "archive": "reversi-board-v2.0.1-corresponding-source.tar.gz",
-    "bytes": 539096880,
-    "sha256": "b1c4ece578fc743ef9f6d74bad5ad32bafdc080de31a7b24ce0ee08ec8e7e799",
-    "sourceManifestSha256": "9381c88b0fed7cf858e23adda31af96efec52773017d8625125a53bbeabae304",
+    "archive": "reversi-board-v2.0.2-corresponding-source.tar.gz",
+    "bytes": 539094569,
+    "sha256": "6d1be7614342f7afd45b6720a9c9f3295b57536023420f6920664da210538bc1",
+    "sourceManifestSha256": "a2eeedcaddead86c70a01114e8ef89879e525f158b43531737b60a96067e0d3a",
     "note": "The Release Asset contains the fixed upstream archive and byte-exact unmodified upstream tree omitted from normal Git history."
   },
   "gitTreeExclusions": [
@@ -25,7 +25,7 @@
     "third_party/egaroucid/source/upstream-v7.8.4/"
   ],
   "fileCount": 2466,
-  "totalBytes": 347543027,
+  "totalBytes": 347547065,
   "files": [
     {
       "path": ".github/workflows/corresponding-source-ci.yml",
@@ -42,7 +42,7 @@
     {
       "path": ".nvmrc",
       "bytes": 8,
-      "sha256": "73fb1b615e2043a933be1c0895cde4358036acc28d785692509b822aa53c761f",
+      "sha256": "584f19ccde29925286e32f566a2aa06c89efb4e2eb2bb2fc9ea5d56e2d190ac4",
       "mode": "0644"
     },
     {
@@ -66,7 +66,7 @@
     {
       "path": "frontend/e2e/react.spec.js",
       "bytes": 39584,
-      "sha256": "0f778b992683d63b4586b558627981e1e61d0265cd0be550d3e97351c8696bb6",
+      "sha256": "461ceab6700535015832cc69b1f6ed8eab7b389f9dc22034509339f6d354e39a",
       "mode": "0644"
     },
     {
@@ -90,7 +90,7 @@
     {
       "path": "frontend/package.json",
       "bytes": 460,
-      "sha256": "7ed80e72adb81559d68ed2f4366aa0848712d790b243a4a056f976127f5b131a",
+      "sha256": "b13a78a2617418425a2fd0de7577338293905a95e1a987a30180b304de607680",
       "mode": "0644"
     },
     {
@@ -144,7 +144,7 @@
     {
       "path": "frontend/src/App.test.tsx",
       "bytes": 9423,
-      "sha256": "c48daefd6562c97f5611b4155b5bd08c938bba59201bee06ab4b3f2eed251f8a",
+      "sha256": "fc5692252948c9284cf7a7419dda068db5631fd538349d751d2034484066361e",
       "mode": "0644"
     },
     {
@@ -318,7 +318,7 @@
     {
       "path": "frontend/src/release.ts",
       "bytes": 271,
-      "sha256": "56e48ef76d11568bb4541103b233f0335620902523e1274eaf6038c1624562de",
+      "sha256": "905ea2efa565511f966f6051cbfa0515e167f5a1a92a5ba083b14cef270119d7",
       "mode": "0644"
     },
     {
@@ -354,25 +354,25 @@
     {
       "path": "manifests/exclusions.json",
       "bytes": 1688,
-      "sha256": "948fa7a869587ce4bd4dd9a82d5fe09dd8db272e6e0291d08925421de7bbbb7c",
+      "sha256": "da50e02c8da637efe9c0a118044cb34ee87e0c7ff506fc231249e20ff387b21b",
       "mode": "0644"
     },
     {
       "path": "manifests/reference-product-artifacts.json",
       "bytes": 2943,
-      "sha256": "5163784e8e9bdb96089c1475e788c4eb7817b560902fc1e6bbe4b5b0e6d43889",
+      "sha256": "8b6dafd45773f59d44742ad6f6f013bbc3d1eecd6885064e5213629919c8e9ee",
       "mode": "0644"
     },
     {
       "path": "package-lock.json",
-      "bytes": 135938,
-      "sha256": "7a52c328559669627a478de83a2634548b38fdec2ab632933320193ec3df693d",
+      "bytes": 139374,
+      "sha256": "9bf0b749076d3ef776de1d11a1d5e0f8f088d3562f4e1ac934ad9f558eedcae5",
       "mode": "0644"
     },
     {
       "path": "package.json",
       "bytes": 3288,
-      "sha256": "99f0177b23bc0a8d1c4a3502028e8ddaea87b6fb8d4d5c2f0aba9fa2c49fc817",
+      "sha256": "3359112720e0101fecadf74867561054965f11bf6132d39f4ba724aeebf42652",
       "mode": "0644"
     },
     {
@@ -390,7 +390,7 @@
     {
       "path": "README.md",
       "bytes": 4108,
-      "sha256": "f176a5cbc95e12ae900a87080ba4779b29e591a382b65066b33103b15f4b93aa",
+      "sha256": "bce69cb89f819b460f0e504411bfbeffb50f24a0e27684cd0296e53281041e0a",
       "mode": "0644"
     },
     {
@@ -401,14 +401,14 @@
     },
     {
       "path": "scripts/create-release1-publication-package.mjs",
-      "bytes": 14605,
-      "sha256": "8031e1ba62dbb03e729148c102ccd128a554cb1c95b8d3d5785962065e2141de",
+      "bytes": 14989,
+      "sha256": "6f63a66fc8c6dde99dd0978b7632804ceb3920e6dab01767c0dd85f32016530b",
       "mode": "0644"
     },
     {
       "path": "scripts/create-release1-source-snapshot.mjs",
       "bytes": 15193,
-      "sha256": "d63487c5fabc2972b244194ddbb1f5a295ccaf70a5904f0004aae29d4e4de706",
+      "sha256": "0da5c647a60d6f801eec47657b35defd5636bc1f037cc1c31e430c0c41d969cc",
       "mode": "0644"
     },
     {
@@ -419,8 +419,8 @@
     },
     {
       "path": "scripts/release-version.mjs",
-      "bytes": 892,
-      "sha256": "0561fe741b5a1077bb314f3e7983e791d22485bd564c9c880bb5f7a5bc29494e",
+      "bytes": 970,
+      "sha256": "4c94730829c0f8ae8f411a8c452efe17e3e145350296529a39ba9274b620d622",
       "mode": "0644"
     },
     {
@@ -437,8 +437,8 @@
     },
     {
       "path": "scripts/verify-public-release-history.mjs",
-      "bytes": 3189,
-      "sha256": "4bd4fd4bab53d9b5ce78acac1499a08a5fd852f1a37807d31f6c52ca641a7c61",
+      "bytes": 3329,
+      "sha256": "6cd5dc272d219b2ade5226058de29b19305fbc172932ba655082e9c7dffcf5fd",
       "mode": "0644"
     },
     {

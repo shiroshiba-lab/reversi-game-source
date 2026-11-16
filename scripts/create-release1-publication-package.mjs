@@ -10,6 +10,7 @@ import {
   PREVIOUS_PUBLIC_TAG_OBJECT,
   PRODUCT_VERSION,
   PUBLIC_REPOSITORY,
+  PUBLIC_ROOT_COMMIT,
   correspondingSourceChecksumName,
   correspondingSourceManifestName,
   publicBundleName,
@@ -74,12 +75,20 @@ const publicBaseCommit = await capture('git', ['rev-parse', 'HEAD'], { cwd: publ
 const previousTagObject = await capture('git', ['rev-parse', `refs/tags/${PREVIOUS_PRODUCT_VERSION}`], { cwd: publicBaseRepository });
 const previousTagCommit = await capture('git', ['rev-parse', `refs/tags/${PREVIOUS_PRODUCT_VERSION}^{}`], { cwd: publicBaseRepository });
 const baseCommitCount = await capture('git', ['rev-list', '--count', 'HEAD'], { cwd: publicBaseRepository });
-if (publicBaseBranch !== 'main' || publicBaseCommit !== PREVIOUS_PUBLIC_COMMIT || baseCommitCount !== '1') {
-  throw new Error('public base must be the approved one-commit v2.0.0 main');
+const baseRootCommits = (await capture('git', ['rev-list', '--max-parents=0', 'HEAD'], { cwd: publicBaseRepository }))
+  .split('\n').filter(Boolean);
+if (
+  publicBaseBranch !== 'main'
+  || publicBaseCommit !== PREVIOUS_PUBLIC_COMMIT
+  || baseRootCommits.length !== 1
+  || baseRootCommits[0] !== PUBLIC_ROOT_COMMIT
+) {
+  throw new Error(`public base must be the approved ${PREVIOUS_PRODUCT_VERSION} main with the preserved root commit`);
 }
 if (previousTagObject !== PREVIOUS_PUBLIC_TAG_OBJECT || previousTagCommit !== PREVIOUS_PUBLIC_COMMIT) {
-  throw new Error('approved v2.0.0 annotated tag changed');
+  throw new Error(`approved ${PREVIOUS_PRODUCT_VERSION} annotated tag changed`);
 }
+const expectedCommitCount = Number(baseCommitCount) + 1;
 
 const publicTree = resolve(snapshotRoot, 'public-git-tree');
 const archiveManifestPath = resolve(snapshotRoot, 'archive-manifest.json');
@@ -164,9 +173,9 @@ const publicationManifest = {
     emailValueIntentionallyOmitted: true,
   },
   history: {
-    commitCount: 2,
+    commitCount: expectedCommitCount,
     rootCount: 1,
-    rootCommit: PREVIOUS_PUBLIC_COMMIT,
+    rootCommit: PUBLIC_ROOT_COMMIT,
     parentCommit: parent,
     previousTagPreserved: true,
     privateHistoryIncluded: false,
@@ -260,7 +269,7 @@ console.log(JSON.stringify({
   publicCommit: commit,
   annotatedTagObject: tag,
   previousAnnotatedTagObject: previousTagObject,
-  commitCount: 2,
+  commitCount: expectedCommitCount,
   rootCount: 1,
   identityName,
   identityConfigMode: '0600',
